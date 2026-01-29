@@ -64,6 +64,77 @@ uv run marimo edit notebooks/feynman_spacetime.py  # Edit mode
 - The invariant spacetime interval
 - E = mc² and mass-energy equivalence
 
+### 4. The Wave-Particle Duality
+
+Based on [Feynman Lectures, Volume III, Chapter 1](https://www.feynmanlectures.caltech.edu/III_01.html) on Quantum Behavior
+
+```bash
+uv run marimo run notebooks/feynman_wave_particle.py   # View mode
+uv run marimo edit notebooks/feynman_wave_particle.py  # Edit mode
+```
+
+**Contents:**
+- Wave interference patterns (animated)
+- Photoelectric effect with photon visualization (animated)
+- Double-slit experiment with single particles (animated)
+- The measurement problem - watching destroys interference
+- de Broglie wavelength and matter waves (animated)
+- Heisenberg's uncertainty principle
+- Feynman's path integral visualization (animated)
+
+### 5. Beyond the Speed of Light
+
+A thought experiment exploring the structure of spacetime and the cosmic speed limit
+
+```bash
+uv run marimo run notebooks/feynman_beyond_light.py   # View mode
+uv run marimo edit notebooks/feynman_beyond_light.py  # Edit mode
+```
+
+**Contents:**
+- Spacetime velocity: everything moves at c through spacetime (animated)
+- The energy barrier at light speed (animated)
+- Tachyons and imaginary mass
+- What if c were larger or smaller?
+- Light cones and causality (animated)
+- Why time becomes imaginary, not negative, above c
+- Length contraction beyond c (animated)
+- **Deep dive: The Newtonian universe** - what if c were 1000x larger? (animated)
+- **Deep dive: The geometric barrier** - Minkowski hyperbolic geometry (animated)
+- **Deep dive: Wormholes** - Einstein-Rosen bridges visualized (animated 3D)
+- **Deep dive: Exotic matter** - negative energy and the Casimir effect
+- **Deep dive: Causality paradoxes** - how FTL creates time machines (animated)
+- Alcubierre warp drive visualization (animated)
+- Why physicists believe FTL is impossible
+
+### 6. Exotic Matter: The Key to Spacetime Engineering
+
+A researcher's guide to negative energy density and its possibilities
+
+```bash
+uv run marimo run notebooks/feynman_exotic_matter.py   # View mode
+uv run marimo edit notebooks/feynman_exotic_matter.py  # Edit mode
+```
+
+**Contents:**
+- Historical timeline from Einstein-Rosen (1935) to quantum inequalities (1996)
+- Energy conditions (WEC, NEC, SEC, DEC) with detailed explanations of the mathematics
+- **The Casimir effect** - real negative energy, math derivation, experimental verification (animated)
+- **Quantum inequalities** - Ford-Roman constraints, the "borrow and repay" principle (animated)
+- **Squeezed vacuum states** - engineering negative energy in quantum optics (animated)
+- Research directions: scaling Casimir, topological effects, quantum gravity loopholes
+- The 40 orders of magnitude gap between what we have and what we need
+- **Experimental validation** - precision Casimir, analog gravity systems (animated)
+- Research roadmap: phases from foundations to spacetime engineering
+- **Making the mathematics work** - 5 theoretical approaches:
+  - Exploiting quantum inequality loopholes in curved spacetime
+  - Interacting field enhancement (nonlinear QED)
+  - Topological negative energy (kink solutions)
+  - Extra dimensions from string theory
+  - Modified gravity (f(R) theories)
+- Self-consistency challenge visualization (animated)
+- Mathematical deep dives: deriving quantum inequalities, Casimir calculation
+
 ## Features
 
 All notebooks include:
