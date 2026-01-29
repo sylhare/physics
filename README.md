@@ -135,6 +135,65 @@ uv run marimo edit notebooks/feynman_exotic_matter.py  # Edit mode
 - Self-consistency challenge visualization (animated)
 - Mathematical deep dives: deriving quantum inequalities, Casimir calculation
 
+### 7. Magnetism and Electric Motors
+
+Based on [Feynman Lectures, Volume II](https://www.feynmanlectures.caltech.edu/II_toc.html) on Electromagnetism
+
+```bash
+uv run marimo run notebooks/feynman_magnetism.py   # View mode
+uv run marimo edit notebooks/feynman_magnetism.py  # Edit mode
+```
+
+**Contents:**
+- Oersted's 1820 discovery - electricity creates magnetism
+- Magnetic field around a wire (animated 3D)
+- Solenoids and electromagnets (animated)
+- Force on current-carrying wires - the motor principle (animated)
+- Electromagnetic induction - Faraday's law (animated)
+- DC motor with commutator (animated)
+- AC induction motor - Tesla's invention (animated)
+- Stepper motor - discrete positioning (animated)
+- AC generator - motors in reverse (animated)
+
+### 8. Motion of Charges in Fields
+
+Based on [Feynman Lectures, Volume II, Chapter 29](https://www.feynmanlectures.caltech.edu/II_29.html)
+
+```bash
+uv run marimo run notebooks/feynman_charged_motion.py   # View mode
+uv run marimo edit notebooks/feynman_charged_motion.py  # Edit mode
+```
+
+**Contents:**
+- Motion in uniform electric field - CRT displays (animated)
+- Circular motion in magnetic field - cyclotron radius (animated)
+- Mass spectrometer - separating isotopes (animated)
+- The cyclotron particle accelerator (animated)
+- Velocity selector - crossed E and B fields (animated)
+- Magnetic bottles and plasma confinement (animated)
+- The Hall effect - measuring fields with voltage (animated)
+- Aurora borealis - Earth's magnetic bottle (animated)
+
+### 9. Black Holes
+
+Based on [Feynman Lectures, Volume II, Chapter 42: Curved Space](https://www.feynmanlectures.caltech.edu/II_42.html) and general relativity
+
+```bash
+uv run marimo run notebooks/feynman_black_holes.py   # View mode
+uv run marimo edit notebooks/feynman_black_holes.py  # Edit mode
+```
+
+**Contents:**
+- Schwarzschild radius and gravitational collapse (animated)
+- Light cones near black holes - causality visualized (animated)
+- Gravitational time dilation - clocks near the horizon (animated)
+- Gravitational redshift - light losing energy (animated)
+- Spacetime curvature - Flamm's paraboloid embedding (3D)
+- Inside the black hole - Kruskal diagram (animated)
+- Kerr rotating black holes with ergosphere (3D)
+- Hawking radiation and black hole evaporation (animated)
+- The information paradox
+
 ## Features
 
 All notebooks include:

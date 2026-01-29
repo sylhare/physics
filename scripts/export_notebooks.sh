@@ -144,6 +144,21 @@ cat > docs/index.html << EOF
                 <h2>6. Exotic Matter</h2>
                 <p>Negative energy density, Casimir effect, quantum inequalities, and the path to spacetime engineering.</p>
             </a>
+
+            <a href="feynman_magnetism.html" class="notebook">
+                <h2>7. Magnetism and Electric Motors</h2>
+                <p>From Oersted's discovery to DC motors, AC induction motors, stepper motors, and generators.</p>
+            </a>
+
+            <a href="feynman_charged_motion.html" class="notebook">
+                <h2>8. Motion of Charges in Fields</h2>
+                <p>Cyclotrons, mass spectrometers, velocity selectors, magnetic bottles, Hall effect, and aurora.</p>
+            </a>
+
+            <a href="feynman_black_holes.html" class="notebook">
+                <h2>9. Black Holes</h2>
+                <p>Event horizons, light cones, time dilation, spacetime curvature, Hawking radiation, and the information paradox.</p>
+            </a>
         </div>
 
         <div class="footer">
