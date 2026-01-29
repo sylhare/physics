@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# marimo cache
+notebooks/__marimo__/
+
+# Generated docs (built by CI)
+docs/
+
+# OS
+.DS_Store
+
+# Environment
+.env
+.env.local
