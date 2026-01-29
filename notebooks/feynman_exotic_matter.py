@@ -1959,5 +1959,92 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Feynman Lectures (Background)
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1963). *The Feynman Lectures on Physics*.
+          Addison-Wesley.
+          - [Volume II, Chapter 19: The Principle of Least Action](https://www.feynmanlectures.caltech.edu/II_19.html)
+          - Feynman's path integral approach underlies quantum field theory
+
+        ### Energy Conditions
+
+        - **Hawking, S. W. & Ellis, G. F. R.** (1973). *The Large Scale Structure of Space-Time*.
+          Cambridge University Press.
+          - Definitive treatment of energy conditions (WEC, NEC, SEC, DEC)
+
+        - **Weak Energy Condition (WEC)**: $T_{\mu\nu} u^\mu u^\nu \geq 0$ for all timelike $u^\mu$
+        - **Null Energy Condition (NEC)**: $T_{\mu\nu} k^\mu k^\nu \geq 0$ for all null $k^\mu$
+        - **Strong Energy Condition (SEC)**: $(T_{\mu\nu} - \frac{1}{2}T g_{\mu\nu}) u^\mu u^\nu \geq 0$
+        - **Dominant Energy Condition (DEC)**: $T_{\mu\nu} u^\mu$ is non-spacelike
+
+        ### Casimir Effect
+
+        - **Casimir, H. B. G.** (1948). "On the attraction between two perfectly conducting plates".
+          Proceedings of the Royal Netherlands Academy of Arts and Sciences, 51, 793.
+          - Original prediction of the Casimir force
+
+        - **Lamoreaux, S. K.** (1997). "Demonstration of the Casimir Force in the 0.6 to 6 μm Range".
+          Physical Review Letters, 78, 5.
+          - First precision measurement
+
+        - **Casimir energy density**: $\rho = -\frac{\pi^2 \hbar c}{720 d^4}$ (negative!)
+
+        ### Quantum Inequalities
+
+        - **Ford, L. H. & Roman, T. A.** (1995). "Averaged Energy Conditions and Quantum Inequalities".
+          Physical Review D, 51, 4277.
+
+        - **Ford, L. H. & Roman, T. A.** (1996). "Quantum Field Theory Constrains Traversable Wormhole Geometries".
+          Physical Review D, 53, 5496.
+          - The "quantum interest" principle: $|\rho_{neg}| \cdot \tau^4 \lesssim \hbar/c$
+
+        ### Squeezed States
+
+        - **Caves, C. M.** (1981). "Quantum-mechanical noise in an interferometer".
+          Physical Review D, 23, 1693.
+          - Squeezed vacuum for gravitational wave detection
+
+        ### Wormholes and Warp Drives
+
+        - **Morris, M. S. & Thorne, K. S.** (1988). "Wormholes in spacetime".
+          American Journal of Physics, 56, 395.
+          - Traversable wormholes require exotic matter
+
+        - **Alcubierre, M.** (1994). "The warp drive: hyper-fast travel within general relativity".
+          Classical and Quantum Gravity, 11, L73.
+          - Original warp drive metric
+
+        - **Pfenning, M. J. & Ford, L. H.** (1997). "The unphysical nature of warp drive".
+          Classical and Quantum Gravity, 14, 1743.
+          - Quantum inequality constraints on Alcubierre drive
+
+        ### Theoretical Approaches
+
+        - **Modified Gravity**: Sotiriou, T. P. & Faraoni, V. (2010). "f(R) theories of gravity".
+          Reviews of Modern Physics, 82, 451.
+
+        - **String Theory**: Polchinski, J. *String Theory* (Vol. 1 & 2). Cambridge University Press.
+
+        - **Chronology Protection**: Hawking, S. W. (1992). "Chronology protection conjecture".
+          Physical Review D, 46, 603.
+
+        ### Further Reading
+
+        - Visser, M. *Lorentzian Wormholes: From Einstein to Hawking* — Comprehensive treatment
+        - Ford, L. H. "Negative Energy in Quantum Field Theory" (2010). arXiv:0911.3597
+        - Barceló, C. & Visser, M. "Twilight for the energy conditions?" (2002). arXiv:gr-qc/0205066
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()

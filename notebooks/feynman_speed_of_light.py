@@ -690,5 +690,63 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Primary Source
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1963). *The Feynman Lectures on Physics*.
+          Addison-Wesley.
+          - [Volume I, Chapter 15: The Special Theory of Relativity](https://www.feynmanlectures.caltech.edu/I_15.html)
+            (discusses the constancy of $c$)
+          - [Volume II, Chapter 18: The Maxwell Equations](https://www.feynmanlectures.caltech.edu/II_18.html)
+
+        ### Historical Measurements
+
+        - **Rømer, O.** (1676). First measurement using Jupiter's moon Io.
+          Estimated $c \approx 220{,}000$ km/s.
+
+        - **Fizeau, H.** (1849). Toothed wheel method.
+          Result: $c \approx 315{,}000$ km/s.
+
+        - **Foucault, L.** (1850). Rotating mirror method.
+          Result: $c \approx 298{,}000$ km/s.
+
+        - **Michelson, A. A.** (1926). Precision rotating mirror.
+          Result: $c = 299{,}796$ km/s.
+
+        ### Maxwell's Theoretical Prediction
+
+        - **Maxwell, J. C.** (1865). "A Dynamical Theory of the Electromagnetic Field".
+          Philosophical Transactions of the Royal Society, 155, 459-512.
+          - Predicted $c = 1/\sqrt{\epsilon_0 \mu_0}$
+          - Connected light to electromagnetic waves
+
+        ### Modern Definition
+
+        - **SI Definition** (1983): The speed of light is *exactly*
+          $c = 299{,}792{,}458$ m/s by definition.
+          - The meter is now defined as the distance light travels in $1/299{,}792{,}458$ seconds
+
+        ### Key Constants
+
+        - Vacuum permittivity: $\epsilon_0 = 8.854 \times 10^{-12}$ F/m
+        - Vacuum permeability: $\mu_0 = 4\pi \times 10^{-7}$ H/m
+        - Speed of light: $c = 1/\sqrt{\epsilon_0 \mu_0} = 299{,}792{,}458$ m/s
+
+        ### Further Reading
+
+        - **Feynman Lectures**: [Volume I, Chapter 17: Space-Time](https://www.feynmanlectures.caltech.edu/I_17.html)
+        - Galison, P. *Einstein's Clocks, Poincaré's Maps* — Historical context
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()

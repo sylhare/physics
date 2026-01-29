@@ -1542,5 +1542,47 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Primary Source
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1963). *The Feynman Lectures on Physics, Volume I*.
+          [Chapter 7: The Theory of Gravitation](https://www.feynmanlectures.caltech.edu/I_07.html).
+          Addison-Wesley.
+
+        ### Mathematical Background
+
+        - **Kepler's Laws of Planetary Motion**
+          - First Law (1609): Planets move in ellipses with the Sun at one focus
+          - Second Law (1609): Equal areas are swept in equal times
+          - Third Law (1619): $T^2 \propto a^3$ for all planets
+          - Original work: *Astronomia Nova* (1609) and *Harmonices Mundi* (1619)
+
+        - **Newton's Law of Universal Gravitation** (1687)
+          - $F = G\frac{m_1 m_2}{r^2}$
+          - Original work: *Philosophiæ Naturalis Principia Mathematica*
+          - Gravitational constant $G = 6.674 \times 10^{-11}$ N⋅m²/kg²
+
+        - **Conic Sections and Orbital Mechanics**
+          - Eccentricity: $e = 0$ (circle), $0 < e < 1$ (ellipse), $e = 1$ (parabola), $e > 1$ (hyperbola)
+          - Orbit equation: $r = \frac{a(1-e^2)}{1 + e\cos\theta}$
+
+        ### Further Reading
+
+        - **Feynman Lectures**: [Chapter 9: Newton's Laws of Dynamics](https://www.feynmanlectures.caltech.edu/I_09.html)
+        - **Feynman Lectures**: [Chapter 13: Work and Potential Energy](https://www.feynmanlectures.caltech.edu/I_13.html)
+        - Goldstein, H. *Classical Mechanics* (3rd ed.) — Chapters on central force motion
+        - Misner, Thorne, & Wheeler. *Gravitation* — For general relativistic treatment
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()

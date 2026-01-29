@@ -2196,5 +2196,72 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Feynman Lectures (Background)
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1963). *The Feynman Lectures on Physics, Volume I*.
+          Addison-Wesley.
+          - [Chapter 15: The Special Theory of Relativity](https://www.feynmanlectures.caltech.edu/I_15.html)
+          - [Chapter 16: Relativistic Energy and Momentum](https://www.feynmanlectures.caltech.edu/I_16.html)
+          - [Chapter 17: Space-Time](https://www.feynmanlectures.caltech.edu/I_17.html)
+
+        ### Special Relativity
+
+        - **Einstein, A.** (1905). "Zur Elektrodynamik bewegter Körper".
+          Annalen der Physik, 17, 891-921.
+
+        - **Minkowski, H.** (1908). Introduced 4D spacetime geometry.
+          - Metric: $ds^2 = c^2 dt^2 - dx^2 - dy^2 - dz^2$
+          - Hyperbolic geometry of velocity addition
+
+        ### Tachyons
+
+        - **Bilaniuk, O.-M. P., Deshpande, V. K., & Sudarshan, E. C. G.** (1962).
+          "'Meta' Relativity". American Journal of Physics, 30, 718.
+          - First serious theoretical treatment of faster-than-light particles
+
+        - **Feinberg, G.** (1967). "Possibility of Faster-Than-Light Particles".
+          Physical Review, 159, 1089.
+          - Named "tachyons" (from Greek *tachys*, swift)
+
+        ### Wormholes
+
+        - **Einstein, A. & Rosen, N.** (1935). "The Particle Problem in the General Theory of Relativity".
+          Physical Review, 48, 73.
+          - Original "Einstein-Rosen bridge" paper
+
+        - **Morris, M. S. & Thorne, K. S.** (1988). "Wormholes in spacetime and their use for interstellar travel".
+          American Journal of Physics, 56, 395.
+          - Traversable wormhole requirements
+
+        ### Warp Drives
+
+        - **Alcubierre, M.** (1994). "The warp drive: hyper-fast travel within general relativity".
+          Classical and Quantum Gravity, 11, L73.
+          - Original Alcubierre metric paper
+
+        ### Causality
+
+        - **Hawking, S. W.** (1992). "Chronology protection conjecture".
+          Physical Review D, 46, 603.
+          - Why physics may forbid time machines
+
+        ### Further Reading
+
+        - Thorne, K. S. *Black Holes and Time Warps* — Popular science
+        - Visser, M. *Lorentzian Wormholes: From Einstein to Hawking* — Technical treatment
+        - Taylor, E. F. & Wheeler, J. A. *Spacetime Physics* — Special relativity foundations
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()

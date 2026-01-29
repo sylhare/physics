@@ -1021,5 +1021,59 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Primary Sources
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1963). *The Feynman Lectures on Physics, Volume I*.
+          Addison-Wesley.
+          - [Chapter 15: The Special Theory of Relativity](https://www.feynmanlectures.caltech.edu/I_15.html)
+          - [Chapter 16: Relativistic Energy and Momentum](https://www.feynmanlectures.caltech.edu/I_16.html)
+          - [Chapter 17: Space-Time](https://www.feynmanlectures.caltech.edu/I_17.html)
+
+        ### Mathematical Background
+
+        - **Lorentz Transformation** (1904)
+          - $t' = \gamma(t - vx/c^2)$, $x' = \gamma(x - vt)$
+          - Lorentz factor: $\gamma = 1/\sqrt{1 - v^2/c^2}$
+
+        - **Time Dilation**: $\Delta t' = \gamma \Delta t$
+          - Moving clocks run slow by factor $\gamma$
+          - Experimentally confirmed with muon decay, GPS satellites
+
+        - **Length Contraction**: $L' = L/\gamma$
+          - Moving objects contract along direction of motion
+
+        - **Spacetime Interval** (invariant):
+          - $s^2 = c^2\Delta t^2 - \Delta x^2 - \Delta y^2 - \Delta z^2$
+          - Timelike ($s^2 > 0$), spacelike ($s^2 < 0$), lightlike ($s^2 = 0$)
+
+        - **Mass-Energy Equivalence** (Einstein, 1905)
+          - $E = mc^2$ (rest energy)
+          - $E = \gamma mc^2$ (total energy)
+          - $E^2 = (pc)^2 + (mc^2)^2$ (energy-momentum relation)
+
+        ### Original Papers
+
+        - Einstein, A. (1905). "Zur Elektrodynamik bewegter Körper" (*On the Electrodynamics of Moving Bodies*).
+          Annalen der Physik, 17, 891-921.
+        - Minkowski, H. (1908). "Die Grundgleichungen für die elektromagnetischen Vorgänge in bewegten Körpern".
+          Introduced the concept of 4-dimensional spacetime.
+
+        ### Further Reading
+
+        - Taylor, E. F. & Wheeler, J. A. *Spacetime Physics* — Excellent introduction
+        - Rindler, W. *Introduction to Special Relativity* — More mathematical treatment
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()

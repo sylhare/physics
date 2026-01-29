@@ -1128,5 +1128,64 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## References
+
+        ### Primary Source
+
+        - **Feynman, R. P., Leighton, R. B., & Sands, M.** (1965). *The Feynman Lectures on Physics, Volume III*.
+          Addison-Wesley.
+          - [Chapter 1: Quantum Behavior](https://www.feynmanlectures.caltech.edu/III_01.html) — The double-slit experiment
+          - [Chapter 2: The Relation of Wave and Particle Viewpoints](https://www.feynmanlectures.caltech.edu/III_02.html)
+          - [Chapter 3: Probability Amplitudes](https://www.feynmanlectures.caltech.edu/III_03.html)
+
+        ### Key Experiments
+
+        - **Young's Double-Slit Experiment** (1801)
+          - Thomas Young demonstrated wave interference of light
+          - Fringe spacing: $\Delta y = \lambda L / d$
+
+        - **Photoelectric Effect** (Einstein, 1905)
+          - Light comes in quanta (photons) with energy $E = h\nu$
+          - Nobel Prize 1921
+          - Planck's constant: $h = 6.626 \times 10^{-34}$ J⋅s
+
+        - **Electron Diffraction** (Davisson & Germer, 1927)
+          - Confirmed de Broglie's matter wave hypothesis
+          - Nobel Prize 1937
+
+        ### Mathematical Framework
+
+        - **de Broglie Wavelength** (1924)
+          - $\lambda = h/p = h/(mv)$
+          - Matter has wave-like properties
+          - Nobel Prize 1929
+
+        - **Heisenberg Uncertainty Principle** (1927)
+          - $\Delta x \cdot \Delta p \geq \hbar/2$
+          - $\Delta E \cdot \Delta t \geq \hbar/2$
+          - Reduced Planck constant: $\hbar = h/(2\pi) = 1.055 \times 10^{-34}$ J⋅s
+
+        - **Feynman Path Integral** (1948)
+          - Amplitude: $\langle x_f | x_i \rangle = \int \mathcal{D}[x(t)] \, e^{iS[x]/\hbar}$
+          - Sum over all possible paths
+          - Action: $S = \int L \, dt$
+
+        ### Further Reading
+
+        - **Feynman Lectures**: [Volume III, Chapter 4: Identical Particles](https://www.feynmanlectures.caltech.edu/III_04.html)
+        - Feynman, R. P. *QED: The Strange Theory of Light and Matter* — Popular introduction
+        - Sakurai, J. J. *Modern Quantum Mechanics* — Graduate-level treatment
+        - Griffiths, D. J. *Introduction to Quantum Mechanics* — Undergraduate textbook
+        """
+    )
+    return
+
+
 if __name__ == "__main__":
     app.run()
