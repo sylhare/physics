@@ -331,7 +331,7 @@ def _(go, np):
                 # At infinity: 45°, at horizon: 90° (fully tilted inward)
                 if r > r_s:
                     # Outside horizon: tilt factor
-                    tilt = 1 - np.sqrt(1 - r_s / r) if r > r_s else 1
+                    tilt = 1 - np.sqrt(1 - r_s / r)
                     tilt = min(tilt * 2, 0.9)  # Exaggerate for visibility
                 else:
                     # Inside horizon: light cone tilted past vertical
@@ -1141,9 +1141,9 @@ def _(mo):
 
         $$\tau = \frac{\pi G M}{c^3} = \frac{\pi r_s}{2c}$$
 
-        For a stellar black hole (3 solar masses): about 0.00001 seconds!
+        For a stellar black hole (3 solar masses): about 50 microseconds!
 
-        For a supermassive black hole (4 million solar masses): about 20 seconds.
+        For a supermassive black hole (4 million solar masses): about 60 seconds.
         """
     )
     return
@@ -1579,7 +1579,7 @@ def _(mo):
         4. The black hole loses mass
 
         **The temperature:**
-        $$T_H = \frac{\hbar c^3}{8\pi G M k_B} = \frac{1.227 \times 10^{23} \text{ kg}}{M} \text{ K}$$
+        $$T_H = \frac{\hbar c^3}{8\pi G M k_B} = \frac{1.227 \times 10^{23} \text{ K} \cdot \text{kg}}{M}$$
 
         **Key insight:** Smaller black holes are hotter! A stellar black hole is colder than
         the cosmic microwave background, so it absorbs more than it emits. But a tiny primordial

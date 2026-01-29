@@ -623,7 +623,7 @@ def _(mo):
         r"""
         ---
 
-        ## De Broglie's Insight: Matter Waves
+        ## de Broglie's Insight: Matter Waves
 
         If light (waves) can behave like particles, could particles behave like waves?
 
@@ -691,7 +691,7 @@ def _(go, np):
             lambda_electron = 1.0
             wave_electron = np.sin(2 * np.pi * x / lambda_electron - t) * np.exp(-((x - 5)**2) / 20)
 
-            # Proton - longer wavelength (1836x mass)
+            # Proton - shorter wavelength (1836x mass means smaller λ = h/mv)
             lambda_proton = 0.3
             wave_proton = np.sin(2 * np.pi * x / lambda_proton - t) * np.exp(-((x - 5)**2) / 20)
 

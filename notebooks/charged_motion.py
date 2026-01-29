@@ -666,22 +666,8 @@ def _(go, np):
                         showlegend=False,
                     ))
 
-                # Landing position indicator
+                # Landing position indicator (ions curve down, landing at y = -2r)
                 if progress > 0.95:
-                    landing_y = r + r * np.sin(np.pi/2 - np.pi)  # = r - r = 0? No...
-                    # Actually landing at y = r - r = 0 when theta = -pi/2
-                    landing_y = 0  # All land at y where x = -2 - 2r... wait
-                    # Let me recalculate. Center at (-2, r). When theta = -pi/2:
-                    # x = -2 + r*cos(-pi/2) = -2 + 0 = -2
-                    # y = r + r*sin(-pi/2) = r - r = 0
-                    # Hmm, they all land at y=0? That's not right for a spectrometer.
-
-                    # Let me fix the geometry. Standard mass spec: ions enter horizontally,
-                    # curve in semicircle, land on detector on opposite side.
-                    # If entering at (-2, 0) going +x direction, B into page (positive charge):
-                    # Force initially in -y direction. So curves down.
-                    # Center at (-2, -r). After semicircle (theta = pi), lands at (-2, -2r).
-
                     landing_y = -2 * r
                     frame_data.append(go.Scatter(
                         x=[-2.3], y=[landing_y],
@@ -1263,7 +1249,7 @@ def _(mo):
         - If $v > E/B$: net force down (fast particles curve toward − plate)
 
         **Historical note:** J.J. Thomson used this principle in 1897 to measure $e/m$ for
-        electrons, proving they were a fundamental particle!
+        electrons, proving the electron was a fundamental particle!
         """
     )
     return

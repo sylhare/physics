@@ -696,7 +696,7 @@ def _(go, np):
                 x=[0], y=[-1.5], z=[0],
                 mode="markers+text",
                 marker=dict(size=10, color=current_color),
-                text=[f"I = {velocity:.2f}"],
+                text=[f"v = {velocity:.2f}"],
                 textposition="bottom center",
                 textfont=dict(size=11, color="white"),
                 name="Induced current",

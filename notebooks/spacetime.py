@@ -1064,7 +1064,7 @@ def _(mo):
         - Einstein, A. (1905). "Zur Elektrodynamik bewegter Körper" (*On the Electrodynamics of Moving Bodies*).
           Annalen der Physik, 17, 891-921.
         - Minkowski, H. (1908). "Die Grundgleichungen für die elektromagnetischen Vorgänge in bewegten Körpern".
-          Introduced the concept of 4-dimensional spacetime.
+          This work introduced the concept of 4-dimensional spacetime.
 
         ### Further Reading
 

@@ -1347,7 +1347,7 @@ def _(mo):
 
         But spacetime has a different geometry—**Minkowski geometry**:
 
-        $$s^2 = -c^2\Delta t^2 + \Delta x^2 + \Delta y^2 + \Delta z^2$$
+        $$s^2 = c^2\Delta t^2 - \Delta x^2 - \Delta y^2 - \Delta z^2$$
 
         That minus sign changes everything! Time and space don't add—they **subtract**.
 

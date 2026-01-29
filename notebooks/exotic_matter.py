@@ -429,7 +429,7 @@ def _(mo):
 
         $$F/A = -\frac{\pi^2 \hbar c}{240 a^4}$$
 
-        For plates 100 nm apart: $F/A \approx 1$ atmosphere!
+        For plates 100 nm apart: $F/A \approx 13$ Pa (about 0.1 mbar).
 
         **Experimental Verification:**
 

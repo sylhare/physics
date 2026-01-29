@@ -210,11 +210,11 @@ def _(mo):
         **The calculation:**
 
         - Distance to mirror and back: $2 \times 8.6$ km $= 17.2$ km
-        - The wheel had 720 teeth, so gaps were separated by $1/720$ of a rotation
+        - The wheel had 720 teeth (and 720 gaps), each tooth/gap spanning $1/1440$ of a rotation
         - Light was blocked when the wheel spun at 12.6 rotations/second
-        - Time for light to travel: $\frac{1}{720 \times 12.6} = \frac{1}{9072}$ seconds
+        - Time for light to travel: $\frac{1}{2 \times 720 \times 12.6} = \frac{1}{18144}$ seconds
 
-        $$c = \frac{17,200 \text{ m}}{1/9072 \text{ s}} \approx 313,000 \text{ km/s}$$
+        $$c = \frac{17,200 \text{ m}}{1/18144 \text{ s}} \approx 312,000 \text{ km/s}$$
 
         Within 5% of the modern value—remarkable for a tabletop experiment!
 
