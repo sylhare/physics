@@ -203,12 +203,26 @@ All notebooks include:
 - LaTeX-rendered equations
 - Feynman-style explanations with historical context
 
+## Development
+
+Install with dev dependencies:
+
+```bash
+uv sync --extra dev
+```
+
+Run tests:
+
+```bash
+uv run pytest tests/ -v
+```
+
 ## Export to HTML
 
 Generate static HTML versions locally:
 
 ```bash
-./scripts/export_notebooks.sh
+uv run python -m physics_explorations.export
 ```
 
 Preview locally:
@@ -216,6 +230,20 @@ Preview locally:
 ```bash
 cd docs && python -m http.server 8000
 # Open http://localhost:8000
+```
+
+## Project Structure
+
+```
+physics/
+├── notebooks/           # Marimo notebook files
+├── src/
+│   └── physics_explorations/
+│       ├── export.py           # Export and index generation
+│       └── visualization/      # Shared styles and animation helpers
+├── tests/
+│   └── e2e/                    # End-to-end notebook tests
+└── docs/                       # Generated HTML (by CI)
 ```
 
 ## GitHub Pages
