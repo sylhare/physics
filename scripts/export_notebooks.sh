@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 # Export all Feynman notebooks to HTML for GitHub Pages
+# GITHUB_REPOSITORY is set automatically in CI
 
 mkdir -p docs
 
@@ -127,6 +128,21 @@ cat > docs/index.html << EOF
             <a href="feynman_spacetime.html" class="notebook">
                 <h2>3. The Fabric of Spacetime</h2>
                 <p>Special relativity: time dilation, length contraction, simultaneity, spacetime diagrams, and E=mc².</p>
+            </a>
+
+            <a href="feynman_wave_particle.html" class="notebook">
+                <h2>4. The Wave-Particle Duality</h2>
+                <p>Quantum mechanics: double-slit experiment, photoelectric effect, measurement problem, and Feynman path integrals.</p>
+            </a>
+
+            <a href="feynman_beyond_light.html" class="notebook">
+                <h2>5. Beyond the Speed of Light</h2>
+                <p>Spacetime geometry, the cosmic speed limit, tachyons, causality, and why FTL leads to imaginary time.</p>
+            </a>
+
+            <a href="feynman_exotic_matter.html" class="notebook">
+                <h2>6. Exotic Matter</h2>
+                <p>Negative energy density, Casimir effect, quantum inequalities, and the path to spacetime engineering.</p>
             </a>
         </div>
 
