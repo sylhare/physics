@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Export all Feynman notebooks to HTML for GitHub Pages
+# Export all notebooks to HTML for GitHub Pages
 # GITHUB_REPOSITORY is set automatically in CI
 
 mkdir -p docs
 
 echo "Exporting notebooks to HTML..."
 
-for notebook in notebooks/feynman_*.py; do
+for notebook in notebooks/*.py; do
     name=$(basename "$notebook" .py)
     echo "  Exporting $name..."
     uv run marimo export html "$notebook" -o "docs/${name}.html"
@@ -115,47 +115,47 @@ cat > docs/index.html << EOF
         </p>
 
         <div class="notebooks">
-            <a href="feynman_gravitation.html" class="notebook">
+            <a href="gravitation.html" class="notebook">
                 <h2>1. The Theory of Gravitation</h2>
                 <p>Kepler's laws, Newton's universal gravitation, orbital mechanics, tidal effects, and Einstein's refinements.</p>
             </a>
 
-            <a href="feynman_speed_of_light.html" class="notebook">
+            <a href="speed_of_light.html" class="notebook">
                 <h2>2. The Speed of Light</h2>
                 <p>Historical measurements from Rømer to Michelson, Maxwell's prediction, and electromagnetic wave visualization.</p>
             </a>
 
-            <a href="feynman_spacetime.html" class="notebook">
+            <a href="spacetime.html" class="notebook">
                 <h2>3. The Fabric of Spacetime</h2>
                 <p>Special relativity: time dilation, length contraction, simultaneity, spacetime diagrams, and E=mc².</p>
             </a>
 
-            <a href="feynman_wave_particle.html" class="notebook">
+            <a href="wave_particle.html" class="notebook">
                 <h2>4. The Wave-Particle Duality</h2>
                 <p>Quantum mechanics: double-slit experiment, photoelectric effect, measurement problem, and Feynman path integrals.</p>
             </a>
 
-            <a href="feynman_beyond_light.html" class="notebook">
+            <a href="beyond_light.html" class="notebook">
                 <h2>5. Beyond the Speed of Light</h2>
                 <p>Spacetime geometry, the cosmic speed limit, tachyons, causality, and why FTL leads to imaginary time.</p>
             </a>
 
-            <a href="feynman_exotic_matter.html" class="notebook">
+            <a href="exotic_matter.html" class="notebook">
                 <h2>6. Exotic Matter</h2>
                 <p>Negative energy density, Casimir effect, quantum inequalities, and the path to spacetime engineering.</p>
             </a>
 
-            <a href="feynman_magnetism.html" class="notebook">
+            <a href="magnetism.html" class="notebook">
                 <h2>7. Magnetism and Electric Motors</h2>
                 <p>From Oersted's discovery to DC motors, AC induction motors, stepper motors, and generators.</p>
             </a>
 
-            <a href="feynman_charged_motion.html" class="notebook">
+            <a href="charged_motion.html" class="notebook">
                 <h2>8. Motion of Charges in Fields</h2>
                 <p>Cyclotrons, mass spectrometers, velocity selectors, magnetic bottles, Hall effect, and aurora.</p>
             </a>
 
-            <a href="feynman_black_holes.html" class="notebook">
+            <a href="black_holes.html" class="notebook">
                 <h2>9. Black Holes</h2>
                 <p>Event horizons, light cones, time dilation, spacetime curvature, Hawking radiation, and the information paradox.</p>
             </a>

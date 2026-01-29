@@ -15,8 +15,8 @@ uv sync
 Based on [Feynman Lectures, Chapter 7](https://www.feynmanlectures.caltech.edu/I_07.html)
 
 ```bash
-uv run marimo run notebooks/feynman_gravitation.py   # View mode
-uv run marimo edit notebooks/feynman_gravitation.py  # Edit mode
+uv run marimo run notebooks/gravitation.py   # View mode
+uv run marimo edit notebooks/gravitation.py  # Edit mode
 ```
 
 **Contents:**
@@ -32,8 +32,8 @@ uv run marimo edit notebooks/feynman_gravitation.py  # Edit mode
 Based on Feynman Lectures discussions of light and electromagnetism
 
 ```bash
-uv run marimo run notebooks/feynman_speed_of_light.py   # View mode
-uv run marimo edit notebooks/feynman_speed_of_light.py  # Edit mode
+uv run marimo run notebooks/speed_of_light.py   # View mode
+uv run marimo edit notebooks/speed_of_light.py  # Edit mode
 ```
 
 **Contents:**
@@ -50,8 +50,8 @@ uv run marimo edit notebooks/feynman_speed_of_light.py  # Edit mode
 Based on [Feynman Lectures, Chapters 15-17](https://www.feynmanlectures.caltech.edu/I_15.html) on Special Relativity
 
 ```bash
-uv run marimo run notebooks/feynman_spacetime.py   # View mode
-uv run marimo edit notebooks/feynman_spacetime.py  # Edit mode
+uv run marimo run notebooks/spacetime.py   # View mode
+uv run marimo edit notebooks/spacetime.py  # Edit mode
 ```
 
 **Contents:**
@@ -69,8 +69,8 @@ uv run marimo edit notebooks/feynman_spacetime.py  # Edit mode
 Based on [Feynman Lectures, Volume III, Chapter 1](https://www.feynmanlectures.caltech.edu/III_01.html) on Quantum Behavior
 
 ```bash
-uv run marimo run notebooks/feynman_wave_particle.py   # View mode
-uv run marimo edit notebooks/feynman_wave_particle.py  # Edit mode
+uv run marimo run notebooks/wave_particle.py   # View mode
+uv run marimo edit notebooks/wave_particle.py  # Edit mode
 ```
 
 **Contents:**
@@ -87,8 +87,8 @@ uv run marimo edit notebooks/feynman_wave_particle.py  # Edit mode
 A thought experiment exploring the structure of spacetime and the cosmic speed limit
 
 ```bash
-uv run marimo run notebooks/feynman_beyond_light.py   # View mode
-uv run marimo edit notebooks/feynman_beyond_light.py  # Edit mode
+uv run marimo run notebooks/beyond_light.py   # View mode
+uv run marimo edit notebooks/beyond_light.py  # Edit mode
 ```
 
 **Contents:**
@@ -112,8 +112,8 @@ uv run marimo edit notebooks/feynman_beyond_light.py  # Edit mode
 A researcher's guide to negative energy density and its possibilities
 
 ```bash
-uv run marimo run notebooks/feynman_exotic_matter.py   # View mode
-uv run marimo edit notebooks/feynman_exotic_matter.py  # Edit mode
+uv run marimo run notebooks/exotic_matter.py   # View mode
+uv run marimo edit notebooks/exotic_matter.py  # Edit mode
 ```
 
 **Contents:**
@@ -140,8 +140,8 @@ uv run marimo edit notebooks/feynman_exotic_matter.py  # Edit mode
 Based on [Feynman Lectures, Volume II](https://www.feynmanlectures.caltech.edu/II_toc.html) on Electromagnetism
 
 ```bash
-uv run marimo run notebooks/feynman_magnetism.py   # View mode
-uv run marimo edit notebooks/feynman_magnetism.py  # Edit mode
+uv run marimo run notebooks/magnetism.py   # View mode
+uv run marimo edit notebooks/magnetism.py  # Edit mode
 ```
 
 **Contents:**
@@ -160,8 +160,8 @@ uv run marimo edit notebooks/feynman_magnetism.py  # Edit mode
 Based on [Feynman Lectures, Volume II, Chapter 29](https://www.feynmanlectures.caltech.edu/II_29.html)
 
 ```bash
-uv run marimo run notebooks/feynman_charged_motion.py   # View mode
-uv run marimo edit notebooks/feynman_charged_motion.py  # Edit mode
+uv run marimo run notebooks/charged_motion.py   # View mode
+uv run marimo edit notebooks/charged_motion.py  # Edit mode
 ```
 
 **Contents:**
@@ -179,8 +179,8 @@ uv run marimo edit notebooks/feynman_charged_motion.py  # Edit mode
 Based on [Feynman Lectures, Volume II, Chapter 42: Curved Space](https://www.feynmanlectures.caltech.edu/II_42.html) and general relativity
 
 ```bash
-uv run marimo run notebooks/feynman_black_holes.py   # View mode
-uv run marimo edit notebooks/feynman_black_holes.py  # Edit mode
+uv run marimo run notebooks/black_holes.py   # View mode
+uv run marimo edit notebooks/black_holes.py  # Edit mode
 ```
 
 **Contents:**

@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 
 # All notebook files
-NOTEBOOKS = sorted(NOTEBOOKS_DIR.glob("feynman_*.py"))
+NOTEBOOKS = sorted(NOTEBOOKS_DIR.glob("*.py"))
 
 # Maximum expected HTML file size (50MB should be plenty)
 MAX_HTML_SIZE_MB = 50
@@ -293,7 +293,7 @@ def test_all_notebooks_in_export_script():
 
     # The script uses glob pattern, so just verify it exists and is executable
     assert export_script.exists(), "Export script not found"
-    assert "feynman_*.py" in script_content, "Export script should glob feynman_*.py"
+    assert "notebooks/*.py" in script_content, "Export script should glob notebooks/*.py"
 
     print("Export script configured correctly")
 
