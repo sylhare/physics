@@ -194,6 +194,27 @@ uv run marimo edit notebooks/black_holes.py  # Edit mode
 - Hawking radiation and black hole evaporation (animated)
 - The information paradox
 
+### 10. The Geometry of Spacetime Dimensions
+
+An exploration of what different numbers of space and time dimensions would mean
+
+```bash
+uv run marimo run notebooks/dimensions.py   # View mode
+uv run marimo edit notebooks/dimensions.py  # Edit mode
+```
+
+**Contents:**
+- Why 3+1 dimensions? The fundamental asymmetry of space vs time
+- 1+1 spacetime: A Linelander's journey (animated)
+- What if time were 2-dimensional? Moving sideways in time (animated)
+- Closed timelike curves and causality paradoxes
+- The speed of light and dimensionality - how c might change (animated)
+- Light propagation in 1D, 2D, and 3D space (animated)
+- Quantum time: Does the wavefunction extend in time? (animated)
+- Different dimensional signatures: Why (3,1) is special
+- The arrow of time: Entropy and the thermodynamic direction (animated)
+- Why we can only move forward in time
+
 ## Features
 
 All notebooks include:

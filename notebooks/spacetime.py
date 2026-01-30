@@ -9,8 +9,12 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, mo, np
+    return COLORS, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -215,7 +219,8 @@ def _(mo):
 
         The factor $\gamma$ (gamma) appears everywhere in special relativity:
 
-        $$\gamma = \frac{1}{\sqrt{1 - v^2/c^2}} = \frac{1}{\sqrt{1 - \beta^2}}$$
+        $$\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}
+        = \frac{1}{\sqrt{1 - \beta^2}}$$
 
         where $\beta = v/c$ is velocity as a fraction of light speed.
 
@@ -312,7 +317,8 @@ def _(mo):
         If time dilates, what about space? Einstein showed that lengths in the direction
         of motion **contract**:
 
-        $$L_{moving} = \frac{L_{rest}}{\gamma} = L_{rest}\sqrt{1 - v^2/c^2}$$
+        $$L_{moving} = \frac{L_{rest}}{\gamma}
+        = L_{rest}\sqrt{1 - v^2/c^2}$$
 
         A meter stick moving at $v = 0.9c$ appears only 44 cm long to a stationary observer!
 
@@ -830,7 +836,8 @@ def _(mo):
         For timelike intervals, the **proper time** $\tau$ (time measured by a clock traveling
         between the events) is:
 
-        $$\tau = \frac{s}{c} = \sqrt{\Delta t^2 - \Delta x^2/c^2}$$
+        $$\tau = \frac{s}{c}
+        = \sqrt{\Delta t^2 - \Delta x^2/c^2}$$
         """
     )
     return
@@ -847,7 +854,8 @@ def _(mo):
         Einstein's most famous equation emerges naturally from special relativity.
         The total energy of a particle is:
 
-        $$E = \gamma mc^2 = \frac{mc^2}{\sqrt{1 - v^2/c^2}}$$
+        $$E = \gamma mc^2
+        = \frac{mc^2}{\sqrt{1 - v^2/c^2}}$$
 
         At rest ($v = 0$, $\gamma = 1$):
 
@@ -855,13 +863,15 @@ def _(mo):
 
         This is the **rest energy**—energy stored in mass itself. A 1 kg object contains:
 
-        $$E = (1 \text{ kg})(3 \times 10^8 \text{ m/s})^2 = 9 \times 10^{16} \text{ J}$$
+        $$E = (1 \text{ kg})(3 \times 10^8 \text{ m/s})^2
+        = 9 \times 10^{16} \text{ J}$$
 
         That's equivalent to about 21 megatons of TNT—from a single kilogram!
 
         **The kinetic energy** is the excess over rest energy:
 
-        $$KE = E - E_0 = (\gamma - 1)mc^2$$
+        $$KE = E - E_0
+        = (\gamma - 1)mc^2$$
 
         At low speeds, this reduces to the familiar $KE = \frac{1}{2}mv^2$.
 

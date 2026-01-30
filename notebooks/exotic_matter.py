@@ -10,8 +10,12 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, make_subplots, mo, np
+    return COLORS, create_play_pause_buttons, go, make_subplots, mo, np
 
 
 @app.cell

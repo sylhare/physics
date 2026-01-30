@@ -9,8 +9,12 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, mo, np
+    return COLORS, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -84,7 +88,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(COLORS, create_play_pause_buttons, go, np):
     def create_romer_animation():
         """Animate Rømer's observation of Jupiter's moons."""
         n_frames = 80
@@ -125,22 +129,22 @@ def _(go, np):
             frame_data = [
                 # Sun
                 go.Scatter(x=[0], y=[0], mode="markers",
-                          marker=dict(size=20, color="gold"), name="Sun"),
+                          marker=dict(size=20, color=COLORS["gravity"]), name="Sun"),
                 # Earth orbit
                 go.Scatter(x=earth_orbit_x, y=earth_orbit_y, mode="lines",
-                          line=dict(color="lightblue", width=1, dash="dot"), name="Earth orbit"),
+                          line=dict(color=COLORS["primary"], width=1, dash="dot"), name="Earth orbit"),
                 # Jupiter orbit
                 go.Scatter(x=jupiter_orbit_x, y=jupiter_orbit_y, mode="lines",
-                          line=dict(color="lightyellow", width=1, dash="dot"), name="Jupiter orbit"),
+                          line=dict(color=COLORS["quaternary"], width=1, dash="dot"), name="Jupiter orbit"),
                 # Earth
                 go.Scatter(x=[earth_x], y=[earth_y], mode="markers",
-                          marker=dict(size=12, color="steelblue"), name="Earth"),
+                          marker=dict(size=12, color=COLORS["quantum"]), name="Earth"),
                 # Jupiter
                 go.Scatter(x=[jupiter_x], y=[jupiter_y], mode="markers",
-                          marker=dict(size=16, color="orange"), name="Jupiter"),
+                          marker=dict(size=16, color=COLORS["gravity"]), name="Jupiter"),
                 # Light path
                 go.Scatter(x=light_x, y=light_y, mode="lines",
-                          line=dict(color="yellow", width=2, dash="dash"),
+                          line=dict(color=COLORS["photon"], width=2, dash="dash"),
                           name=f"Light path: {distance:.2f} AU"),
             ]
 
@@ -164,16 +168,9 @@ def _(go, np):
                         y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 100, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
-                        ],
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
                 margin=dict(b=60),

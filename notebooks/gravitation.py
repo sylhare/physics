@@ -10,8 +10,13 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     import polars as pl
+    from physics_explorations.visualization import (
+        COLORS,
+        ANIMATION_SETTINGS,
+        create_play_pause_buttons,
+    )
 
-    return go, mo, np, pl
+    return ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, mo, np, pl
 
 
 @app.cell
@@ -107,7 +112,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
     def create_ellipse_animation(e: float = 0.5, a: float = 1.0, n_frames: int = 120):
         """Create animated ellipse with planet motion."""
         # Generate ellipse
@@ -139,7 +144,7 @@ def _(go, np):
             x_planet.append(r_val * np.cos(theta_true))
             y_planet.append(r_val * np.sin(theta_true))
 
-        # Create figure
+        # Create figure using shared utilities
         fig = go.Figure(
             data=[
                 # Ellipse orbit
@@ -147,7 +152,7 @@ def _(go, np):
                     x=x_ellipse,
                     y=y_ellipse,
                     mode="lines",
-                    line={"color": "lightblue", "width": 2},
+                    line={"color": COLORS["primary"], "width": 2},
                     name="Orbit",
                 ),
                 # Sun at focus 1
@@ -155,7 +160,7 @@ def _(go, np):
                     x=[focus1[0]],
                     y=[focus1[1]],
                     mode="markers",
-                    marker={"size": 22, "color": "gold", "symbol": "circle"},
+                    marker={"size": 22, "color": COLORS["gravity"], "symbol": "circle"},
                     name="Sun (Focus 1)",
                 ),
                 # Focus 2 marker
@@ -163,7 +168,7 @@ def _(go, np):
                     x=[focus2[0]],
                     y=[focus2[1]],
                     mode="markers",
-                    marker={"size": 12, "color": "gray", "symbol": "x"},
+                    marker={"size": 12, "color": COLORS["text_secondary"], "symbol": "x"},
                     name="Focus 2 (empty)",
                 ),
                 # Planet (initial position)
@@ -171,7 +176,7 @@ def _(go, np):
                     x=[x_planet[0]],
                     y=[y_planet[0]],
                     mode="markers",
-                    marker={"size": 14, "color": "steelblue"},
+                    marker={"size": 14, "color": COLORS["quantum"]},
                     name="Planet",
                 ),
                 # Radius vector to sun
@@ -179,7 +184,7 @@ def _(go, np):
                     x=[0, x_planet[0]],
                     y=[0, y_planet[0]],
                     mode="lines",
-                    line={"color": "orange", "width": 2, "dash": "dash"},
+                    line={"color": COLORS["secondary"], "width": 2, "dash": "dash"},
                     name="r₁ (to Sun)",
                 ),
                 # Radius vector to focus 2
@@ -187,19 +192,29 @@ def _(go, np):
                     x=[focus2[0], x_planet[0]],
                     y=[focus2[1], y_planet[0]],
                     mode="lines",
-                    line={"color": "green", "width": 2, "dash": "dash"},
+                    line={"color": COLORS["wave"], "width": 2, "dash": "dash"},
                     name="r₂ (to Focus 2)",
                 ),
             ],
             layout=go.Layout(
                 title=dict(
                     text="<b>Kepler's First Law:</b> Elliptical Orbit",
-                    font=dict(size=16),
+                    font=dict(size=16, color=COLORS["text"]),
                 ),
                 xaxis={"scaleanchor": "y", "range": [-2.5, 2], "title": "x (AU)"},
                 yaxis={"range": [-1.5, 1.5], "title": "y (AU)"},
+                plot_bgcolor=COLORS["background"],
+                paper_bgcolor=COLORS["paper"],
+                font=dict(color=COLORS["text"]),
                 showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    bgcolor="rgba(22, 33, 62, 0.8)",
+                ),
                 updatemenus=[
                     {
                         "type": "buttons",
@@ -207,32 +222,9 @@ def _(go, np):
                         "y": -0.15,
                         "x": 0.5,
                         "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "▶ Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "⏸ Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                        ],
+                        "buttons": create_play_pause_buttons(),
+                        "bgcolor": COLORS["paper"],
+                        "font": {"color": COLORS["text"]},
                     }
                 ],
                 margin=dict(b=80),
@@ -274,10 +266,16 @@ def _(mo):
         **Step 1: Conservation of Angular Momentum**
 
         For any central force (pointing toward a fixed point), there's no torque:
-        $$\vec{\tau} = \vec{r} \times \vec{F} = 0$$
+        $$\begin{aligned}
+        \vec{\tau} &= \vec{r} \times \vec{F} \\
+        &= 0
+        \end{aligned}$$
 
         So angular momentum is conserved:
-        $$L = mr^2\dot{\theta} = \text{constant}$$
+        $$\begin{aligned}
+        L &= mr^2\dot{\theta} \\
+        &= \text{constant}
+        \end{aligned}$$
 
         **Step 2: The Orbit Equation**
 
@@ -293,7 +291,10 @@ def _(mo):
         **Step 3: Recognize the Ellipse**
 
         Rearranging gives the polar equation of a conic section:
-        $$r = \frac{L^2/(GMm^2)}{1 + e\cos\theta} = \frac{a(1-e^2)}{1 + e\cos\theta}$$
+        $$\begin{aligned}
+        r &= \frac{L^2/(GMm^2)}{1 + e\cos\theta} \\
+        &= \frac{a(1-e^2)}{1 + e\cos\theta}
+        \end{aligned}$$
 
         The eccentricity $e$ is determined by the total energy:
         $$e = \sqrt{1 + \frac{2EL^2}{G^2M^2m^3}}$$
@@ -342,7 +343,11 @@ def _(mo):
         Angular momentum $L = mvr$ must stay constant (there's no torque from a central force).
         When $r$ is small, $v$ must be large. When $r$ is large, $v$ must be small:
 
-        $$\frac{dA}{dt} = \frac{1}{2}r^2\frac{d\theta}{dt} = \frac{L}{2m} = \text{constant}$$
+        $$\begin{aligned}
+        \frac{dA}{dt} &= \frac{1}{2}r^2\frac{d\theta}{dt} \\
+        &= \frac{L}{2m} \\
+        &= \text{constant}
+        \end{aligned}$$
 
         **Real-world example:** Earth moves fastest in January (perihelion) and slowest in July
         (aphelion). Northern hemisphere winter is actually shorter than summer by about 5 days
@@ -571,13 +576,17 @@ def _(mo):
 
         **For ANY central force** (one that always points toward a fixed center):
 
-        $$\vec{\tau} = \vec{r} \times \vec{F} = 0$$
+        $$\vec{\tau} = \vec{r} \times \vec{F}
+        = 0$$
 
         No torque means angular momentum is conserved:
-        $$\vec{L} = m\vec{r} \times \vec{v} = \text{constant}$$
+        $$\vec{L} = m\vec{r} \times \vec{v}
+        = \text{constant}$$
 
         The area swept out in time $dt$ is half the parallelogram formed by $\vec{r}$ and $d\vec{r}$:
-        $$dA = \frac{1}{2}|\vec{r} \times d\vec{r}| = \frac{1}{2}|\vec{r} \times \vec{v}|\,dt = \frac{L}{2m}\,dt$$
+        $$dA = \frac{1}{2}|\vec{r} \times d\vec{r}|
+        = \frac{1}{2}|\vec{r} \times \vec{v}|\,dt
+        = \frac{L}{2m}\,dt$$
 
         Therefore:
         $$\boxed{\frac{dA}{dt} = \frac{L}{2m} = \text{constant}}$$
@@ -901,10 +910,14 @@ def _(mo):
         - Orbital period: $T \approx 27.3$ days $\approx 2.36 \times 10^6$ seconds
 
         **Calculate the Moon's centripetal acceleration:**
-        $$a_{moon} = \frac{4\pi^2 r}{T^2} = \frac{4\pi^2 \times 3.84 \times 10^8}{(2.36 \times 10^6)^2} \approx 0.00272 \text{ m/s}^2$$
+        $$a_{moon} = \frac{4\pi^2 r}{T^2}
+        = \frac{4\pi^2 \times 3.84 \times 10^8}{(2.36 \times 10^6)^2}
+        \approx 0.00272 \text{ m/s}^2$$
 
         **If gravity follows inverse-square, predict from surface gravity:**
-        $$\frac{a_{moon}}{g_{surface}} = \left(\frac{R_{Earth}}{r_{moon}}\right)^2 = \frac{1}{60^2} = \frac{1}{3600}$$
+        $$\frac{a_{moon}}{g_{surface}} = \left(\frac{R_{Earth}}{r_{moon}}\right)^2
+        = \frac{1}{60^2}
+        = \frac{1}{3600}$$
 
         $$a_{moon} = \frac{9.8}{3600} \approx 0.00272 \text{ m/s}^2$$
 

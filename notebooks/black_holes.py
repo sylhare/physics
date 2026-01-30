@@ -9,8 +9,12 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, mo, np
+    return COLORS, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -1139,7 +1143,8 @@ def _(mo):
         For an observer falling from rest at the horizon, the proper time to reach
         the singularity is:
 
-        $$\tau = \frac{\pi G M}{c^3} = \frac{\pi r_s}{2c}$$
+        $$\tau = \frac{\pi G M}{c^3}
+        = \frac{\pi r_s}{2c}$$
 
         For a stellar black hole (3 solar masses): about 50 microseconds!
 
@@ -1579,7 +1584,8 @@ def _(mo):
         4. The black hole loses mass
 
         **The temperature:**
-        $$T_H = \frac{\hbar c^3}{8\pi G M k_B} = \frac{1.227 \times 10^{23} \text{ K} \cdot \text{kg}}{M}$$
+        $$T_H = \frac{\hbar c^3}{8\pi G M k_B}
+        = \frac{1.227 \times 10^{23} \text{ K} \cdot \text{kg}}{M}$$
 
         **Key insight:** Smaller black holes are hotter! A stellar black hole is colder than
         the cosmic microwave background, so it absorbs more than it emits. But a tiny primordial

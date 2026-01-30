@@ -10,8 +10,12 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, make_subplots, mo, np
+    return COLORS, create_play_pause_buttons, go, make_subplots, mo, np
 
 
 @app.cell
@@ -217,7 +221,8 @@ def _(mo):
         One reason we can't reach $c$ is the **energy requirement**. As an object speeds up,
         its relativistic mass-energy increases:
 
-        $$E = \gamma m c^2 = \frac{mc^2}{\sqrt{1 - v^2/c^2}}$$
+        $$E = \gamma m c^2
+        = \frac{mc^2}{\sqrt{1 - v^2/c^2}}$$
 
         | Speed | γ (gamma) | Energy (× rest mass) |
         |-------|-----------|---------------------|
@@ -357,11 +362,14 @@ def _(mo):
 
         When $v > c$, the term under the square root is **negative**, giving an **imaginary** result:
 
-        $$\gamma = \frac{1}{\sqrt{1 - v^2/c^2}} = \frac{i}{\sqrt{v^2/c^2 - 1}} \quad \text{(imaginary!)}$$
+        $$\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}
+        = \frac{i}{\sqrt{v^2/c^2 - 1}} \quad \text{(imaginary!)}$$
 
         For the energy to be real, tachyons would need **imaginary mass**:
 
-        $$E = \gamma m c^2 = \frac{i \cdot (im_0) \cdot c^2}{\sqrt{v^2/c^2 - 1}} = \frac{m_0 c^2}{\sqrt{v^2/c^2 - 1}}$$
+        $$E = \gamma m c^2
+        = \frac{i \cdot (im_0) \cdot c^2}{\sqrt{v^2/c^2 - 1}}
+        = \frac{m_0 c^2}{\sqrt{v^2/c^2 - 1}}$$
 
         With $m = im_0$ (imaginary rest mass), the energy becomes real again!
 
@@ -462,7 +470,8 @@ def _(mo):
 
         **1. Time dilation weakens:**
 
-        $$\gamma' = \frac{1}{\sqrt{1 - v^2/{c'}^2}} = \frac{1}{\sqrt{1 - v^2/4c^2}}$$
+        $$\gamma' = \frac{1}{\sqrt{1 - v^2/{c'}^2}}
+        = \frac{1}{\sqrt{1 - v^2/4c^2}}$$
 
         At $v = 0.5c$, with our $c$: $\gamma = 1.15$ (15% time dilation)
 
@@ -475,7 +484,9 @@ def _(mo):
 
         **3. E = mc² changes scale:**
 
-        $$E = m{c'}^2 = m(2c)^2 = 4mc^2$$
+        $$E = m{c'}^2
+        = m(2c)^2
+        = 4mc^2$$
 
         Each kilogram contains 4× more energy! Nuclear reactions would be more powerful,
         stars would burn differently, and the balance of forces in the universe would shift.
@@ -853,7 +864,8 @@ def _(mo):
 
         For a moving object, length contracts:
 
-        $$L = L_0 \sqrt{1 - v^2/c^2} = \frac{L_0}{\gamma}$$
+        $$L = L_0 \sqrt{1 - v^2/c^2}
+        = \frac{L_0}{\gamma}$$
 
         - At $v = 0$: $L = L_0$ (no contraction)
         - At $v = 0.866c$: $L = 0.5 L_0$ (half length)
@@ -1202,7 +1214,9 @@ def _(mo):
 
         **2. Nuclear energy would be vastly more powerful**
 
-        $$E = mc'^2 = m(1000c)^2 = 10^6 \times mc^2$$
+        $$E = mc'^2
+        = m(1000c)^2
+        = 10^6 \times mc^2$$
 
         One kilogram of matter would contain a million times more energy! Nuclear reactors
         would be proportionally more powerful, but so would nuclear weapons. The sun would

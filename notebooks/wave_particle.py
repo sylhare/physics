@@ -9,8 +9,12 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics_explorations.visualization import (
+        COLORS,
+        create_play_pause_buttons,
+    )
 
-    return go, mo, np
+    return COLORS, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -638,7 +642,8 @@ def _(mo):
 
         He proposed the inverse relation:
 
-        $$\lambda = \frac{h}{p} = \frac{h}{mv}$$
+        $$\lambda = \frac{h}{p}
+        = \frac{h}{mv}$$
 
         **What the equation tells us:**
 
@@ -954,7 +959,8 @@ def _(mo):
 
         **Quantum mechanics:** We add **amplitudes** (complex numbers), then square:
 
-        $$P = |\psi_A + \psi_B|^2 = |\psi_A|^2 + |\psi_B|^2 + 2\text{Re}(\psi_A^* \psi_B)$$
+        $$P = |\psi_A + \psi_B|^2
+        = |\psi_A|^2 + |\psi_B|^2 + 2\text{Re}(\psi_A^* \psi_B)$$
 
         That last term—the **interference term**—is what makes quantum mechanics different.
         It can be positive (constructive) or negative (destructive).
