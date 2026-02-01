@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.19.6"
-app = marimo.App(width="medium")
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -250,7 +250,7 @@ def _(mo):
 def _(go, np):
     def create_energy_barrier_animation():
         """Animate the energy barrier at c."""
-        n_frames = 80
+        n_frames = 50
 
         frames = []
 
@@ -458,8 +458,21 @@ def _(go, np):
         return fig
 
     tachyon_energy_fig = create_tachyon_energy()
-    tachyon_energy_fig
     return create_tachyon_energy, tachyon_energy_fig
+
+
+@app.cell
+def _(mo, tachyon_energy_fig):
+    mo.vstack(
+        [
+            tachyon_energy_fig,
+            mo.md(
+                "**What this shows:** The energy-velocity relationship reveals two separate 'worlds'—normal matter (cyan) that can never reach light speed, and hypothetical tachyons (magenta) that can never slow down to it. The light barrier at v = c acts as an impenetrable wall: accelerating normal matter requires infinite energy as you approach c, while tachyons paradoxically lose energy as they speed up."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell
@@ -577,8 +590,21 @@ def _(go, np):
         return fig
 
     different_c_fig = create_different_c_comparison()
-    different_c_fig
     return create_different_c_comparison, different_c_fig
+
+
+@app.cell
+def _(mo, different_c_fig):
+    mo.vstack(
+        [
+            different_c_fig,
+            mo.md(
+                "**What this shows:** How the Lorentz factor γ (time dilation) depends on the speed of light. With a smaller c (red), relativistic effects kick in at lower velocities—clocks slow dramatically even at modest speeds. With a larger c (green), the universe behaves more like Newton imagined: you could travel at half our light speed with barely any time dilation. Our universe (cyan) sits between these extremes."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell
@@ -860,8 +886,21 @@ def _(go, np):
         return fig
 
     proper_time_fig = create_proper_time_visualization()
-    proper_time_fig
     return create_proper_time_visualization, proper_time_fig
+
+
+@app.cell
+def _(mo, proper_time_fig):
+    mo.vstack(
+        [
+            proper_time_fig,
+            mo.md(
+                "**What this shows:** Proper time (the time experienced by a traveler) as a function of velocity. Below c (cyan), time flows normally but slows down as you approach light speed. At exactly c, time stops completely—photons don't age. Above c (magenta dashed), proper time becomes imaginary, not negative. This means FTL travelers wouldn't experience 'backwards time' but rather something that isn't time at all."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell
@@ -909,7 +948,7 @@ def _(mo):
 def _(go, np):
     def create_length_contraction_animation():
         """Animate length contraction approaching and beyond c."""
-        n_frames = 80
+        n_frames = 50
 
         frames = []
 
@@ -1352,8 +1391,21 @@ def _(go, np):
         return fig
 
     newtonian_fig = create_newtonian_universe_comparison()
-    newtonian_fig
     return create_newtonian_universe_comparison, newtonian_fig
+
+
+@app.cell
+def _(mo, newtonian_fig):
+    mo.vstack(
+        [
+            newtonian_fig,
+            mo.md(
+                "**What this shows:** In our universe (cyan), relativistic effects become significant near c = 3×10⁸ m/s. With c' = 10c (yellow) or c' = 1000c (green), you could reach speeds far beyond our light limit before spacetime curvature matters. At c' = 1000c, even escaping the solar system would feel perfectly Newtonian—Newton's physics would be an excellent approximation for almost everything we'd ever want to do."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell
@@ -1597,7 +1649,7 @@ def _(mo):
 def _(go, np):
     def create_wormhole_animation():
         """Visualize a wormhole connecting distant regions of spacetime."""
-        n_frames = 80
+        n_frames = 50
 
         frames = []
 
@@ -1914,7 +1966,7 @@ def _(mo):
 def _(go, np):
     def create_causality_paradox_animation():
         """Visualize how warp drive could create a time loop."""
-        n_frames = 100
+        n_frames = 50
 
         frames = []
 

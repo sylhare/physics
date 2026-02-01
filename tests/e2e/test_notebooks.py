@@ -136,6 +136,15 @@ class TestNotebookContent:
             r"TypeError:",
             r"ValueError:",
             r"AttributeError:",
+            r"KeyError:",
+            r"IndexError:",
+            r"RuntimeError:",
+            r"ZeroDivisionError:",
+            r"FileNotFoundError:",
+            r"SyntaxError:",
+            r"RecursionError:",
+            r"OverflowError:",
+            r"UnboundLocalError:",
         ]
 
         for name, (html, _size) in exported_html.items():
@@ -147,7 +156,13 @@ class TestNotebookContent:
                         ctx in html.lower()
                         for ctx in ["example of error", "error handling"]
                     ):
-                        assert False, f"{name}: Found error pattern '{pattern}' in output"
+                        # Extract context around the error
+                        idx = html.find(matches[0])
+                        context = html[max(0, idx - 50) : idx + 150]
+                        assert False, (
+                            f"{name}: Found error pattern '{pattern}' in output\n"
+                            f"Context: ...{context}..."
+                        )
 
     def test_no_output_too_large(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no 'output too large' warnings from marimo."""
@@ -173,6 +188,35 @@ class TestNotebookContent:
                     idx = html.lower().find(error.lower())
                     context = html[max(0, idx-50):idx+100]
                     assert False, f"{name}: KaTeX error found: {context}"
+
+    def test_no_marimo_errors(self, exported_html: dict[str, tuple[str, int]]):
+        """Verify no marimo-specific errors appear in the notebook output."""
+        error_patterns = [
+            r'"type"\s*:\s*"error"',  # ErrorOutput in cell outputs
+            r'"type"\s*:\s*"cycle"',
+            r'"type"\s*:\s*"exception"',
+            r'"type"\s*:\s*"syntax"',
+            r'"type"\s*:\s*"interruption"',
+            r'"type"\s*:\s*"internal"',
+            r'"type"\s*:\s*"unknown"',
+            r'application/vnd\.marimo\+error',
+            r'application/vnd\.marimo\+traceback',
+            r'"channel"\s*:\s*"marimo-error"',
+        ]
+
+        for name, (html, _size) in exported_html.items():
+            for pattern in error_patterns:
+                matches = re.findall(pattern, html, re.IGNORECASE)
+                if matches:
+                    # Extract error details for reporting
+                    enames = re.findall(r'"ename"\s*:\s*"([^"]+)"', html)
+                    evalues = re.findall(r'"evalue"\s*:\s*"([^"]*)"', html)
+                    details = [f"{n}: {v[:80]}" for n, v in zip(enames, evalues)]
+
+                    assert False, (
+                        f"{name}: Found marimo error pattern '{pattern}'\n"
+                        f"Errors: {details[:5]}"
+                    )
 
     def test_aligned_equations_render(self, exported_html: dict[str, tuple[str, int]]):
         """Verify LaTeX aligned environments are rendered (not shown as raw text)."""

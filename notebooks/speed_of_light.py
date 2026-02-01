@@ -571,8 +571,21 @@ def _(go, np):
         showlegend=False,
     )
 
-    history_fig
     return history_fig, measurements, modern_c, names, values, years
+
+
+@app.cell
+def _(history_fig, mo):
+    mo.vstack(
+        [
+            history_fig,
+            mo.md(
+                "**What this shows:** Four centuries of increasingly precise measurements converging on the modern value. Rømer's 1676 estimate using Jupiter's moons was off by 27%, but proved light had finite speed. By Michelson's 1926 measurement, we were within 0.001% of the true value. Today, c is defined exactly—we no longer measure it, we use it to define the meter."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell

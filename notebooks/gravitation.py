@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.19.6"
-app = marimo.App(width="medium")
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -250,8 +250,16 @@ def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
         return fig
 
     ellipse_fig = create_ellipse_animation(e=0.6)
-    ellipse_fig
     return (create_ellipse_animation, ellipse_fig)
+
+
+@app.cell
+def _(ellipse_fig, mo):
+    mo.vstack([
+        ellipse_fig,
+        mo.md("**What this shows:** A planet orbiting the Sun in an elliptical orbit (eccentricity e=0.6). The **orange dashed line** (r₁) shows the distance to the Sun, while the **green dashed line** (r₂) shows the distance to the empty focus. Notice that r₁ + r₂ remains constant throughout the orbit—this is the defining property of an ellipse. Click Play to see the orbit in motion.")
+    ], align="center")
+    return
 
 
 @app.cell
@@ -561,8 +569,16 @@ def _(go, np):
         return fig
 
     equal_areas_fig = create_equal_areas_animation()
-    equal_areas_fig
     return (create_equal_areas_animation, equal_areas_fig)
+
+
+@app.cell
+def _(equal_areas_fig, mo):
+    mo.vstack([
+        equal_areas_fig,
+        mo.md("**What this shows:** Each colored wedge represents the same time interval. The planet sweeps out **equal areas** in **equal times**—Kepler's Second Law. Notice how wedges near the Sun (right side) are short and wide, while those far from the Sun (left side) are long and narrow. The planet must move faster when closer to the Sun to sweep out the same area.")
+    ], align="center")
+    return
 
 
 @app.cell
@@ -1119,8 +1135,16 @@ def _(go, np):
         return fig
 
     cannon_fig = create_newtons_cannon_animated()
-    cannon_fig
     return (cannon_fig, create_newtons_cannon_animated)
+
+
+@app.cell
+def _(cannon_fig, mo):
+    mo.vstack([
+        cannon_fig,
+        mo.md("**What this shows:** Newton's famous thought experiment demonstrating that **orbiting is just falling**. At low velocity (red), the cannonball falls to Earth. At higher velocities (yellow, green), it curves around Earth. At exactly the right velocity (green), Earth's surface curves away as fast as the ball falls—creating a circular orbit. Faster still (blue) creates an elliptical orbit. The Moon is simply 'falling around' Earth!")
+    ], align="center")
+    return
 
 
 @app.cell
@@ -1318,12 +1342,26 @@ def _(go, np):
         moon_distance = 4.5
         n_frames = 60
 
-        # Base shapes
-        theta = np.linspace(0, 2 * np.pi, 100)
+        # Near-side bulge (right half, toward Moon) - Cyan
+        theta_near = np.linspace(-np.pi/2, np.pi/2, 50)
+        r_near = R + bulge * np.cos(2 * theta_near)
+        x_near = r_near * np.cos(theta_near)
+        y_near = r_near * np.sin(theta_near)
+        # Close the shape
+        x_near = np.concatenate([[0], x_near, [0]])
+        y_near = np.concatenate([[y_near[0]], y_near, [y_near[-1]]])
 
-        # Tidal bulge (fixed relative to Moon)
-        x_bulge = (R + bulge * np.cos(2 * theta)) * np.cos(theta)
-        y_bulge = (R + bulge * np.cos(2 * theta)) * np.sin(theta)
+        # Far-side bulge (left half, away from Moon) - Orange
+        theta_far = np.linspace(np.pi/2, 3*np.pi/2, 50)
+        r_far = R + bulge * np.cos(2 * theta_far)
+        x_far = r_far * np.cos(theta_far)
+        y_far = r_far * np.sin(theta_far)
+        # Close the shape
+        x_far = np.concatenate([[0], x_far, [0]])
+        y_far = np.concatenate([[y_far[0]], y_far, [y_far[-1]]])
+
+        # Base theta for Earth interior
+        theta = np.linspace(0, 2 * np.pi, 100)
 
         # Moon
         moon_theta = np.linspace(0, 2 * np.pi, 50)
@@ -1353,21 +1391,45 @@ def _(go, np):
             cont_y = [0.6 * np.sin(a + rotation_angle) for a in continent_angles]
 
             frame_data = [
-                # Ocean bulge (fixed)
-                go.Scatter(x=x_bulge, y=y_bulge, mode="lines", fill="toself",
-                           fillcolor="rgba(65, 105, 225, 0.3)", line={"color": "royalblue", "width": 2}),
+                # Near-side ocean bulge (cyan, toward Moon)
+                go.Scatter(x=x_near, y=y_near, mode="lines", fill="toself",
+                           fillcolor="rgba(0, 200, 255, 0.4)", line={"color": "cyan", "width": 2},
+                           name="Near-side bulge", showlegend=(i == 0)),
+                # Far-side ocean bulge (orange, away from Moon)
+                go.Scatter(x=x_far, y=y_far, mode="lines", fill="toself",
+                           fillcolor="rgba(255, 140, 0, 0.4)", line={"color": "orange", "width": 2},
+                           name="Far-side bulge", showlegend=(i == 0)),
                 # Earth interior (rotating)
                 go.Scatter(x=x_earth, y=y_earth, mode="lines", fill="toself",
-                           fillcolor="rgba(139, 119, 101, 0.6)", line={"color": "sienna", "width": 1}),
+                           fillcolor="rgba(139, 119, 101, 0.6)", line={"color": "sienna", "width": 1},
+                           showlegend=False),
                 # Continent markers
                 go.Scatter(x=cont_x, y=cont_y, mode="markers",
-                           marker={"size": 12, "color": "forestgreen", "symbol": "circle"}),
+                           marker={"size": 12, "color": "forestgreen", "symbol": "circle"},
+                           showlegend=False),
                 # Coastal city marker
                 go.Scatter(x=[marker_x], y=[marker_y], mode="markers",
-                           marker={"size": 10, "color": "red", "symbol": "star"}),
+                           marker={"size": 10, "color": "red", "symbol": "star"},
+                           name="Coastal city", showlegend=(i == 0)),
                 # Moon
                 go.Scatter(x=moon_x, y=moon_y, mode="lines", fill="toself",
-                           fillcolor="rgba(200, 200, 200, 0.8)", line={"color": "gray", "width": 1}),
+                           fillcolor="rgba(200, 200, 200, 0.8)", line={"color": "gray", "width": 1},
+                           showlegend=False),
+                # Near-side arrow (strong pull toward Moon) - cyan
+                go.Scatter(x=[1.3, 2.3], y=[0, 0], mode="lines+markers",
+                           line={"color": "cyan", "width": 3},
+                           marker={"symbol": "arrow", "size": 15, "angleref": "previous", "color": "cyan"},
+                           name="Strong pull on near water", showlegend=(i == 0)),
+                # Center arrow (reference pull on Earth) - white dashed
+                go.Scatter(x=[0, 0.9], y=[0.5, 0.5], mode="lines+markers",
+                           line={"color": "white", "width": 2, "dash": "dash"},
+                           marker={"symbol": "arrow", "size": 12, "angleref": "previous", "color": "white"},
+                           name="Pull on Earth center", showlegend=(i == 0)),
+                # Far-side arrow (weaker pull - shorter) - orange
+                go.Scatter(x=[-1.3, -0.85], y=[0, 0], mode="lines+markers",
+                           line={"color": "orange", "width": 2},
+                           marker={"symbol": "arrow", "size": 10, "angleref": "previous", "color": "orange"},
+                           name="Weaker pull on far water", showlegend=(i == 0)),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -1377,17 +1439,25 @@ def _(go, np):
             data=frames[0].data,
             layout=go.Layout(
                 title=dict(
-                    text="<b>Tidal Animation:</b> Earth Rotates Under the Bulges<br><sub>Red star = coastal city experiencing two high tides per rotation</sub>",
+                    text="<b>Tidal Forces:</b> Differential Gravity Creates Two Bulges",
                     font=dict(size=16),
                 ),
                 xaxis={"scaleanchor": "y", "range": [-3, 6], "showgrid": False, "zeroline": False, "showticklabels": False},
                 yaxis={"range": [-2.5, 2.5], "showgrid": False, "zeroline": False, "showticklabels": False},
-                showlegend=False,
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    font=dict(size=9),
+                ),
                 updatemenus=[
                     {
                         "type": "buttons",
                         "showactive": False,
-                        "y": -0.08,
+                        "y": -0.12,
                         "x": 0.5,
                         "xanchor": "center",
                         "buttons": [
@@ -1405,10 +1475,10 @@ def _(go, np):
                         ],
                     }
                 ],
-                margin=dict(b=60),
+                margin=dict(b=80),
                 annotations=[
-                    dict(x=-1.3, y=-1.8, text="Far-side bulge<br>(Moon pulls Earth away)", showarrow=False, font=dict(size=10)),
-                    dict(x=1.3, y=-1.8, text="Near-side bulge<br>(Moon pulls water)", showarrow=False, font=dict(size=10)),
+                    dict(x=-1.3, y=-1.8, text="<span style='color:orange'><b>Far-side bulge</b></span><br>Weaker pull → water 'left behind'", showarrow=False, font=dict(size=10)),
+                    dict(x=1.5, y=-1.8, text="<span style='color:cyan'><b>Near-side bulge</b></span><br>Stronger pull → water toward Moon", showarrow=False, font=dict(size=10)),
                     dict(x=moon_distance, y=-0.8, text="Moon", showarrow=False, font=dict(size=11, color="gray")),
                 ],
             ),
@@ -1418,8 +1488,16 @@ def _(go, np):
         return fig
 
     tidal_fig = create_tidal_animation()
-    tidal_fig
     return (create_tidal_animation, tidal_fig)
+
+
+@app.cell
+def _(mo, tidal_fig):
+    mo.vstack([
+        tidal_fig,
+        mo.md("**What this shows:** The Moon's gravity pulls more strongly on the <span style='color:cyan'>**near side**</span> of Earth (cyan) than on its center, and more on the center than on the <span style='color:orange'>**far side**</span> (orange). These *differential* forces stretch Earth along the Earth-Moon line. The red star marks a coastal city rotating through two high tides per day. Arrows show the relative strength of the Moon's gravitational pull at different locations.")
+    ], align="center")
+    return
 
 
 @app.cell

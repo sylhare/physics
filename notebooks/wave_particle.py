@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.19.6"
-app = marimo.App(width="medium")
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -889,8 +889,21 @@ def _(go, np):
         return fig
 
     uncertainty_fig = create_uncertainty_visualization()
-    uncertainty_fig
     return create_uncertainty_visualization, uncertainty_fig
+
+
+@app.cell
+def _(mo, uncertainty_fig):
+    mo.vstack(
+        [
+            uncertainty_fig,
+            mo.md(
+                "**What this shows:** The unavoidable tradeoff between knowing position and momentum. A tightly localized wave packet (cyan, top) has well-defined position but its momentum is spread across many values. A broadly spread wave (orange, bottom) has more definite momentum but could be found almost anywhere. The product Δx·Δp can never be smaller than ℏ/2—this isn't a measurement limitation, it's how nature works."
+            ),
+        ],
+        align="center",
+    )
+    return
 
 
 @app.cell

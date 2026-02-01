@@ -30,6 +30,14 @@ class NotebookMetadata:
     description: str
     tags: list[str]
     path: Path
+    category: str  # "feynman" or "exploration"
+
+
+# Notebooks that are part of the Feynman Lectures series
+FEYNMAN_NOTEBOOKS = {
+    "gravitation", "speed_of_light", "spacetime", "wave_particle",
+    "magnetism", "charged_motion", "black_holes"
+}
 
 
 def get_all_notebooks() -> list[Path]:
@@ -83,6 +91,9 @@ def extract_metadata(notebook_path: Path) -> NotebookMetadata:
     # Infer tags from content
     tags = _infer_tags(content, stem)
 
+    # Determine category based on stem
+    category = "feynman" if stem in FEYNMAN_NOTEBOOKS else "exploration"
+
     return NotebookMetadata(
         number=number,
         stem=stem,
@@ -90,6 +101,7 @@ def extract_metadata(notebook_path: Path) -> NotebookMetadata:
         description=description,
         tags=tags,
         path=notebook_path,
+        category=category,
     )
 
 
@@ -213,8 +225,15 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate notebook cards
-    cards_html = "\n".join(_generate_card(nb) for nb in notebooks)
+    # Split notebooks into categories
+    feynman_notebooks = [nb for nb in notebooks if nb.category == "feynman"]
+    exploration_notebooks = [nb for nb in notebooks if nb.category == "exploration"]
+
+    # Generate notebook cards for each section
+    feynman_cards = "\n".join(_generate_card(nb) for nb in feynman_notebooks)
+    exploration_cards = "\n".join(
+        _generate_card(nb, show_badge=True) for nb in exploration_notebooks
+    )
 
     # Get GitHub repository URL from environment (set in CI)
     github_repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -250,7 +269,7 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         header {{
             text-align: center;
             margin-bottom: 3rem;
-            padding: 2rem;
+            padding: 1rem 0;
         }}
 
         h1 {{
@@ -275,6 +294,14 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
 
         .subtitle a:hover {{
             text-decoration: underline;
+        }}
+
+        .section-header {{
+            font-size: 1.5rem;
+            color: #60a5fa;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }}
 
         .notebooks {{
@@ -321,6 +348,15 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
             color: #f4f4f5;
         }}
 
+        .exploration-badge {{
+            background: rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+            padding: 0.15rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }}
+
         .card-description {{
             font-size: 0.95rem;
             color: #a1a1aa;
@@ -358,6 +394,47 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         footer a:hover {{
             text-decoration: underline;
         }}
+
+        @media (max-width: 768px) {{
+            body {{
+                padding: 1rem;
+            }}
+
+            header {{
+                padding: 1rem 0;
+                margin-bottom: 2rem;
+            }}
+
+            h1 {{
+                font-size: 1.75rem;
+            }}
+
+            .subtitle {{
+                font-size: 0.95rem;
+            }}
+
+            .section-header {{
+                font-size: 1.25rem;
+            }}
+
+            .card {{
+                padding: 1rem;
+            }}
+
+            .card-header {{
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }}
+
+            .card-title {{
+                font-size: 1.1rem;
+            }}
+
+            .card-description {{
+                font-size: 0.9rem;
+            }}
+        }}
     </style>
 </head>
 <body>
@@ -371,7 +448,10 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         </header>
 
         <main class="notebooks">
-{cards_html}
+            <h2 class="section-header">Feynman Lectures Series</h2>
+{feynman_cards}
+            <h2 class="section-header">Explorations</h2>
+{exploration_cards}
         </main>
 
         <footer>
@@ -389,16 +469,18 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
     return output_path
 
 
-def _generate_card(nb: NotebookMetadata) -> str:
+def _generate_card(nb: NotebookMetadata, show_badge: bool = False) -> str:
     """Generate HTML for a single notebook card."""
     tags_html = "\n                    ".join(
         f'<span class="tag">{tag}</span>' for tag in nb.tags
     )
 
+    badge_html = '<span class="exploration-badge">Exploration</span>' if show_badge else ''
+
     return f'''            <a href="{nb.stem}.html" class="card">
                 <div class="card-header">
                     <span class="card-number">{nb.number}</span>
-                    <h2 class="card-title">{nb.title}</h2>
+                    <h2 class="card-title">{nb.title}{badge_html}</h2>
                 </div>
                 <p class="card-description">{nb.description}</p>
                 <div class="card-tags">
