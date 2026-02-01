@@ -1143,8 +1143,10 @@ def _(mo):
         For an observer falling from rest at the horizon, the proper time to reach
         the singularity is:
 
-        $$\tau = \frac{\pi G M}{c^3}
-        = \frac{\pi r_s}{2c}$$
+        $$\begin{aligned}
+        \tau &= \frac{\pi G M}{c^3} \\
+        &= \frac{\pi r_s}{2c}
+        \end{aligned}$$
 
         For a stellar black hole (3 solar masses): about 50 microseconds!
 
@@ -1584,8 +1586,10 @@ def _(mo):
         4. The black hole loses mass
 
         **The temperature:**
-        $$T_H = \frac{\hbar c^3}{8\pi G M k_B}
-        = \frac{1.227 \times 10^{23} \text{ K} \cdot \text{kg}}{M}$$
+        $$\begin{aligned}
+        T_H &= \frac{\hbar c^3}{8\pi G M k_B} \\
+        &= \frac{1.227 \times 10^{23} \text{ K} \cdot \text{kg}}{M}
+        \end{aligned}$$
 
         **Key insight:** Smaller black holes are hotter! A stellar black hole is colder than
         the cosmic microwave background, so it absorbs more than it emits. But a tiny primordial

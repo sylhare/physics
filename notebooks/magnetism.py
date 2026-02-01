@@ -1757,8 +1757,10 @@ def _(mo):
         **Key observation:** The EMF is maximum when the coil is edge-on (flux changing fastest)
         and zero when face-on (flux momentarily constant). This is why:
 
-        $$\mathcal{E} = -\frac{d\Phi}{dt}
-        = NBA\omega\sin(\omega t)$$
+        $$\begin{aligned}
+        \mathcal{E} &= -\frac{d\Phi}{dt} \\
+        &= NBA\omega\sin(\omega t)
+        \end{aligned}$$
 
         The sine function comes from the geometry of rotation.
 

@@ -383,7 +383,7 @@ def _(go, np):
             yaxis=dict(title="Pressure p", range=[-2.5, 3.5], showgrid=True,
                       gridcolor="rgba(255,255,255,0.1)", zeroline=False),
             showlegend=True,
-            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10)),
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10, color="white")),
             plot_bgcolor="rgba(0,0,30,0.95)",
         )
 
@@ -997,7 +997,7 @@ def _(go, np):
                 xaxis=dict(range=[-7, 14], showgrid=False, showticklabels=False, zeroline=False),
                 yaxis=dict(range=[-2, 4], showgrid=False, showticklabels=False, zeroline=False),
                 showlegend=True,
-                legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10)),
+                legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10, color="white")),
                 plot_bgcolor="rgba(0,0,30,0.95)",
                 updatemenus=[
                     dict(
@@ -1119,7 +1119,7 @@ def _(go, np):
             marker_color=colors,
             text=[f"10^{int(np.log10(v))}" for v in values],
             textposition="outside",
-            textfont=dict(size=12),
+            textfont=dict(size=12, color="white"),
         ))
 
         # Achievable line
@@ -1337,7 +1337,7 @@ def _(go, np):
                           gridcolor="rgba(255,255,255,0.1)"),
                 yaxis=dict(title="", range=[-2.5, 2.5], showgrid=False, showticklabels=False),
                 showlegend=True,
-                legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99, font=dict(size=10)),
+                legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99, font=dict(size=10, color="white")),
                 plot_bgcolor="rgba(0,0,50,0.95)",
                 updatemenus=[
                     dict(

@@ -89,8 +89,8 @@ def _(go, np):
         n_frames = 50
 
         # Grid for wave visualization
-        x = np.linspace(-10, 10, 200)
-        y = np.linspace(-10, 10, 200)
+        x = np.linspace(-10, 10, 100)
+        y = np.linspace(-10, 10, 100)
         X, Y = np.meshgrid(x, y)
 
         # Two sources
@@ -102,14 +102,15 @@ def _(go, np):
         for i in range(n_frames):
             t = 2 * np.pi * i / n_frames
 
-            # Distance from each source
-            r1 = np.sqrt((X - source1[0])**2 + (Y - source1[1])**2)
-            r2 = np.sqrt((X - source2[0])**2 + (Y - source2[1])**2)
+            # Distance from each source (use maximum to avoid sqrt of negative due to float precision)
+            r1 = np.sqrt(np.maximum(0, (X - source1[0])**2 + (Y - source1[1])**2))
+            r2 = np.sqrt(np.maximum(0, (X - source2[0])**2 + (Y - source2[1])**2))
 
             # Wave from each source (circular waves)
+            # Add small epsilon to avoid sqrt(0) warnings
             k = 1.5  # wave number
-            wave1 = np.sin(k * r1 - t) / (np.sqrt(r1) + 0.5)
-            wave2 = np.sin(k * r2 - t) / (np.sqrt(r2) + 0.5)
+            wave1 = np.sin(k * r1 - t) / (np.sqrt(r1 + 1e-10) + 0.5)
+            wave2 = np.sin(k * r2 - t) / (np.sqrt(r2 + 1e-10) + 0.5)
 
             # Superposition
             total_wave = wave1 + wave2
@@ -390,7 +391,7 @@ def _(go, np):
             return (np.cos(np.pi * d * x / wavelength) ** 2) * np.exp(-x**2 / 50)
 
         # Sample from this distribution
-        x_range = np.linspace(-8, 8, 1000)
+        x_range = np.linspace(-8, 8, 300)
         probs = interference_probability(x_range)
         probs = probs / probs.sum()
 
@@ -568,7 +569,7 @@ def _(mo):
 def _(go, np):
     def create_measurement_comparison():
         """Show interference vs no interference when measuring."""
-        x = np.linspace(-8, 8, 500)
+        x = np.linspace(-8, 8, 200)
 
         # Interference pattern (not measured)
         interference = (np.cos(np.pi * x / 2) ** 2) * np.exp(-x**2 / 30)
@@ -642,8 +643,10 @@ def _(mo):
 
         He proposed the inverse relation:
 
-        $$\lambda = \frac{h}{p}
-        = \frac{h}{mv}$$
+        $$\begin{aligned}
+        \lambda &= \frac{h}{p} \\
+        &= \frac{h}{mv}
+        \end{aligned}$$
 
         **What the equation tells us:**
 
@@ -689,7 +692,7 @@ def _(go, np):
 
         for i in range(n_frames):
             t = 2 * np.pi * i / n_frames
-            x = np.linspace(0, 10, 500)
+            x = np.linspace(0, 10, 200)
 
             # Three "particles" with different masses (different wavelengths)
             # Electron - short wavelength but visible
@@ -836,7 +839,7 @@ def _(mo):
 def _(go, np):
     def create_uncertainty_visualization():
         """Visualize position-momentum uncertainty tradeoff."""
-        x = np.linspace(-10, 10, 1000)
+        x = np.linspace(-10, 10, 300)
 
         fig = go.Figure()
 
@@ -959,8 +962,10 @@ def _(mo):
 
         **Quantum mechanics:** We add **amplitudes** (complex numbers), then square:
 
-        $$P = |\psi_A + \psi_B|^2
-        = |\psi_A|^2 + |\psi_B|^2 + 2\text{Re}(\psi_A^* \psi_B)$$
+        $$\begin{aligned}
+        P &= |\psi_A + \psi_B|^2 \\
+        &= |\psi_A|^2 + |\psi_B|^2 + 2\text{Re}(\psi_A^* \psi_B)
+        \end{aligned}$$
 
         That last term—the **interference term**—is what makes quantum mechanics different.
         It can be positive (constructive) or negative (destructive).

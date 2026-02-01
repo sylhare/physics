@@ -149,6 +149,15 @@ class TestNotebookContent:
                     ):
                         assert False, f"{name}: Found error pattern '{pattern}' in output"
 
+    def test_no_output_too_large(self, exported_html: dict[str, tuple[str, int]]):
+        """Verify no 'output too large' warnings from marimo."""
+        for name, (html, _size) in exported_html.items():
+            if "Your output is too large" in html:
+                assert False, (
+                    f"{name}: Found 'output too large' warning. "
+                    f"Some visualizations have too many frames or data points."
+                )
+
     def test_no_katex_errors(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no KaTeX parsing errors in output."""
         error_indicators = [
@@ -164,6 +173,26 @@ class TestNotebookContent:
                     idx = html.lower().find(error.lower())
                     context = html[max(0, idx-50):idx+100]
                     assert False, f"{name}: KaTeX error found: {context}"
+
+    def test_aligned_equations_render(self, exported_html: dict[str, tuple[str, int]]):
+        """Verify LaTeX aligned environments are rendered (not shown as raw text)."""
+        # If aligned environments aren't rendered, they show up as raw text
+        raw_latex_patterns = [
+            r"\\begin\{aligned\}",  # Raw \begin{aligned}
+            r"\\end\{aligned\}",    # Raw \end{aligned}
+            r"&amp;=",              # HTML-escaped &= (alignment marker not processed)
+        ]
+
+        for name, (html, _size) in exported_html.items():
+            for pattern in raw_latex_patterns:
+                matches = re.findall(pattern, html)
+                # Some raw LaTeX might appear in code examples or source views
+                # but shouldn't appear many times if rendering works
+                if len(matches) > 20:  # Allow some for code display
+                    assert False, (
+                        f"{name}: Found many instances of raw LaTeX '{pattern}' ({len(matches)}x). "
+                        f"LaTeX aligned environments may not be rendering correctly."
+                    )
 
 
 class TestNotebookStructure:
@@ -193,6 +222,40 @@ class TestNotebookStructure:
         for imp in required_imports:
             has_import = f"import {imp}" in content or f"from {imp}" in content
             assert has_import, f"{notebook.name}: Missing import for {imp}"
+
+
+class TestNoRuntimeWarnings:
+    """Test that notebooks don't produce runtime warnings."""
+
+    @pytest.mark.parametrize("notebook", get_all_notebooks(), ids=lambda p: p.stem)
+    def test_no_runtime_warnings_during_export(self, notebook: Path):
+        """Verify notebook export doesn't produce RuntimeWarnings (e.g., invalid sqrt)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / f"{notebook.stem}.html"
+
+            result = subprocess.run(
+                [
+                    sys.executable, "-m", "marimo", "export", "html",
+                    str(notebook), "-o", str(output_path), "--no-include-code"
+                ],
+                capture_output=True,
+                text=True,
+                env={**subprocess.os.environ, "PYTHONWARNINGS": "error::RuntimeWarning"},
+            )
+
+            # Check stderr for RuntimeWarnings (may appear even with non-zero exit)
+            warning_patterns = [
+                "RuntimeWarning",
+                "invalid value encountered",
+                "divide by zero",
+                "overflow encountered",
+            ]
+
+            for pattern in warning_patterns:
+                if pattern in result.stderr:
+                    pytest.fail(
+                        f"{notebook.name}: RuntimeWarning during export:\n{result.stderr}"
+                    )
 
 
 class TestMetadataExtraction:

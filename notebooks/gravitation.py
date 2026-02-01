@@ -576,17 +576,23 @@ def _(mo):
 
         **For ANY central force** (one that always points toward a fixed center):
 
-        $$\vec{\tau} = \vec{r} \times \vec{F}
-        = 0$$
+        $$\begin{aligned}
+        \vec{\tau} &= \vec{r} \times \vec{F} \\
+        &= 0
+        \end{aligned}$$
 
         No torque means angular momentum is conserved:
-        $$\vec{L} = m\vec{r} \times \vec{v}
-        = \text{constant}$$
+        $$\begin{aligned}
+        \vec{L} &= m\vec{r} \times \vec{v} \\
+        &= \text{constant}
+        \end{aligned}$$
 
         The area swept out in time $dt$ is half the parallelogram formed by $\vec{r}$ and $d\vec{r}$:
-        $$dA = \frac{1}{2}|\vec{r} \times d\vec{r}|
-        = \frac{1}{2}|\vec{r} \times \vec{v}|\,dt
-        = \frac{L}{2m}\,dt$$
+        $$\begin{aligned}
+        dA &= \frac{1}{2}|\vec{r} \times d\vec{r}| \\
+        &= \frac{1}{2}|\vec{r} \times \vec{v}|\,dt \\
+        &= \frac{L}{2m}\,dt
+        \end{aligned}$$
 
         Therefore:
         $$\boxed{\frac{dA}{dt} = \frac{L}{2m} = \text{constant}}$$
@@ -910,14 +916,18 @@ def _(mo):
         - Orbital period: $T \approx 27.3$ days $\approx 2.36 \times 10^6$ seconds
 
         **Calculate the Moon's centripetal acceleration:**
-        $$a_{moon} = \frac{4\pi^2 r}{T^2}
-        = \frac{4\pi^2 \times 3.84 \times 10^8}{(2.36 \times 10^6)^2}
-        \approx 0.00272 \text{ m/s}^2$$
+        $$\begin{aligned}
+        a_{moon} &= \frac{4\pi^2 r}{T^2} \\
+        &= \frac{4\pi^2 \times 3.84 \times 10^8}{(2.36 \times 10^6)^2} \\
+        &\approx 0.00272 \text{ m/s}^2
+        \end{aligned}$$
 
         **If gravity follows inverse-square, predict from surface gravity:**
-        $$\frac{a_{moon}}{g_{surface}} = \left(\frac{R_{Earth}}{r_{moon}}\right)^2
-        = \frac{1}{60^2}
-        = \frac{1}{3600}$$
+        $$\begin{aligned}
+        \frac{a_{moon}}{g_{surface}} &= \left(\frac{R_{Earth}}{r_{moon}}\right)^2 \\
+        &= \frac{1}{60^2} \\
+        &= \frac{1}{3600}
+        \end{aligned}$$
 
         $$a_{moon} = \frac{9.8}{3600} \approx 0.00272 \text{ m/s}^2$$
 

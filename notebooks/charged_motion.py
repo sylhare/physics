@@ -504,8 +504,10 @@ def _(mo):
         is independent of the particle's speed!**
 
         The period is:
-        $$T = \frac{2\pi r}{v}
-        = \frac{2\pi m}{qB}$$
+        $$\begin{aligned}
+        T &= \frac{2\pi r}{v} \\
+        &= \frac{2\pi m}{qB}
+        \end{aligned}$$
 
         The cyclotron frequency is:
         $$f_c = \frac{qB}{2\pi m} \quad \text{or} \quad \omega_c = \frac{qB}{m}$$
@@ -550,9 +552,11 @@ def _(mo):
         $$\frac{1}{2}mv^2 = qV \implies v = \sqrt{\frac{2qV}{m}}$$
 
         The radius in the magnetic field:
-        $$r = \frac{mv}{qB}
-        = \frac{m}{qB}\sqrt{\frac{2qV}{m}}
-        = \frac{1}{B}\sqrt{\frac{2mV}{q}}$$
+        $$\begin{aligned}
+        r &= \frac{mv}{qB} \\
+        &= \frac{m}{qB}\sqrt{\frac{2qV}{m}} \\
+        &= \frac{1}{B}\sqrt{\frac{2mV}{q}}
+        \end{aligned}$$
 
         **Key result:** The radius depends on $\sqrt{m/q}$. Heavier ions curve less and land
         farther from the entrance.
@@ -998,8 +1002,10 @@ def _(mo):
         **relativistic effects**.
 
         As particles approach the speed of light, their mass increases:
-        $$m = \gamma m_0
-        = \frac{m_0}{\sqrt{1 - v^2/c^2}}$$
+        $$\begin{aligned}
+        m &= \gamma m_0 \\
+        &= \frac{m_0}{\sqrt{1 - v^2/c^2}}
+        \end{aligned}$$
 
         This means the cyclotron frequency decreases:
         $$\omega = \frac{qB}{\gamma m_0}$$
