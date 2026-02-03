@@ -292,6 +292,7 @@ def _(COLORS, go, np):
                                         "frame": {"duration": 30, "redraw": True},
                                         "fromcurrent": True,
                                         "transition": {"duration": 0},
+                                        "mode": "loop",
                                     },
                                 ],
                             },
@@ -347,8 +348,8 @@ def _(COLORS, go, np):
         fig8_colors,
         fig8_sizes,
         title="The Figure-8 Orbit: A Rare Stable Solution",
-        n_frames=100,
-        trail_length=80,
+        n_frames=180,
+        trail_length=120,
     )
 
     return (
@@ -817,7 +818,7 @@ def _(COLORS, go, np):
 
         return sun_trajectories, planet_trajectory
 
-    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=150):
+    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=200):
         """Create animation of Trisolaran system."""
         total_points = len(planet_traj)
         indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
@@ -998,7 +999,300 @@ def _(mo, trisolaris_fig):
         [
             trisolaris_fig,
             mo.md(
-                "**The Trisolaran System:** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
+                "**The Trisolaran System (Chaotic):** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
+            ),
+        ],
+        align="center",
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ### But Wait—Can a Trisolaran System Ever Be Stable?
+
+        Yes! Real triple-star systems with planets do exist. The key is **hierarchy**:
+
+        - The planet must orbit much closer to one star (or a tight binary) than the
+          distance to the third star
+        - The "stability zone" requires the planet's orbit to be less than ~1/3 the
+          distance to the perturbing star
+
+        Examples like **Alpha Centauri** show this is possible. Below is a stable configuration
+        where the planet safely orbits the binary pair while the third sun stays far away.
+        """
+    )
+    return
+
+
+@app.cell
+def _(COLORS, go, np):
+    def simulate_stable_trisolaris(dt=0.0003, n_steps=50000):
+        """Simulate a STABLE planet in a triple-star system.
+
+        Key to stability:
+        - Tight binary pair (separation ~1)
+        - Third star far away (distance ~8, giving ratio > 5:1)
+        - Planet in circumbinary orbit at ~2x binary separation
+        """
+        # Tight binary pair
+        binary_sep = 0.8
+        sun_positions = np.array([
+            [-binary_sep/2, 0.0],   # Sun 1 (binary)
+            [binary_sep/2, 0.0],    # Sun 2 (binary)
+            [8.0, 0.0],             # Sun 3 (distant - 10x binary separation)
+        ])
+
+        # Binary orbital velocity (circular orbit around center of mass)
+        v_binary = np.sqrt(1.0 / binary_sep) * 0.7
+        # Third star velocity (slow orbit around system)
+        v_third = np.sqrt(2.0 / 8.0) * 0.5
+
+        sun_velocities = np.array([
+            [0.0, -v_binary],
+            [0.0, v_binary],
+            [0.0, v_third],
+        ])
+        sun_masses = np.array([1.0, 1.0, 0.6])
+
+        # Planet in stable circumbinary orbit
+        # Orbital radius should be > 2x binary separation for stability
+        planet_radius = 2.0
+        planet_orbital_v = np.sqrt(2.0 / planet_radius) * 0.95  # Slightly less than circular
+
+        planet_pos = np.array([planet_radius, 0.0])
+        planet_vel = np.array([0.0, planet_orbital_v])
+
+        # Storage (sample every 5 steps to reduce memory)
+        sun_trajectories = [[pos.copy()] for pos in sun_positions]
+        planet_trajectory = [planet_pos.copy()]
+
+        G = 1.0
+        sample_rate = 5
+
+        for step in range(n_steps):
+            # Sun-sun forces
+            sun_acc = np.zeros_like(sun_positions)
+            for i in range(3):
+                for j in range(3):
+                    if i != j:
+                        r_vec = sun_positions[j] - sun_positions[i]
+                        r_mag = np.sqrt(np.sum(r_vec**2)) + 0.001
+                        sun_acc[i] += G * sun_masses[j] * r_vec / (r_mag**3)
+
+            # Planet acceleration (from all suns)
+            planet_acc = np.zeros(2)
+            for j in range(3):
+                r_vec = sun_positions[j] - planet_pos
+                r_mag = np.sqrt(np.sum(r_vec**2)) + 0.001
+                planet_acc += G * sun_masses[j] * r_vec / (r_mag**3)
+
+            # Velocity Verlet integration
+            sun_velocities += sun_acc * dt
+            sun_positions += sun_velocities * dt
+            planet_vel += planet_acc * dt
+            planet_pos += planet_vel * dt
+
+            # Store periodically
+            if step % sample_rate == 0:
+                for i in range(3):
+                    sun_trajectories[i].append(sun_positions[i].copy())
+                planet_trajectory.append(planet_pos.copy())
+
+        # Convert to arrays
+        for i in range(3):
+            sun_trajectories[i] = np.array(sun_trajectories[i])
+        planet_trajectory = np.array(planet_trajectory)
+
+        return sun_trajectories, planet_trajectory
+
+    def create_stable_trisolaris_animation(sun_trajs, planet_traj, n_frames=250):
+        """Create animation of stable Trisolaran system."""
+        total_points = len(planet_traj)
+        indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
+
+        sun_colors = ["#FFD700", "#FFA500", "#FF6347"]
+        sun_sizes = [26, 26, 22]
+        planet_color = COLORS["quantum"]
+        planet_size = 12
+
+        frames = []
+        for frame_idx, data_idx in enumerate(indices):
+            frame_data = []
+
+            # Sun trails and positions
+            for sun_idx in range(3):
+                traj = sun_trajs[sun_idx]
+                trail_start = max(0, data_idx - 200)
+
+                # Trail
+                frame_data.append(
+                    go.Scatter(
+                        x=traj[trail_start : data_idx + 1, 0],
+                        y=traj[trail_start : data_idx + 1, 1],
+                        mode="lines",
+                        line={"color": sun_colors[sun_idx], "width": 2},
+                        opacity=0.4,
+                        showlegend=False,
+                        hoverinfo="skip",
+                    )
+                )
+
+                # Sun
+                frame_data.append(
+                    go.Scatter(
+                        x=[traj[data_idx, 0]],
+                        y=[traj[data_idx, 1]],
+                        mode="markers",
+                        marker={
+                            "size": sun_sizes[sun_idx],
+                            "color": sun_colors[sun_idx],
+                            "line": {"width": 2, "color": "white"},
+                        },
+                        name=f"Sun {sun_idx + 1}" if frame_idx == 0 else None,
+                        showlegend=(frame_idx == 0),
+                        hoverinfo="skip",
+                    )
+                )
+
+            # Planet trail (longer for stable orbit visibility)
+            trail_start = max(0, data_idx - 300)
+            frame_data.append(
+                go.Scatter(
+                    x=planet_traj[trail_start : data_idx + 1, 0],
+                    y=planet_traj[trail_start : data_idx + 1, 1],
+                    mode="lines",
+                    line={"color": planet_color, "width": 2},
+                    opacity=0.7,
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+
+            # Planet
+            frame_data.append(
+                go.Scatter(
+                    x=[planet_traj[data_idx, 0]],
+                    y=[planet_traj[data_idx, 1]],
+                    mode="markers",
+                    marker={
+                        "size": planet_size,
+                        "color": planet_color,
+                        "symbol": "circle",
+                        "line": {"width": 1, "color": "white"},
+                    },
+                    name="Trisolaris" if frame_idx == 0 else None,
+                    showlegend=(frame_idx == 0),
+                    hoverinfo="skip",
+                )
+            )
+
+            frames.append(go.Frame(data=frame_data, name=str(frame_idx)))
+
+        # Axis range - focus on inner system but show distant sun
+        inner_x = np.concatenate([sun_trajs[0][:, 0], sun_trajs[1][:, 0], planet_traj[:, 0]])
+        inner_y = np.concatenate([sun_trajs[0][:, 1], sun_trajs[1][:, 1], planet_traj[:, 1]])
+        margin = 1.0
+        x_min = min(inner_x.min() - margin, -4)
+        x_max = max(inner_x.max() + margin, sun_trajs[2][:, 0].max() + 1)
+        y_range = [inner_y.min() - margin, inner_y.max() + margin]
+
+        fig = go.Figure(
+            data=frames[0].data,
+            layout=go.Layout(
+                title=dict(
+                    text="<b>Stable Trisolaran System:</b> Hierarchy Creates Order<br><sub>Planet safely orbits the binary while the third sun stays distant</sub>",
+                    font=dict(size=16),
+                ),
+                xaxis={
+                    "scaleanchor": "y",
+                    "range": [x_min, x_max],
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
+                yaxis={
+                    "range": y_range,
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
+                plot_bgcolor=COLORS["background"],
+                paper_bgcolor=COLORS["paper"],
+                font=dict(color=COLORS["text"]),
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                ),
+                updatemenus=[
+                    {
+                        "type": "buttons",
+                        "showactive": False,
+                        "y": -0.12,
+                        "x": 0.5,
+                        "xanchor": "center",
+                        "buttons": [
+                            {
+                                "label": "Play",
+                                "method": "animate",
+                                "args": [
+                                    None,
+                                    {
+                                        "frame": {"duration": 30, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                        "mode": "loop",
+                                    },
+                                ],
+                            },
+                            {
+                                "label": "Pause",
+                                "method": "animate",
+                                "args": [
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            },
+                        ],
+                        "bgcolor": COLORS["paper"],
+                        "font": {"color": COLORS["text"]},
+                    }
+                ],
+                margin=dict(b=80),
+            ),
+            frames=frames,
+        )
+
+        return fig
+
+    stable_sun_trajs, stable_planet_traj = simulate_stable_trisolaris()
+    stable_trisolaris_fig = create_stable_trisolaris_animation(stable_sun_trajs, stable_planet_traj)
+
+    return (
+        create_stable_trisolaris_animation,
+        simulate_stable_trisolaris,
+        stable_planet_traj,
+        stable_sun_trajs,
+        stable_trisolaris_fig,
+    )
+
+
+@app.cell
+def _(mo, stable_trisolaris_fig):
+    mo.vstack(
+        [
+            stable_trisolaris_fig,
+            mo.md(
+                "**Stable Trisolaran Configuration:** The secret is hierarchy! The planet (blue) orbits the tight binary pair (gold and orange suns) at a safe distance, while the third sun (red) is far enough away that its gravitational perturbations are gentle. This is how real planets survive in triple-star systems like Alpha Centauri. The planet experiences predictable **Stable Eras** indefinitely."
             ),
         ],
         align="center",
@@ -1091,22 +1385,34 @@ def _(eject_animation, mo):
 
 
 @app.cell
-def _(COLORS, create_three_body_animation, simulate_three_body):
-    # Scenario 2: Hierarchical system
+def _(COLORS, create_three_body_animation, np, simulate_three_body):
+    # Scenario 2: Hierarchical system - tight binary + distant third
+    # Binary separation
+    binary_sep = 0.5
+    # Third body distance (must be >> binary_sep for stability)
+    third_dist = 5.0
+
+    # Binary orbital velocity: v = sqrt(G*m_other / separation)
+    v_binary = np.sqrt(1.0 / binary_sep) * 0.7
+
+    # Third body orbital velocity around binary center of mass
+    # Total binary mass = 2.0, so v = sqrt(2.0 / distance)
+    v_third = np.sqrt(2.0 / third_dist) * 0.95
+
     positions_hier = [
-        (-0.3, 0.0),
-        (0.3, 0.0),
-        (3.0, 0.0),
+        (-binary_sep/2, 0.0),
+        (binary_sep/2, 0.0),
+        (third_dist, 0.0),
     ]
     velocities_hier = [
-        (0.0, -0.6),
-        (0.0, 0.6),
-        (0.0, 0.25),
+        (0.0, -v_binary),
+        (0.0, v_binary),
+        (0.0, v_third),
     ]
-    masses_hier = [1.0, 1.0, 0.5]
+    masses_hier = [1.0, 1.0, 0.6]
 
     trajectories_hier = simulate_three_body(
-        positions_hier, velocities_hier, masses_hier, dt=0.001, n_steps=15000
+        positions_hier, velocities_hier, masses_hier, dt=0.0008, n_steps=25000
     )
 
     hier_colors = [COLORS["gravity"], COLORS["photon"], COLORS["wave"]]
@@ -1117,8 +1423,8 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
         hier_colors,
         hier_sizes,
         title="Scenario: Hierarchical System (Binary + Distant Third)",
-        n_frames=120,
-        trail_length=100,
+        n_frames=180,
+        trail_length=150,
     )
 
     return (
