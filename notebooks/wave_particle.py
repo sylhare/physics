@@ -86,11 +86,11 @@ def _(mo):
 def _(go, np):
     def create_wave_interference_animation():
         """Animate two-source wave interference."""
-        n_frames = 50
+        n_frames = 40
 
         # Grid for wave visualization
-        x = np.linspace(-10, 10, 100)
-        y = np.linspace(-10, 10, 100)
+        x = np.linspace(-10, 10, 50)
+        y = np.linspace(-10, 10, 50)
         X, Y = np.meshgrid(x, y)
 
         # Two sources
@@ -219,7 +219,7 @@ def _(mo):
 def _(go, np):
     def create_photoelectric_animation():
         """Animate the photoelectric effect."""
-        n_frames = 80
+        n_frames = 60
         np.random.seed(42)
 
         frames = []
@@ -381,7 +381,7 @@ def _(mo):
 def _(go, np):
     def create_double_slit_animation():
         """Animate particles building up an interference pattern."""
-        n_frames = 120
+        n_frames = 80
         np.random.seed(123)
 
         # Generate detection positions following interference pattern
@@ -391,11 +391,11 @@ def _(go, np):
             return (np.cos(np.pi * d * x / wavelength) ** 2) * np.exp(-x**2 / 50)
 
         # Sample from this distribution
-        x_range = np.linspace(-8, 8, 300)
+        x_range = np.linspace(-8, 8, 200)
         probs = interference_probability(x_range)
         probs = probs / probs.sum()
 
-        n_total_particles = 300
+        n_total_particles = 150
         all_x_positions = np.random.choice(x_range, size=n_total_particles, p=probs)
         all_y_positions = np.random.uniform(-0.3, 0.3, n_total_particles)
 
@@ -686,13 +686,13 @@ def _(mo):
 def _(go, np):
     def create_debroglie_animation():
         """Animate de Broglie wavelength for different masses."""
-        n_frames = 80
+        n_frames = 60
 
         frames = []
 
         for i in range(n_frames):
             t = 2 * np.pi * i / n_frames
-            x = np.linspace(0, 10, 200)
+            x = np.linspace(0, 10, 100)
 
             # Three "particles" with different masses (different wavelengths)
             # Electron - short wavelength but visible
@@ -1002,7 +1002,7 @@ def _(mo):
 def _(go, np):
     def create_path_integral_animation():
         """Visualize Feynman path integral concept."""
-        n_frames = 60
+        n_frames = 50
         np.random.seed(42)
 
         frames = []

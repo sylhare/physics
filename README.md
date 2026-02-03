@@ -275,3 +275,7 @@ To enable for your fork:
 1. Go to **Settings** > **Pages**
 2. Under **Source**, select **GitHub Actions**
 3. Push to `main` to trigger deployment
+
+---
+
+*Made with AI*

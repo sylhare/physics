@@ -1660,8 +1660,8 @@ def _(go, np):
             # Two "sheets" connected by a throat
 
             # Radial coordinate
-            r = np.linspace(0.5, 4, 100)
-            theta = np.linspace(0, 2 * np.pi, 60)
+            r = np.linspace(0.5, 4, 40)
+            theta = np.linspace(0, 2 * np.pi, 30)
             R, Theta = np.meshgrid(r, theta)
 
             # Embedding function: z = sqrt(r² - b²) for r > b (throat radius b)
@@ -1768,7 +1768,6 @@ def _(go, np):
         return fig
 
     wormhole_fig = create_wormhole_animation()
-    wormhole_fig
     return create_wormhole_animation, wormhole_fig
 
 

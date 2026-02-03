@@ -818,7 +818,7 @@ def _(mo):
 def _(go, np):
     # Animation: Cyclotron accelerator
     def create_cyclotron_animation():
-        n_frames = 200
+        n_frames = 100
         frames = []
 
         # Parameters
@@ -1305,7 +1305,7 @@ def _(mo):
 def _(go, np):
     # Animation: Magnetic bottle / mirror confinement
     def create_magnetic_bottle_animation():
-        n_frames = 150
+        n_frames = 80
         frames = []
 
         # Bottle parameters

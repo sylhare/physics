@@ -457,7 +457,8 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         <footer>
             <p>
                 Built with <a href="https://marimo.io" target="_blank">marimo</a> &bull;
-                <a href="{github_url}" target="_blank">View source on GitHub</a>
+                <a href="{github_url}" target="_blank">View source on GitHub</a> &bull;
+                Made with AI
             </p>
         </footer>
     </div>
