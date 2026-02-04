@@ -39,6 +39,23 @@ FEYNMAN_NOTEBOOKS = {
     "magnetism", "charged_motion", "black_holes"
 }
 
+# Explicit tags for each notebook (avoids false matches from keyword inference)
+NOTEBOOK_TAGS = {
+    # Feynman Lectures series
+    "gravitation": ["Gravity", "Orbital Mechanics", "Feynman Lectures"],
+    "speed_of_light": ["Optics", "Relativity", "Feynman Lectures"],
+    "spacetime": ["Relativity", "Spacetime", "Feynman Lectures"],
+    "wave_particle": ["Quantum Mechanics", "Wave-Particle Duality", "Feynman Lectures"],
+    "magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
+    "charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
+    "black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
+    # Explorations
+    "beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
+    "dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
+    "exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
+    "three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
+}
+
 
 def get_all_notebooks() -> list[Path]:
     """Get all notebook files in the notebooks directory, sorted by name."""
@@ -106,66 +123,18 @@ def extract_metadata(notebook_path: Path) -> NotebookMetadata:
 
 
 def _infer_tags(content: str, stem: str) -> list[str]:
-    """Infer tags from notebook content and filename."""
-    tags = []
-    content_lower = content.lower()
-    stem_lower = stem.lower()
+    """Get tags for a notebook from the explicit mapping."""
+    # Use explicit tags if defined, otherwise fall back to generic
+    if stem in NOTEBOOK_TAGS:
+        return NOTEBOOK_TAGS[stem]
+    return ["Physics"]
 
-    # Physics tag mappings: keyword -> tag
-    tag_keywords = {
-        # Mechanics & Gravity
-        "gravitation": "Gravity",
-        "gravity": "Gravity",
-        "kepler": "Orbital Mechanics",
-        "orbit": "Orbital Mechanics",
-        "newton": "Classical Mechanics",
-        # Electromagnetism
-        "magnetic": "Electromagnetism",
-        "electric": "Electromagnetism",
-        "electromagnetic": "Electromagnetism",
-        "maxwell": "Electromagnetism",
-        "motor": "Motors",
-        "induction": "Induction",
-        "faraday": "Induction",
-        # Relativity
-        "relativity": "Relativity",
-        "spacetime": "Relativity",
-        "lorentz": "Relativity",
-        "einstein": "Relativity",
-        "time dilation": "Relativity",
-        "light speed": "Relativity",
-        "speed of light": "Optics",
-        # Quantum
-        "quantum": "Quantum Mechanics",
-        "wave-particle": "Quantum Mechanics",
-        "photon": "Quantum Mechanics",
-        "double-slit": "Quantum Mechanics",
-        "heisenberg": "Quantum Mechanics",
-        "de broglie": "Quantum Mechanics",
-        # Cosmology & Astrophysics
-        "black hole": "Black Holes",
-        "schwarzschild": "Black Holes",
-        "hawking": "Black Holes",
-        "event horizon": "Black Holes",
-        # Exotic physics
-        "tachyon": "Exotic Physics",
-        "wormhole": "Exotic Physics",
-        "exotic matter": "Exotic Physics",
-        "casimir": "Quantum Field Theory",
-        "warp": "Exotic Physics",
-        # General
-        "animation": "Animations",
-        "visualization": "Visualizations",
-        "feynman": "Feynman Lectures",
-    }
 
-    for keyword, tag in tag_keywords.items():
-        if keyword in content_lower or keyword in stem_lower:
-            if tag not in tags:
-                tags.append(tag)
-
-    # Limit to 4 most relevant tags
-    return tags[:4] if tags else ["Physics"]
+def _markdown_links_to_html(text: str) -> str:
+    """Convert markdown links [text](url) to HTML <a> tags."""
+    # Pattern matches [link text](url)
+    pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+    return re.sub(pattern, r'<a href="\2" target="_blank">\1</a>', text)
 
 
 def export_notebook(
@@ -231,9 +200,7 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
 
     # Generate notebook cards for each section
     feynman_cards = "\n".join(_generate_card(nb) for nb in feynman_notebooks)
-    exploration_cards = "\n".join(
-        _generate_card(nb, show_badge=True) for nb in exploration_notebooks
-    )
+    exploration_cards = "\n".join(_generate_card(nb) for nb in exploration_notebooks)
 
     # Get GitHub repository URL from environment (set in CI)
     github_repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -319,12 +286,31 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
             color: inherit;
             display: block;
             transition: all 0.2s ease;
+            cursor: pointer;
         }}
 
         .card:hover {{
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(96, 165, 250, 0.5);
             transform: translateY(-2px);
+        }}
+
+        .card-title a {{
+            color: #f4f4f5;
+            text-decoration: none;
+        }}
+
+        .card-title a:hover {{
+            text-decoration: underline;
+        }}
+
+        .card-description a {{
+            color: #60a5fa;
+            text-decoration: none;
+        }}
+
+        .card-description a:hover {{
+            text-decoration: underline;
         }}
 
         .card-header {{
@@ -346,15 +332,6 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         .card-title {{
             font-size: 1.25rem;
             color: #f4f4f5;
-        }}
-
-        .exploration-badge {{
-            background: rgba(167, 139, 250, 0.2);
-            color: #a78bfa;
-            padding: 0.15rem 0.5rem;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            margin-left: 0.5rem;
         }}
 
         .card-description {{
@@ -462,6 +439,13 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
             </p>
         </footer>
     </div>
+    <script>
+        document.querySelectorAll('.card-description a').forEach(function(link) {{
+            link.addEventListener('click', function(e) {{
+                e.stopPropagation();
+            }});
+        }});
+    </script>
 </body>
 </html>'''
 
@@ -470,24 +454,25 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
     return output_path
 
 
-def _generate_card(nb: NotebookMetadata, show_badge: bool = False) -> str:
+def _generate_card(nb: NotebookMetadata) -> str:
     """Generate HTML for a single notebook card."""
     tags_html = "\n                    ".join(
         f'<span class="tag">{tag}</span>' for tag in nb.tags
     )
 
-    badge_html = '<span class="exploration-badge">Exploration</span>' if show_badge else ''
+    # Convert markdown links to HTML in description
+    description_html = _markdown_links_to_html(nb.description)
 
-    return f'''            <a href="{nb.stem}.html" class="card">
+    return f'''            <div class="card" onclick="window.location='{nb.stem}.html'">
                 <div class="card-header">
                     <span class="card-number">{nb.number}</span>
-                    <h2 class="card-title">{nb.title}{badge_html}</h2>
+                    <h2 class="card-title"><a href="{nb.stem}.html">{nb.title}</a></h2>
                 </div>
-                <p class="card-description">{nb.description}</p>
+                <p class="card-description">{description_html}</p>
                 <div class="card-tags">
                     {tags_html}
                 </div>
-            </a>'''
+            </div>'''
 
 
 def export_all(output_dir: Path | None = None, include_code: bool = False) -> list[Path]:
