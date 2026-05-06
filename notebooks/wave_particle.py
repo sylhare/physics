@@ -9,12 +9,15 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import G, C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, G, C, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -141,8 +144,12 @@ def _(go, np):
                     text="<b>Wave Interference:</b> Two Sources Creating Patterns<br><sub>Bright and dark bands form where waves add or cancel</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="", showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(title="", showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x"),
+                xaxis=dict(range=[-10, 10], showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(range=[-10, 10], showgrid=False, zeroline=False, showticklabels=False,
+                          scaleanchor="x"),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
@@ -152,19 +159,12 @@ def _(go, np):
                         y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
-                        ],
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
-                margin=dict(b=60),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )

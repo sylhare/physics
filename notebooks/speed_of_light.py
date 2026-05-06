@@ -9,12 +9,14 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import C, AU, PLANETS
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return C, AU, PLANETS, COLORS, DARK_THEME, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -93,34 +95,36 @@ def _(COLORS, create_play_pause_buttons, go, np):
         """Animate Rømer's observation of Jupiter's moons."""
         n_frames = 80
 
-        # Orbits (not to scale, for visualization)
+        # Orbits from constants
         theta = np.linspace(0, 2 * np.pi, 100)
 
         # Earth orbit (inner)
-        earth_orbit_r = 1.0
-        earth_orbit_x = earth_orbit_r * np.cos(theta)
-        earth_orbit_y = earth_orbit_r * np.sin(theta)
+        earth_r = PLANETS["Earth"].semi_major_axis_au
+        earth_orbit_x = earth_r * np.cos(theta)
+        earth_orbit_y = earth_r * np.sin(theta)
 
-        # Jupiter orbit (outer) - Jupiter moves slower
-        jupiter_orbit_r = 2.5
-        jupiter_orbit_x = jupiter_orbit_r * np.cos(theta)
-        jupiter_orbit_y = jupiter_orbit_r * np.sin(theta)
+        # Jupiter orbit (outer)
+        jupiter_r = PLANETS["Jupiter"].semi_major_axis_au
+        jupiter_orbit_x = jupiter_r * np.cos(theta)
+        jupiter_orbit_y = jupiter_r * np.sin(theta)
 
         # Create frames
         frames = []
         for i in range(n_frames):
             # Earth completes ~1 orbit while Jupiter moves ~1/12 of orbit
             earth_angle = 2 * np.pi * i / n_frames
-            jupiter_angle = 2 * np.pi * i / (n_frames * 12) + np.pi  # Start opposite side
+            earth_years = i / n_frames
+            jupiter_angle = 2 * np.pi * (earth_years / PLANETS["Jupiter"].orbital_period_years) + np.pi
 
-            earth_x = earth_orbit_r * np.cos(earth_angle)
-            earth_y = earth_orbit_r * np.sin(earth_angle)
+            earth_x = earth_r * np.cos(earth_angle)
+            earth_y = earth_r * np.sin(earth_angle)
 
-            jupiter_x = jupiter_orbit_r * np.cos(jupiter_angle)
-            jupiter_y = jupiter_orbit_r * np.sin(jupiter_angle)
+            jupiter_x = jupiter_r * np.cos(jupiter_angle)
+            jupiter_y = jupiter_r * np.sin(jupiter_angle)
 
             # Distance between Earth and Jupiter
-            distance = np.sqrt((jupiter_x - earth_x)**2 + (jupiter_y - earth_y)**2)
+            distance_au = np.sqrt((jupiter_x - earth_x)**2 + (jupiter_y - earth_y)**2)
+            distance_km = distance_au * AU / 1000
 
             # Light ray from Jupiter to Earth
             light_x = [jupiter_x, earth_x]
@@ -145,7 +149,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 # Light path
                 go.Scatter(x=light_x, y=light_y, mode="lines",
                           line=dict(color=COLORS["photon"], width=2, dash="dash"),
-                          name=f"Light path: {distance:.2f} AU"),
+                          name=f"Distance: {distance_au:.2f} AU ({distance_km/1e6:.1f}M km)"),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -157,9 +161,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     text="<b>Rømer's Method:</b> Earth-Jupiter Distance Changes<br><sub>Watch how the light travel time varies as Earth orbits</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(scaleanchor="y", range=[-3.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
+                xaxis=dict(scaleanchor="y", range=[-6, 6], showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(range=[-6, 6], showgrid=False, zeroline=False, showticklabels=False),
                 showlegend=True,
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
@@ -173,7 +180,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
                         font=dict(color=COLORS["text"]),
                     )
                 ],
-                margin=dict(b=60),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -541,7 +548,7 @@ def _(go, np):
     values = list(measurements.values())
     names = list(measurements.keys())
 
-    modern_c = 299792.458
+    modern_c = C / 1000  # km/s
 
     history_fig = go.Figure()
 

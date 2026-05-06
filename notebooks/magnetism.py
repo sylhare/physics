@@ -9,12 +9,15 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import G, C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, G, C, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -1245,27 +1248,24 @@ def _(go, np):
                 xaxis=dict(range=[-3, 3], showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(range=[-2.5, 3.2], showgrid=False, zeroline=False, showticklabels=False,
                           scaleanchor="x"),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
-                legend=dict(x=0.75, y=0.25),
-                plot_bgcolor="rgba(20, 20, 40, 1)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 40, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -1474,29 +1474,26 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3, 3], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3.2, 3.2], showgrid=False, zeroline=False, showticklabels=False,
+                yaxis=dict(range=[-2.5, 3.2], showgrid=False, zeroline=False, showticklabels=False,
                           scaleanchor="x"),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
-                legend=dict(x=0.8, y=1),
-                plot_bgcolor="rgba(20, 20, 40, 1)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )

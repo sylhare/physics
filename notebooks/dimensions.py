@@ -10,12 +10,25 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+    from physics.constants import C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, make_subplots, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        C,
+        create_play_pause_buttons,
+        go,
+        make_subplots,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -959,57 +972,49 @@ def _(COLORS, create_play_pause_buttons, go, np):
             em_test_x = em_x + em_r * np.cos(test_angles - t * 0.3)
             em_test_y = em_y + em_r * np.sin(test_angles - t * 0.3)
 
-            # Spacetime curvature visualization (deformed grid)
-            grid_traces = []
-            for gx in x_grid:
-                line_y = y_grid.copy()
-                line_x = np.full_like(line_y, gx)
-                # Deform based on matter locations
-                for j in range(len(line_y)):
-                    # Normal matter pulls grid inward
-                    d_nm = np.sqrt((gx - nm_x)**2 + (line_y[j] - nm_y)**2)
-                    if d_nm > 0.3:
-                        pull = 0.3 / d_nm**1.5
-                        line_x[j] += pull * (nm_x - gx) / d_nm
-                        line_y[j] += pull * (nm_y - line_y[j]) / d_nm
+            # Vectorized Spacetime curvature visualization
+            x_mesh, y_mesh = np.meshgrid(x_grid, y_grid)
+            
+            # Deform meshes based on matter
+            def deform(x, y):
+                # Normal matter
+                d_nm = np.sqrt((x - nm_x)**2 + (y - nm_y)**2)
+                pull = np.where(d_nm > 0.3, 0.3 / (d_nm**1.5 + 1e-10), 0)
+                dx_nm = pull * (nm_x - x) / (d_nm + 1e-10)
+                dy_nm = pull * (nm_y - y) / (d_nm + 1e-10)
+                
+                # Exotic matter
+                d_em = np.sqrt((x - em_x)**2 + (y - em_y)**2)
+                push = np.where(d_em > 0.3, 0.3 / (d_em**1.5 + 1e-10), 0)
+                dx_em = -push * (em_x - x) / (d_em + 1e-10)
+                dy_em = -push * (em_y - y) / (d_em + 1e-10)
+                
+                return x + dx_nm + dx_em, y + dy_nm + dy_em
 
-                    # Exotic matter pushes grid outward
-                    d_em = np.sqrt((gx - em_x)**2 + (line_y[j] - em_y)**2)
-                    if d_em > 0.3:
-                        push = 0.3 / d_em**1.5
-                        line_x[j] -= push * (em_x - gx) / d_em  # Opposite direction!
-                        line_y[j] -= push * (em_y - line_y[j]) / d_em
-
-                grid_traces.append(go.Scatter(
-                    x=line_x, y=line_y,
-                    mode="lines",
-                    line=dict(color=COLORS["grid"], width=1),
-                    showlegend=False,
-                ))
-
-            # Horizontal grid lines
-            for gy in y_grid:
-                line_x = x_grid.copy()
-                line_y = np.full_like(line_x, gy)
-                for j in range(len(line_x)):
-                    d_nm = np.sqrt((line_x[j] - nm_x)**2 + (gy - nm_y)**2)
-                    if d_nm > 0.3:
-                        pull = 0.3 / d_nm**1.5
-                        line_x[j] += pull * (nm_x - line_x[j]) / d_nm
-                        line_y[j] += pull * (nm_y - gy) / d_nm
-
-                    d_em = np.sqrt((line_x[j] - em_x)**2 + (gy - em_y)**2)
-                    if d_em > 0.3:
-                        push = 0.3 / d_em**1.5
-                        line_x[j] -= push * (em_x - line_x[j]) / d_em
-                        line_y[j] -= push * (em_y - gy) / d_em
-
-                grid_traces.append(go.Scatter(
-                    x=line_x, y=line_y,
-                    mode="lines",
-                    line=dict(color=COLORS["grid"], width=1),
-                    showlegend=False,
-                ))
+            x_def, y_def = deform(x_mesh, y_mesh)
+            
+            # Create vertical line segments separated by None
+            vx = []
+            vy = []
+            for j in range(len(x_grid)):
+                vx.extend(x_def[:, j])
+                vx.append(None)
+                vy.extend(y_def[:, j])
+                vy.append(None)
+            
+            # Create horizontal line segments separated by None
+            hx = []
+            hy = []
+            for i in range(len(y_grid)):
+                hx.extend(x_def[i, :])
+                hx.append(None)
+                hy.extend(y_def[i, :])
+                hy.append(None)
+            
+            grid_traces = [
+                go.Scatter(x=vx, y=vy, mode="lines", line=dict(color=COLORS["grid"], width=1), showlegend=False),
+                go.Scatter(x=hx, y=hy, mode="lines", line=dict(color=COLORS["grid"], width=1), showlegend=False)
+            ]
 
             frame_data = [
                 # Deformed spacetime grid

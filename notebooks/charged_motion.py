@@ -9,12 +9,14 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, C, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -41,6 +43,8 @@ def _(mo):
         The physics is elegantly simple: the **Lorentz force** governs everything.
 
         $$\mathbf{F} = q(\mathbf{E} + \mathbf{v} \times \mathbf{B})$$
+
+        *Note: $c$ is the speed of light.*
 
         This single equation tells us how any charged particle responds to any combination
         of electric and magnetic fields. Let's explore its consequences.
@@ -890,23 +894,21 @@ def _(go, np):
                 name="Acceleration gap",
             ))
 
-            # Spiral trajectory trace
+            # Spiral trajectory trace - Vectorized
             t_trace = np.linspace(0, t, 300)
-            x_trace = []
-            y_trace = []
-            for tt in t_trace:
-                n_cross = int(omega_c * tt / np.pi)
-                e = 0.5 + n_cross * energy_gain
-                v_t = np.sqrt(2 * e)
-                r_t = v_t / (q_over_m * B)
-                theta_t = omega_c * tt
-                x_trace.append(r_t * np.cos(theta_t))
-                y_trace.append(r_t * np.sin(theta_t))
+            n_cross_t = (omega_c * t_trace / np.pi).astype(int)
+            e_t = 0.5 + n_cross_t * energy_gain
+            v_t = np.sqrt(2 * e_t)
+            r_t = v_t / (q_over_m * B)
+            theta_t = omega_c * t_trace
+            
+            x_trace = r_t * np.cos(theta_t)
+            y_trace = r_t * np.sin(theta_t)
 
             frame_data.append(go.Scatter(
                 x=x_trace, y=y_trace,
                 mode="lines",
-                line=dict(color="cyan", width=1),
+                line=dict(color=COLORS["primary"], width=2),
                 name="Spiral path",
             ))
 
@@ -919,17 +921,16 @@ def _(go, np):
                 name="Particle",
             ))
 
-            # Magnetic field indicators (around edge)
-            for angle in np.linspace(0, 2*np.pi, 8, endpoint=False):
-                bx = 4.5 * np.cos(angle)
-                by = 4.5 * np.sin(angle)
-                frame_data.append(go.Scatter(
-                    x=[bx], y=[by],
-                    mode="markers",
-                    marker=dict(size=10, color="rgba(100, 100, 255, 0.4)",
-                               symbol="x"),
-                    showlegend=False,
-                ))
+            # Magnetic field indicators (Vectorized single trace)
+            angles_b = np.linspace(0, 2*np.pi, 8, endpoint=False)
+            bx = 4.5 * np.cos(angles_b)
+            by = 4.5 * np.sin(angles_b)
+            frame_data.append(go.Scatter(
+                x=bx, y=by,
+                mode="markers",
+                marker=dict(size=10, color="rgba(100, 100, 255, 0.4)", symbol="x"),
+                showlegend=False,
+            ))
 
             # Info display
             frame_data.append(go.Scatter(
@@ -962,26 +963,23 @@ def _(go, np):
                 yaxis=dict(range=[-5.5, 6], showgrid=False, zeroline=False, showticklabels=False,
                           scaleanchor="x"),
                 showlegend=True,
-                legend=dict(x=0.75, y=0.2),
-                plot_bgcolor="rgba(20, 20, 40, 1)",
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 30, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )

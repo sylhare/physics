@@ -9,12 +9,15 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, C, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -172,32 +175,29 @@ def _(go, np):
             data=frames[0].data,
             layout=go.Layout(
                 title=dict(
-                    text=f"<b>Light Clock:</b> Time Dilation Visualized (v = {velocity}c, γ = {gamma:.2f})<br><sub>Moving clock ticks slower because light travels a longer diagonal path</sub>",
+                    text="<b>The Light Clock:</b> Time Dilation in Action<br><sub>Moving clocks run slow because light must travel further</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(range=[-1.5, 10], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-1, 3], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
-                showlegend=False,
+                xaxis=dict(range=[-0.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(range=[-0.5, 2.5], showgrid=False, zeroline=False, showticklabels=False),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=-0.1,
+                        y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
-                        ],
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
-                margin=dict(b=60),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )

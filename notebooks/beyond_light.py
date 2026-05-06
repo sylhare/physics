@@ -10,19 +10,37 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+    from physics.constants import C
+    from physics.relativity import lorentz_factor, lorentz_transform
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        get_physics_palette,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, make_subplots, mo, np
+    return (
+        C,
+        lorentz_factor,
+        lorentz_transform,
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        get_physics_palette,
+        create_play_pause_buttons,
+        go,
+        make_subplots,
+        mo,
+        np,
+    )
 
 
 @app.cell
 def _(mo):
     mo.md(
         r"""
-        # Beyond the Speed of Light?
+        # Beyond the Speed of Light? ($c = 299,792,458 \text{ m/s}$)
 
         *A thought experiment exploring the deep structure of spacetime*
 
@@ -40,7 +58,28 @@ def _(mo):
 
         > *"The speed of light is the conversion factor between space and time.
         > It tells us how much space equals how much time."*
+        > — Richard Feynman
 
+        $$G_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}$$
+
+        $$c = \frac{1}{\sqrt{\epsilon_0 \mu_0}}$$
+
+        $$\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}$$
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"$$E = mc^2$$")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
         $$c = 299,792,458 \text{ m/s} = 1 \text{ light-second per second}$$
 
         In natural units, physicists often set $c = 1$, treating space and time as
@@ -72,13 +111,13 @@ def _(mo):
 
         $$v_{time}^2 - v_{space}^2 = c^2$$
 
-        This is the **spacetime interval**—and it's always preserved.
+        This derived from the **spacetime interval**—and its magnitude is always preserved for a given observer.
 
-        - At rest: $v_{space} = 0$, so $v_{time} = c$ (maximum aging)
-        - Moving at $0.6c$: $v_{time} = \sqrt{c^2 - (0.6c)^2} = 0.8c$ (time dilation!)
-        - Moving at $c$: $v_{time} = 0$ (time stops—photons don't age)
+        - At rest: $v_{space} = 0$, so $v_{time} = c$
+        - Moving through space: Your coordinate time $t$ passes faster relative to your proper time $\tau$ ($\Delta t = \gamma \Delta \tau$)
+        - Moving at $c$: For a photon, the "interval" vanishes ($ds^2 = 0$).
 
-        *The animation shows how your "velocity through time" decreases as you move through space.*
+        *The animation shows the relationship between space velocity and the Lorentz factor $\gamma$.*
         """
     )
     return
@@ -93,14 +132,16 @@ def _(go, np):
         frames = []
 
         for i in range(n_frames):
-            # Velocity through space (0 to 0.99c)
-            v_space = 0.99 * i / n_frames
-
-            # Velocity through time (using Minkowski geometry)
-            # v_time^2 - v_space^2 = c^2, so v_time = sqrt(c^2 + v_space^2)
-            # But for proper time: gamma = 1/sqrt(1 - v^2/c^2)
-            # Rate of proper time: dtau/dt = 1/gamma = sqrt(1 - v^2/c^2)
-            gamma = 1 / np.sqrt(1 - v_space**2) if v_space < 1 else float('inf')
+            # Velocity through space (0 to 0.95c)
+            v_ratio = 0.95 * i / n_frames
+            v_space = v_ratio * C
+            
+            # The Lorentz factor determines the rate of coordinate time vs proper time (dt/dτ)
+            gamma = lorentz_factor(v_ratio)
+            v_time = gamma * C
+            
+            # Rate of proper time (aging): dτ/dt = 1/gamma
+            aging_rate = 1.0 / gamma
             v_time = np.sqrt(1 - v_space**2) if v_space < 1 else 0  # As fraction of c
 
             # For the circle visualization (Euclidean analogy)
@@ -1303,25 +1344,19 @@ def _(go, np):
 
         c_our = 3e8  # Our c
 
-        # Gamma for our universe (use maximum to avoid sqrt of negative)
+        # Gamma for our universe
         v_ratio_our = v / c_our
-        gamma_our = np.where(v_ratio_our < 0.9999,
-                            1 / np.sqrt(np.maximum(1e-10, 1 - v_ratio_our**2)),
-                            np.nan)
+        gamma_our = lorentz_factor(v_ratio_our)
 
         # Gamma for c' = 10c
         c_10 = 10 * c_our
         v_ratio_10 = v / c_10
-        gamma_10 = np.where(v_ratio_10 < 0.9999,
-                           1 / np.sqrt(np.maximum(1e-10, 1 - v_ratio_10**2)),
-                           np.nan)
+        gamma_10 = lorentz_factor(v_ratio_10)
 
         # Gamma for c' = 1000c
         c_1000 = 1000 * c_our
         v_ratio_1000 = v / c_1000
-        gamma_1000 = np.where(v_ratio_1000 < 0.9999,
-                             1 / np.sqrt(np.maximum(1e-10, 1 - v_ratio_1000**2)),
-                             np.nan)
+        gamma_1000 = lorentz_factor(v_ratio_1000)
 
         fig = go.Figure()
 

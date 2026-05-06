@@ -9,13 +9,28 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import G, AU
+    from physics.integrators import rk4_step, gravity_acceleration
     from physics_explorations.visualization import (
         COLORS,
-        ANIMATION_SETTINGS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, mo, np
+    return (
+        G,
+        AU,
+        rk4_step,
+        gravity_acceleration,
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        create_play_pause_buttons,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -134,50 +149,45 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
+def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
     def simulate_three_body(
-        positions, velocities, masses, dt=0.001, n_steps=10000, G=1.0
+        positions, velocities, masses, dt=0.001, n_steps=10000, G=G
     ):
-        """Simulate three-body gravitational dynamics.
-
-        Args:
-            positions: Initial positions [(x1,y1), (x2,y2), (x3,y3)]
-            velocities: Initial velocities [(vx1,vy1), (vx2,vy2), (vx3,vy3)]
-            masses: Masses [m1, m2, m3]
-            dt: Time step
-            n_steps: Number of simulation steps
-            G: Gravitational constant
-
-        Returns:
-            trajectories: List of (x_array, y_array) for each body
-        """
+        """Simulate three-body gravitational dynamics using RK4."""
         pos = np.array(positions, dtype=float)
         vel = np.array(velocities, dtype=float)
         m = np.array(masses, dtype=float)
 
-        trajectories = [[pos[i].copy()] for i in range(3)]
+        # Initial state [N*D + N*D]
+        state = np.concatenate([pos.flatten(), vel.flatten()])
+        n_bodies = len(m)
+        dim = pos.shape[1]
 
-        for _ in range(n_steps):
-            # Calculate accelerations
-            acc = np.zeros_like(pos)
-            for i in range(3):
-                for j in range(3):
-                    if i != j:
-                        r_vec = pos[j] - pos[i]
-                        r_mag = np.sqrt(np.sum(r_vec**2))
-                        if r_mag > 0.01:  # Softening to avoid singularities
-                            acc[i] += G * m[j] * r_vec / (r_mag**3 + 0.001)
+        trajectories = [[pos[i].copy()] for i in range(n_bodies)]
 
-            # Velocity Verlet integration
-            vel += acc * dt
-            pos += vel * dt
+        def derivative_func(s):
+            # Extract pos and vel from state
+            p = s[:n_bodies*dim].reshape(n_bodies, dim)
+            v = s[n_bodies*dim:].reshape(n_bodies, dim)
+            
+            # Accelerations using centralized vectorized function
+            a = gravity_acceleration(p, m, G=G, softening=0.01)
+            
+            # Return [vel.flatten(), acc.flatten()]
+            return np.concatenate([v.flatten(), a.flatten()])
 
-            # Store positions
-            for i in range(3):
-                trajectories[i].append(pos[i].copy())
+        for step in range(n_steps):
+            # RK4 Step
+            state = rk4_step(state, derivative_func, dt)
+            
+            # Store positions every few steps if needed or every step for chaotic detail
+            if step % 2 == 0:
+                p_curr = state[:n_bodies*dim].reshape(n_bodies, dim)
+                for i in range(n_bodies):
+                    trajectories[i].append(p_curr[i].copy())
 
         # Convert to arrays
-        for i in range(3):
+        for i in range(n_bodies):
             trajectories[i] = np.array(trajectories[i])
 
         return trajectories
@@ -264,9 +274,9 @@ def _(COLORS, go, np):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -276,43 +286,18 @@ def _(COLORS, go, np):
                     x=0.5,
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 30, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                        "mode": "loop",
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -353,6 +338,7 @@ def _(COLORS, go, np):
     )
 
     return (
+        create_play_pause_buttons,
         create_three_body_animation,
         fig8_animation,
         fig8_colors,
@@ -494,7 +480,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np, simulate_three_body):
+def _(COLORS, create_play_pause_buttons, go, np, simulate_three_body):
     def create_butterfly_effect_animation():
         """Show two nearly-identical systems diverging."""
         # Base initial conditions
@@ -530,16 +516,6 @@ def _(COLORS, go, np, simulate_three_body):
         n_frames = 100
         total_points = len(traj_base[0])
         indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
-
-        # Calculate divergence over time
-        divergence = []
-        for idx in indices:
-            total_div = 0
-            for body in range(3):
-                dx = traj_base[body][idx, 0] - traj_perturbed[body][idx, 0]
-                dy = traj_base[body][idx, 1] - traj_perturbed[body][idx, 1]
-                total_div += np.sqrt(dx**2 + dy**2)
-            divergence.append(total_div / 3)
 
         frames = []
         for frame_idx, data_idx in enumerate(indices):
@@ -644,9 +620,9 @@ def _(COLORS, go, np, simulate_three_body):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -657,42 +633,18 @@ def _(COLORS, go, np, simulate_three_body):
                     font=dict(size=10),
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
                 annotations=[
                     dict(
                         x=0.5,
@@ -753,7 +705,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
+def _(COLORS, create_play_pause_buttons, go, np):
     def simulate_trisolaris(dt=0.0005, n_steps=30000):
         """Simulate a planet in a triple-star system."""
         # Three suns - hierarchical system (binary pair + distant third)
@@ -818,7 +770,7 @@ def _(COLORS, go, np):
 
         return sun_trajectories, planet_trajectory
 
-    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=200):
+    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=100):
         """Create animation of Trisolaran system."""
         total_points = len(planet_traj)
         indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
@@ -868,7 +820,7 @@ def _(COLORS, go, np):
                 )
 
             # Planet trail
-            trail_start = max(0, data_idx - 200)
+            trail_start = max(0, data_idx - 100)
             frame_data.append(
                 go.Scatter(
                     x=planet_traj[trail_start : data_idx + 1, 0],
@@ -881,17 +833,50 @@ def _(COLORS, go, np):
                 )
             )
 
+            # Planet IR temperature (Irradiance)
+            irradiance = 0
+            for sun_idx in range(3):
+                dist = np.sqrt(np.sum((planet_traj[data_idx] - sun_trajs[sun_idx][data_idx])**2))
+                irradiance += 0.5 / (dist**2 + 0.1) # Simplified units
+            
+            temp_status = "STABLE"
+            temp_color = COLORS["quantum"]
+            if irradiance > 1.5:
+                temp_status = "SCORCHING"
+                temp_color = "red"
+            elif irradiance < 0.2:
+                temp_status = "FREEZING"
+                temp_color = "cyan"
+
+            # Stability Zones (Hill spheres - approximate)
+            for sun_idx in range(3):
+                sun_pos = sun_trajs[sun_idx][data_idx]
+                r_hill = 0.5 # Visualization constant
+                theta_h = np.linspace(0, 2*np.pi, 30)
+                frame_data.append(go.Scatter(
+                    x=sun_pos[0] + r_hill * np.cos(theta_h),
+                    y=sun_pos[1] + r_hill * np.sin(theta_h),
+                    mode="lines",
+                    line=dict(color=sun_colors[sun_idx], width=1, dash="dot"),
+                    opacity=0.2,
+                    showlegend=False,
+                    hoverinfo="skip"
+                ))
+
             # Planet
             frame_data.append(
                 go.Scatter(
                     x=[planet_traj[data_idx, 0]],
                     y=[planet_traj[data_idx, 1]],
-                    mode="markers",
+                    mode="markers+text",
                     marker={
                         "size": planet_size,
-                        "color": planet_color,
+                        "color": temp_color,
                         "symbol": "circle",
                     },
+                    text=[f" {temp_status}"],
+                    textposition="top right",
+                    textfont=dict(color=temp_color, size=10),
                     name="Trisolaris" if frame_idx == 0 else None,
                     showlegend=(frame_idx == 0),
                     hoverinfo="skip",
@@ -927,9 +912,9 @@ def _(COLORS, go, np):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -939,42 +924,18 @@ def _(COLORS, go, np):
                     x=0.5,
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 25, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )

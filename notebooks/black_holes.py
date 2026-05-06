@@ -9,12 +9,15 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from physics.constants import G, C, M_SUN
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, G, C, M_SUN, create_play_pause_buttons, go, mo, np
 
 
 @app.cell
@@ -28,6 +31,8 @@ def _(mo):
         ---
 
         ## The Ultimate Extreme
+
+        $$G_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}$$
 
         Black holes are regions of spacetime where gravity is so strong that **nothing—not even
         light—can escape**. They represent the most extreme predictions of Einstein's general
@@ -205,29 +210,26 @@ def _(go, np):
                     text="<b>Gravitational Collapse to Black Hole</b><br><sub>When r < r_s, light cannot escape</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(range=[-4, 5], showgrid=False, zeroline=False, scaleanchor="y"),
-                yaxis=dict(range=[-4, 4], showgrid=False, zeroline=False),
+                xaxis=dict(range=[-4, 4], showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(range=[-4, 4], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
                 showlegend=True,
-                legend=dict(x=0.7, y=0.3),
-                plot_bgcolor="rgba(0, 0, 20, 1)",
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -1062,20 +1064,17 @@ def _(go, np):
         fig.update_layout(
             title=dict(
                 text="<b>Flamm's Paraboloid: Embedding of Schwarzschild Geometry</b><br><sub>Space curves into a 'well' around the black hole (time dimension not shown)</sub>",
-                font=dict(size=14),
+                font=dict(size=16),
             ),
             scene=dict(
-                xaxis=dict(showbackground=False, showticklabels=False, title=""),
-                yaxis=dict(showbackground=False, showticklabels=False, title=""),
-                zaxis=dict(showbackground=False, showticklabels=False, title="Embedding depth"),
-                camera=dict(eye=dict(x=1.5, y=1.5, z=0.8)),
+                **SCENE_3D,
                 aspectmode="manual",
                 aspectratio=dict(x=1, y=1, z=0.5),
             ),
             showlegend=True,
-            legend=dict(x=0.7, y=0.9),
-            paper_bgcolor="rgba(0,0,20,1)",
-            plot_bgcolor="rgba(0,0,20,1)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+            paper_bgcolor=COLORS["paper"],
+            plot_bgcolor=COLORS["background"],
         )
 
         return fig
