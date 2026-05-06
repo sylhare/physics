@@ -36,25 +36,25 @@ class NotebookMetadata:
 
 # Notebooks that are part of the Feynman Lectures series
 FEYNMAN_NOTEBOOKS = {
-    "gravitation", "speed_of_light", "spacetime", "wave_particle",
-    "magnetism", "charged_motion", "black_holes"
+    "006_gravitation", "009_speed_of_light", "008_spacetime", "011_wave_particle",
+    "007_magnetism", "003_charged_motion", "002_black_holes"
 }
 
 # Explicit tags for each notebook (avoids false matches from keyword inference)
 NOTEBOOK_TAGS = {
     # Feynman Lectures series
-    "gravitation": ["Gravity", "Orbital Mechanics", "Feynman Lectures"],
-    "speed_of_light": ["Optics", "Relativity", "Feynman Lectures"],
-    "spacetime": ["Relativity", "Spacetime", "Feynman Lectures"],
-    "wave_particle": ["Quantum Mechanics", "Wave-Particle Duality", "Feynman Lectures"],
-    "magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
-    "charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
-    "black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
+    "006_gravitation": ["Gravity", "Orbital Mechanics", "Feynman Lectures"],
+    "009_speed_of_light": ["Optics", "Relativity", "Feynman Lectures"],
+    "008_spacetime": ["Relativity", "Spacetime", "Feynman Lectures"],
+    "011_wave_particle": ["Quantum Mechanics", "Wave-Particle Duality", "Feynman Lectures"],
+    "007_magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
+    "003_charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
+    "002_black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
     # Explorations
-    "beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
-    "dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
-    "exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
-    "three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
+    "001_beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
+    "004_dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
+    "005_exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
+    "010_three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
 }
 
 
