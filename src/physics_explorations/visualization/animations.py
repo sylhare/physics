@@ -1,6 +1,6 @@
 """Animation utilities for physics visualizations."""
 
-from typing import Any, Callable
+from typing import Any, Callable, List, Optional, Union
 import plotly.graph_objects as go
 
 from physics_explorations.visualization.styles import (
@@ -14,7 +14,7 @@ from physics_explorations.visualization.styles import (
 def create_play_pause_buttons(
     play_label: str = "Play",
     pause_label: str = "Pause",
-) -> list[dict[str, Any]]:
+) -> List[dict[str, Any]]:
     """Create standard Play/Pause animation buttons.
 
     Args:
@@ -55,10 +55,10 @@ def create_play_pause_buttons(
 
 def create_slider_steps(
     n_frames: int,
-    labels: list[str] | None = None,
+    labels: Optional[List[str]] = None,
     prefix: str = "",
     suffix: str = "",
-) -> list[dict[str, Any]]:
+) -> List[dict[str, Any]]:
     """Create slider steps for animation control.
 
     Args:
@@ -99,8 +99,8 @@ def create_animation_figure(
     title: str = "",
     xaxis_title: str = "",
     yaxis_title: str = "",
-    xaxis_range: list | None = None,
-    yaxis_range: list | None = None,
+    xaxis_range: Optional[List] = None,
+    yaxis_range: Optional[List] = None,
     show_slider: bool = True,
     slider_prefix: str = "",
     height: int = 600,

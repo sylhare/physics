@@ -3,10 +3,12 @@
 from physics_explorations.visualization.styles import (
     COLORS,
     DARK_THEME,
+    SCENE_3D,
     ANIMATION_SETTINGS,
     SLIDER_STYLE,
     apply_dark_theme,
     get_color_palette,
+    get_physics_palette,
     get_trace_style,
 )
 from physics_explorations.visualization.animations import (
@@ -19,10 +21,12 @@ __all__ = [
     # Styles
     "COLORS",
     "DARK_THEME",
+    "SCENE_3D",
     "ANIMATION_SETTINGS",
     "SLIDER_STYLE",
     "apply_dark_theme",
     "get_color_palette",
+    "get_physics_palette",
     "get_trace_style",
     # Animations
     "create_animation_figure",

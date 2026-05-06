@@ -13,6 +13,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Optional, Union
 
 # Project paths
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -57,7 +58,7 @@ NOTEBOOK_TAGS = {
 }
 
 
-def get_all_notebooks() -> list[Path]:
+def get_all_notebooks() -> List[Path]:
     """Get all notebook files in the notebooks directory, sorted by name."""
     return sorted(NOTEBOOKS_DIR.glob("*.py"))
 
@@ -159,12 +160,15 @@ def export_notebook(
     output_path = output_dir / f"{notebook_path.stem}.html"
 
     cmd = [
-        "uv", "run", "marimo", "export", "html",
+        "python3", "-m", "marimo", "export", "html",
         str(notebook_path),
         "-o", str(output_path),
     ]
     if not include_code:
         cmd.append("--no-include-code")
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(PROJECT_ROOT / "src") + os.pathsep + env.get("PYTHONPATH", "")
 
     result = subprocess.run(
         cmd,
@@ -172,6 +176,7 @@ def export_notebook(
         text=True,
         cwd=PROJECT_ROOT,
         timeout=180,
+        env=env,
     )
 
     if result.returncode != 0:
@@ -182,7 +187,7 @@ def export_notebook(
     return output_path
 
 
-def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> Path:
+def generate_index_html(notebooks: List[NotebookMetadata], output_dir: Path) -> Path:
     """Generate the index.html page from notebook metadata.
 
     Args:
@@ -475,7 +480,7 @@ def _generate_card(nb: NotebookMetadata) -> str:
             </div>'''
 
 
-def export_all(output_dir: Path | None = None, include_code: bool = False) -> list[Path]:
+def export_all(output_dir: Optional[Path] = None, include_code: bool = False) -> List[Path]:
     """Export all notebooks and generate index.html.
 
     Args:

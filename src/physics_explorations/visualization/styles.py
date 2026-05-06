@@ -1,6 +1,6 @@
 """Consistent dark theme styling for physics visualizations."""
 
-from typing import Any
+from typing import Any, Dict
 
 # Dark theme color palette - physics-specific
 COLORS = {
@@ -32,7 +32,7 @@ COLORS = {
 }
 
 # Plotly layout template
-DARK_THEME: dict[str, Any] = {
+DARK_THEME: Dict[str, Any] = {
     "paper_bgcolor": COLORS["paper"],
     "plot_bgcolor": COLORS["background"],
     "font": {
@@ -79,8 +79,33 @@ DARK_THEME: dict[str, Any] = {
     },
 }
 
+# 3D Scene settings
+SCENE_3D: Dict[str, Any] = {
+    "xaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "yaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "zaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "camera": {
+        "eye": {"x": 1.5, "y": 1.5, "z": 1.5}
+    },
+}
+
 # Animation settings
-ANIMATION_SETTINGS: dict[str, Any] = {
+ANIMATION_SETTINGS: Dict[str, Any] = {
     "frame_duration": 50,
     "transition_duration": 0,
     "redraw": True,
@@ -88,7 +113,7 @@ ANIMATION_SETTINGS: dict[str, Any] = {
 }
 
 # Slider styling
-SLIDER_STYLE: dict[str, Any] = {
+SLIDER_STYLE: Dict[str, Any] = {
     "bgcolor": COLORS["paper"],
     "bordercolor": COLORS["grid"],
     "borderwidth": 1,
@@ -189,6 +214,14 @@ def get_trace_style(trace_type: str = "primary") -> dict[str, Any]:
         },
         "field": {
             "line": {"color": COLORS["electric"], "width": 1},
+            "mode": "lines",
+        },
+        "translucent_area": {
+            "fillcolor": "rgba(96, 165, 250, 0.2)",  # Transparent blue
+            "line": {"width": 0},
+        },
+        "translucent_field": {
+            "line": {"color": "rgba(34, 211, 238, 0.3)", "width": 1},
             "mode": "lines",
         },
     }

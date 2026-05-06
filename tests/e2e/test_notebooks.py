@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
 import pytest
 
@@ -75,7 +76,7 @@ class TestNotebookContent:
     MAX_HTML_SIZE = 50 * 1024 * 1024  # 50 MB maximum (physics notebooks have large animations)
 
     @pytest.fixture(scope="class")
-    def exported_html(self) -> dict[str, tuple[str, int]]:
+    def exported_html(self) -> Dict[str, Tuple[str, int]]:
         """Export all notebooks and return their HTML content and size."""
         html_content = {}
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -91,7 +92,7 @@ class TestNotebookContent:
                     pass  # Skip failed exports for this fixture
         return html_content
 
-    def test_output_size_reasonable(self, exported_html: dict[str, tuple[str, int]]):
+    def test_output_size_reasonable(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify exported HTML is neither too small nor too large."""
         for name, (content, size) in exported_html.items():
             assert size >= self.MIN_HTML_SIZE, (
@@ -103,7 +104,7 @@ class TestNotebookContent:
                 f"Expected at most {self.MAX_HTML_SIZE / (1024*1024):.0f} MB."
             )
 
-    def test_html_is_valid(self, exported_html: dict[str, tuple[str, int]]):
+    def test_html_is_valid(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify exported HTML has basic structure."""
         for name, (html, _size) in exported_html.items():
             assert "<!DOCTYPE html>" in html or "<html" in html, (
@@ -111,12 +112,12 @@ class TestNotebookContent:
             )
             assert "</html>" in html, f"{name}: HTML not properly closed"
 
-    def test_katex_is_loaded(self, exported_html: dict[str, tuple[str, int]]):
+    def test_katex_is_loaded(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify KaTeX is loaded for math rendering."""
         for name, (html, _size) in exported_html.items():
             assert "katex" in html.lower(), f"{name}: KaTeX not loaded"
 
-    def test_plotly_visualizations_present(self, exported_html: dict[str, tuple[str, int]]):
+    def test_plotly_visualizations_present(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify Plotly visualizations are embedded in the output."""
         for name, (html, _size) in exported_html.items():
             has_plotly = any([
@@ -126,7 +127,7 @@ class TestNotebookContent:
             ])
             assert has_plotly, f"{name}: Expected Plotly visualizations but found none"
 
-    def test_no_error_messages(self, exported_html: dict[str, tuple[str, int]]):
+    def test_no_error_messages(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify no Python error messages appear in output."""
         error_patterns = [
             r"Traceback \(most recent call last\)",
@@ -164,7 +165,7 @@ class TestNotebookContent:
                             f"Context: ...{context}..."
                         )
 
-    def test_no_output_too_large(self, exported_html: dict[str, tuple[str, int]]):
+    def test_no_output_too_large(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify no 'output too large' warnings from marimo."""
         for name, (html, _size) in exported_html.items():
             if "Your output is too large" in html:
@@ -173,7 +174,7 @@ class TestNotebookContent:
                     f"Some visualizations have too many frames or data points."
                 )
 
-    def test_no_katex_errors(self, exported_html: dict[str, tuple[str, int]]):
+    def test_no_katex_errors(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify no KaTeX parsing errors in output."""
         error_indicators = [
             "katex-error",
@@ -189,7 +190,7 @@ class TestNotebookContent:
                     context = html[max(0, idx-50):idx+100]
                     assert False, f"{name}: KaTeX error found: {context}"
 
-    def test_no_marimo_errors(self, exported_html: dict[str, tuple[str, int]]):
+    def test_no_marimo_errors(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify no marimo-specific errors appear in the notebook output."""
         error_patterns = [
             r'"type"\s*:\s*"error"',  # ErrorOutput in cell outputs
@@ -218,7 +219,7 @@ class TestNotebookContent:
                         f"Errors: {details[:5]}"
                     )
 
-    def test_aligned_equations_render(self, exported_html: dict[str, tuple[str, int]]):
+    def test_aligned_equations_render(self, exported_html: Dict[str, Tuple[str, int]]):
         """Verify LaTeX aligned environments are rendered (not shown as raw text)."""
         # If aligned environments aren't rendered, they show up as raw text
         raw_latex_patterns = [
