@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import G, C
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -198,8 +199,7 @@ def _(go, np):
         return fig
 
     wire_field_fig = create_wire_field_animation()
-    wire_field_fig
-    return (create_wire_field_animation, wire_field_fig)
+    return (create_wire_field_animation, mo.ui.plotly(wire_field_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -377,8 +377,7 @@ def _(go, np):
         return fig
 
     solenoid_fig = create_solenoid_animation()
-    solenoid_fig
-    return (create_solenoid_animation, solenoid_fig)
+    return (create_solenoid_animation, mo.ui.plotly(solenoid_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -542,8 +541,7 @@ def _(go, np):
         return fig
 
     wire_force_fig = create_wire_force_animation()
-    wire_force_fig
-    return (create_wire_force_animation, wire_force_fig)
+    return (create_wire_force_animation, mo.ui.plotly(wire_force_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -752,8 +750,7 @@ def _(go, np):
         return fig
 
     induction_fig = create_induction_animation()
-    induction_fig
-    return (create_induction_animation, induction_fig)
+    return (create_induction_animation, mo.ui.plotly(induction_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1030,8 +1027,7 @@ def _(go, np):
         return fig
 
     dc_motor_fig = create_dc_motor_animation()
-    dc_motor_fig
-    return (create_dc_motor_animation, dc_motor_fig)
+    return (create_dc_motor_animation, mo.ui.plotly(dc_motor_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1272,8 +1268,7 @@ def _(go, np):
         return fig
 
     ac_motor_fig = create_ac_motor_animation()
-    ac_motor_fig
-    return (create_ac_motor_animation, ac_motor_fig)
+    return (create_ac_motor_animation, mo.ui.plotly(ac_motor_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1500,8 +1495,7 @@ def _(go, np):
         return fig
 
     stepper_fig = create_stepper_animation()
-    stepper_fig
-    return (create_stepper_animation, stepper_fig)
+    return (create_stepper_animation, mo.ui.plotly(stepper_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1734,8 +1728,7 @@ def _(go, np):
         return fig
 
     generator_fig = create_generator_animation()
-    generator_fig
-    return (create_generator_animation, generator_fig)
+    return (create_generator_animation, mo.ui.plotly(generator_fig, config=get_plotly_config()))
 
 
 @app.cell

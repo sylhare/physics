@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import C
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -205,8 +206,7 @@ def _(go, np):
         return fig
 
     light_clock_fig = create_light_clock_animation()
-    light_clock_fig
-    return (create_light_clock_animation, light_clock_fig)
+    return (create_light_clock_animation, mo.ui.plotly(light_clock_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -304,8 +304,7 @@ def _(go, np, velocity_slider):
         showlegend=True,
     )
 
-    gamma_fig
-    return gamma_fig, gamma_val, gammas, v, velocities
+    return mo.ui.plotly(gamma_fig, config=get_plotly_config()), gamma_val, gammas, v, velocities
 
 
 @app.cell
@@ -440,8 +439,7 @@ def _(go, np):
         return fig
 
     contraction_fig = create_length_contraction_animation()
-    contraction_fig
-    return (contraction_fig, create_length_contraction_animation)
+    return (mo.ui.plotly(contraction_fig, config=get_plotly_config()), create_length_contraction_animation)
 
 
 @app.cell
@@ -635,8 +633,7 @@ def _(go, np):
         return fig
 
     simultaneity_fig = create_simultaneity_animation()
-    simultaneity_fig
-    return (create_simultaneity_animation, simultaneity_fig)
+    return (create_simultaneity_animation, mo.ui.plotly(simultaneity_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -803,8 +800,7 @@ def _(go, np):
         return fig
 
     spacetime_fig = create_spacetime_diagram()
-    spacetime_fig
-    return (create_spacetime_diagram, spacetime_fig)
+    return (create_spacetime_diagram, mo.ui.plotly(spacetime_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -951,10 +947,9 @@ def _(go, np):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
     )
 
-    energy_fig
     return (
         classical_ke,
-        energy_fig,
+        mo.ui.plotly(energy_fig, config=get_plotly_config()),
         gamma_range,
         kinetic_energy,
         rest_energy,

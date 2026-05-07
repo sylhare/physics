@@ -13,6 +13,7 @@ def _():
     from physics.constants import C
     from physics.relativity import lorentz_factor, lorentz_transform
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -247,8 +248,7 @@ def _(go, np):
         return fig
 
     spacetime_velocity_fig = create_spacetime_velocity_animation()
-    spacetime_velocity_fig
-    return create_spacetime_velocity_animation, spacetime_velocity_fig
+    return create_spacetime_velocity_animation, mo.ui.plotly(spacetime_velocity_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -387,8 +387,7 @@ def _(go, np):
         return fig
 
     energy_barrier_fig = create_energy_barrier_animation()
-    energy_barrier_fig
-    return create_energy_barrier_animation, energy_barrier_fig
+    return create_energy_barrier_animation, mo.ui.plotly(energy_barrier_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -504,7 +503,7 @@ def _(go, np):
 
 @app.cell
 def _(mo, tachyon_energy_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             tachyon_energy_fig,
             mo.md(
@@ -513,7 +512,6 @@ def _(mo, tachyon_energy_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -636,7 +634,7 @@ def _(go, np):
 
 @app.cell
 def _(mo, different_c_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             different_c_fig,
             mo.md(
@@ -645,7 +643,6 @@ def _(mo, different_c_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -812,8 +809,7 @@ def _(go, np):
         return fig
 
     light_cone_fig = create_light_cone_animation()
-    light_cone_fig
-    return create_light_cone_animation, light_cone_fig
+    return create_light_cone_animation, mo.ui.plotly(light_cone_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -932,7 +928,7 @@ def _(go, np):
 
 @app.cell
 def _(mo, proper_time_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             proper_time_fig,
             mo.md(
@@ -941,7 +937,6 @@ def _(mo, proper_time_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1106,8 +1101,7 @@ def _(go, np):
         return fig
 
     length_contraction_fig = create_length_contraction_animation()
-    length_contraction_fig
-    return create_length_contraction_animation, length_contraction_fig
+    return create_length_contraction_animation, mo.ui.plotly(length_contraction_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1277,8 +1271,7 @@ def _(go, np):
         return fig
 
     warp_bubble_fig = create_warp_bubble_animation()
-    warp_bubble_fig
-    return create_warp_bubble_animation, warp_bubble_fig
+    return create_warp_bubble_animation, mo.ui.plotly(warp_bubble_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1431,7 +1424,7 @@ def _(go, np):
 
 @app.cell
 def _(mo, newtonian_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             newtonian_fig,
             mo.md(
@@ -1440,7 +1433,6 @@ def _(mo, newtonian_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1633,8 +1625,7 @@ def _(go, np):
         return fig
 
     minkowski_fig = create_minkowski_geometry_animation()
-    minkowski_fig
-    return create_minkowski_geometry_animation, minkowski_fig
+    return create_minkowski_geometry_animation, mo.ui.plotly(minkowski_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1947,8 +1938,7 @@ def _(go, np):
         return fig
 
     exotic_matter_fig = create_exotic_matter_visualization()
-    exotic_matter_fig
-    return create_exotic_matter_visualization, exotic_matter_fig
+    return create_exotic_matter_visualization, mo.ui.plotly(exotic_matter_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -2171,8 +2161,7 @@ def _(go, np):
         return fig
 
     causality_paradox_fig = create_causality_paradox_animation()
-    causality_paradox_fig
-    return create_causality_paradox_animation, causality_paradox_fig
+    return create_causality_paradox_animation, mo.ui.plotly(causality_paradox_fig, config=get_plotly_config())
 
 
 @app.cell

@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import G, C, M_SUN
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -236,8 +237,7 @@ def _(go, np):
         return fig
 
     schwarzschild_fig = create_schwarzschild_animation()
-    schwarzschild_fig
-    return (create_schwarzschild_animation, schwarzschild_fig)
+    return (create_schwarzschild_animation, mo.ui.plotly(schwarzschild_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -466,8 +466,7 @@ def _(go, np):
         return fig
 
     light_cone_fig = create_light_cone_animation()
-    light_cone_fig
-    return (create_light_cone_animation, light_cone_fig)
+    return (create_light_cone_animation, mo.ui.plotly(light_cone_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -692,8 +691,7 @@ def _(go, np):
         return fig
 
     time_dilation_fig = create_time_dilation_animation()
-    time_dilation_fig
-    return (create_time_dilation_animation, time_dilation_fig)
+    return (create_time_dilation_animation, mo.ui.plotly(time_dilation_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -924,8 +922,7 @@ def _(go, np):
         return fig
 
     redshift_fig = create_redshift_animation()
-    redshift_fig
-    return (create_redshift_animation, redshift_fig)
+    return (create_redshift_animation, mo.ui.plotly(redshift_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1080,8 +1077,7 @@ def _(go, np):
         return fig
 
     embedding_fig = create_embedding_diagram()
-    embedding_fig
-    return (create_embedding_diagram, embedding_fig)
+    return (create_embedding_diagram, mo.ui.plotly(embedding_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1346,8 +1342,7 @@ def _(go, np):
         return fig
 
     interior_fig = create_interior_animation()
-    interior_fig
-    return (create_interior_animation, interior_fig)
+    return (create_interior_animation, mo.ui.plotly(interior_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1524,8 +1519,7 @@ def _(go, np):
         return fig
 
     kerr_fig = create_kerr_black_hole()
-    kerr_fig
-    return (create_kerr_black_hole, kerr_fig)
+    return (create_kerr_black_hole, mo.ui.plotly(kerr_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1774,8 +1768,7 @@ def _(go, np):
         return fig
 
     hawking_fig = create_hawking_animation()
-    hawking_fig
-    return (create_hawking_animation, hawking_fig)
+    return (create_hawking_animation, mo.ui.plotly(hawking_fig, config=get_plotly_config()))
 
 
 @app.cell

@@ -12,6 +12,7 @@ def _():
     from plotly.subplots import make_subplots
     from physics.constants import C, G
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -201,8 +202,7 @@ def _(go, np):
         return fig
 
     timeline_fig = create_historical_timeline()
-    timeline_fig
-    return create_historical_timeline, timeline_fig
+    return create_historical_timeline, mo.ui.plotly(timeline_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -404,8 +404,7 @@ def _(go, np):
         return fig
 
     energy_conditions_fig = create_energy_conditions_visualization()
-    energy_conditions_fig
-    return create_energy_conditions_visualization, energy_conditions_fig
+    return create_energy_conditions_visualization, mo.ui.plotly(energy_conditions_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -620,8 +619,7 @@ def _(go, np):
         return fig
 
     casimir_fig = create_casimir_animation()
-    casimir_fig
-    return create_casimir_animation, casimir_fig
+    return create_casimir_animation, mo.ui.plotly(casimir_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -813,8 +811,7 @@ def _(go, np):
         return fig
 
     quantum_inequality_fig = create_quantum_inequality_animation()
-    quantum_inequality_fig
-    return create_quantum_inequality_animation, quantum_inequality_fig
+    return create_quantum_inequality_animation, mo.ui.plotly(quantum_inequality_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1035,8 +1032,7 @@ def _(go, np):
         return fig
 
     squeezed_vacuum_fig = create_squeezed_vacuum_animation()
-    squeezed_vacuum_fig
-    return create_squeezed_vacuum_animation, squeezed_vacuum_fig
+    return create_squeezed_vacuum_animation, mo.ui.plotly(squeezed_vacuum_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1162,8 +1158,7 @@ def _(go, np):
         return fig
 
     research_fig = create_research_directions_visualization()
-    research_fig
-    return create_research_directions_visualization, research_fig
+    return create_research_directions_visualization, mo.ui.plotly(research_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1375,8 +1370,7 @@ def _(go, np):
         return fig
 
     analog_gravity_fig = create_analog_gravity_animation()
-    analog_gravity_fig
-    return create_analog_gravity_animation, analog_gravity_fig
+    return create_analog_gravity_animation, mo.ui.plotly(analog_gravity_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -1781,8 +1775,7 @@ def _(go, np):
         return fig
 
     self_consistency_fig = create_self_consistency_visualization()
-    self_consistency_fig
-    return create_self_consistency_visualization, self_consistency_fig
+    return create_self_consistency_visualization, mo.ui.plotly(self_consistency_fig, config=get_plotly_config())
 
 
 @app.cell

@@ -1,6 +1,9 @@
 """Consistent dark theme styling for physics visualizations."""
 
 from typing import Any, Dict
+import plotly.io as pio
+import plotly.graph_objects as go
+
 
 # Dark theme color palette - physics-specific
 COLORS = {
@@ -35,9 +38,11 @@ COLORS = {
 DARK_THEME: Dict[str, Any] = {
     "paper_bgcolor": COLORS["paper"],
     "plot_bgcolor": COLORS["background"],
+    "autosize": True,
+    "margin": {"l": 50, "r": 30, "t": 80, "b": 50, "pad": 4},
     "font": {
-        "family": "JetBrains Mono, Fira Code, monospace",
-        "size": 14,
+        "family": "Inter, system-ui, -apple-system, sans-serif",
+        "size": 13,
         "color": COLORS["text"],
     },
     "title": {
@@ -47,36 +52,45 @@ DARK_THEME: Dict[str, Any] = {
         },
         "x": 0.5,
         "xanchor": "center",
+        "pad": {"t": 10},
     },
     "xaxis": {
         "gridcolor": COLORS["grid"],
         "gridwidth": 1,
         "zerolinecolor": COLORS["text_secondary"],
-        "zerolinewidth": 2,
-        "tickfont": {"color": COLORS["text_secondary"]},
-        "titlefont": {"color": COLORS["text"]},
+        "zerolinewidth": 1,
+        "tickfont": {"color": COLORS["text_secondary"], "size": 11},
+        "title_font": {"color": COLORS["text"], "size": 13},
         "showgrid": True,
+        "automargin": True,
     },
     "yaxis": {
         "gridcolor": COLORS["grid"],
         "gridwidth": 1,
         "zerolinecolor": COLORS["text_secondary"],
-        "zerolinewidth": 2,
-        "tickfont": {"color": COLORS["text_secondary"]},
-        "titlefont": {"color": COLORS["text"]},
+        "zerolinewidth": 1,
+        "tickfont": {"color": COLORS["text_secondary"], "size": 11},
+        "title_font": {"color": COLORS["text"], "size": 13},
         "showgrid": True,
+        "automargin": True,
     },
     "legend": {
-        "bgcolor": "rgba(22, 33, 62, 0.8)",
+        "bgcolor": "rgba(22, 33, 62, 0.7)",
         "bordercolor": COLORS["grid"],
         "borderwidth": 1,
-        "font": {"color": COLORS["text"]},
+        "font": {"color": COLORS["text"], "size": 11},
+        "orientation": "h",
+        "yanchor": "bottom",
+        "y": -0.2,
+        "xanchor": "center",
+        "x": 0.5,
     },
     "hoverlabel": {
         "bgcolor": COLORS["paper"],
         "bordercolor": COLORS["primary"],
-        "font": {"color": COLORS["text"], "family": "JetBrains Mono, monospace"},
+        "font": {"color": COLORS["text"], "family": "Inter, sans-serif"},
     },
+    "hovermode": "closest",
 }
 
 # 3D Scene settings
@@ -134,6 +148,23 @@ def apply_dark_theme(fig: Any) -> Any:
     """
     fig.update_layout(**DARK_THEME)
     return fig
+
+
+def get_plotly_config() -> Dict[str, Any]:
+    """Get the recommended Plotly configuration for responsiveness and clean UI."""
+    return {
+        "responsive": True,
+        "displaylogo": False,
+        "modeBarButtonsToRemove": [
+            "select2d",
+            "lasso2d",
+            "autoScale2d",
+            "hoverClosestCartesian",
+            "hoverCompareCartesian",
+        ],
+        "displayModeBar": "hover",
+        "scrollZoom": False,
+    }
 
 
 def get_color_palette() -> list[str]:
@@ -226,3 +257,8 @@ def get_trace_style(trace_type: str = "primary") -> dict[str, Any]:
         },
     }
     return styles.get(trace_type, styles["primary"])
+
+
+# Set the default template
+pio.templates["physics_dark"] = go.layout.Template(layout=DARK_THEME)
+pio.templates.default = "physics_dark"

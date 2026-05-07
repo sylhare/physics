@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import C
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         create_play_pause_buttons,
@@ -257,8 +258,7 @@ def _(go, np):
         return fig
 
     electric_field_fig = create_electric_field_animation()
-    electric_field_fig
-    return (create_electric_field_animation, electric_field_fig)
+    return (create_electric_field_animation, mo.ui.plotly(electric_field_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -494,8 +494,7 @@ def _(go, np):
         return fig
 
     magnetic_circular_fig = create_magnetic_circular_animation()
-    magnetic_circular_fig
-    return (create_magnetic_circular_animation, magnetic_circular_fig)
+    return (create_magnetic_circular_animation, mo.ui.plotly(magnetic_circular_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -747,8 +746,7 @@ def _(go, np):
         return fig
 
     mass_spec_fig = create_mass_spectrometer_animation()
-    mass_spec_fig
-    return (create_mass_spectrometer_animation, mass_spec_fig)
+    return (create_mass_spectrometer_animation, mo.ui.plotly(mass_spec_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -986,8 +984,7 @@ def _(go, np):
         return fig
 
     cyclotron_fig = create_cyclotron_animation()
-    cyclotron_fig
-    return (create_cyclotron_animation, cyclotron_fig)
+    return (create_cyclotron_animation, mo.ui.plotly(cyclotron_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1232,8 +1229,7 @@ def _(go, np):
         return fig
 
     velocity_selector_fig = create_velocity_selector_animation()
-    velocity_selector_fig
-    return (create_velocity_selector_animation, velocity_selector_fig)
+    return (create_velocity_selector_animation, mo.ui.plotly(velocity_selector_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1459,8 +1455,7 @@ def _(go, np):
         return fig
 
     magnetic_bottle_fig = create_magnetic_bottle_animation()
-    magnetic_bottle_fig
-    return (create_magnetic_bottle_animation, magnetic_bottle_fig)
+    return (create_magnetic_bottle_animation, mo.ui.plotly(magnetic_bottle_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1687,8 +1682,7 @@ def _(go, np):
         return fig
 
     hall_effect_fig = create_hall_effect_animation()
-    hall_effect_fig
-    return (create_hall_effect_animation, hall_effect_fig)
+    return (create_hall_effect_animation, mo.ui.plotly(hall_effect_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1936,8 +1930,7 @@ def _(go, np):
         return fig
 
     aurora_fig = create_aurora_animation()
-    aurora_fig
-    return (create_aurora_animation, aurora_fig)
+    return (create_aurora_animation, mo.ui.plotly(aurora_fig, config=get_plotly_config()))
 
 
 @app.cell

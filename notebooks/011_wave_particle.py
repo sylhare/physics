@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import G, C
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -172,8 +173,7 @@ def _(go, np):
         return fig
 
     wave_interference_fig = create_wave_interference_animation()
-    wave_interference_fig
-    return create_wave_interference_animation, wave_interference_fig
+    return create_wave_interference_animation, mo.ui.plotly(wave_interference_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -336,8 +336,7 @@ def _(go, np):
         return fig
 
     photoelectric_fig = create_photoelectric_animation()
-    photoelectric_fig
-    return create_photoelectric_animation, photoelectric_fig
+    return create_photoelectric_animation, mo.ui.plotly(photoelectric_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -525,8 +524,7 @@ def _(go, np):
         return fig
 
     double_slit_fig = create_double_slit_animation()
-    double_slit_fig
-    return create_double_slit_animation, double_slit_fig
+    return create_double_slit_animation, mo.ui.plotly(double_slit_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -618,8 +616,7 @@ def _(go, np):
         return fig
 
     measurement_fig = create_measurement_comparison()
-    measurement_fig
-    return create_measurement_comparison, measurement_fig
+    return create_measurement_comparison, mo.ui.plotly(measurement_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -769,8 +766,7 @@ def _(go, np):
         return fig
 
     debroglie_fig = create_debroglie_animation()
-    debroglie_fig
-    return create_debroglie_animation, debroglie_fig
+    return create_debroglie_animation, mo.ui.plotly(debroglie_fig, config=get_plotly_config())
 
 
 @app.cell
@@ -894,7 +890,7 @@ def _(go, np):
 
 @app.cell
 def _(mo, uncertainty_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             uncertainty_fig,
             mo.md(
@@ -903,7 +899,6 @@ def _(mo, uncertainty_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1105,8 +1100,7 @@ def _(go, np):
         return fig
 
     path_integral_fig = create_path_integral_animation()
-    path_integral_fig
-    return create_path_integral_animation, path_integral_fig
+    return create_path_integral_animation, mo.ui.plotly(path_integral_fig, config=get_plotly_config())
 
 
 @app.cell

@@ -12,6 +12,7 @@ def _():
     from plotly.subplots import make_subplots
     from physics.constants import C
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -282,8 +283,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_1d_fig = create_1d_spacetime_animation()
-    spacetime_1d_fig
-    return (create_1d_spacetime_animation, spacetime_1d_fig)
+    return (create_1d_spacetime_animation, mo.ui.plotly(spacetime_1d_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -446,8 +446,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     time_2d_fig = create_2d_time_animation()
-    time_2d_fig
-    return (create_2d_time_animation, time_2d_fig)
+    return (create_2d_time_animation, mo.ui.plotly(time_2d_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -754,8 +753,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_dim_fig = create_spacetime_dimensions_animation()
-    spacetime_dim_fig
-    return (create_spacetime_dimensions_animation, spacetime_dim_fig)
+    return (create_spacetime_dimensions_animation, mo.ui.plotly(spacetime_dim_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -932,8 +930,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     wormhole_fig = create_wormhole_animation()
-    wormhole_fig
-    return (create_wormhole_animation, wormhole_fig)
+    return (create_wormhole_animation, mo.ui.plotly(wormhole_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1153,8 +1150,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     exotic_spacetime_fig = create_exotic_matter_spacetime_animation()
-    exotic_spacetime_fig
-    return (create_exotic_matter_spacetime_animation, exotic_spacetime_fig)
+    return (create_exotic_matter_spacetime_animation, mo.ui.plotly(exotic_spacetime_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1347,8 +1343,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     directions_fig = create_time_directions_animation()
-    directions_fig
-    return (create_time_directions_animation, directions_fig)
+    return (create_time_directions_animation, mo.ui.plotly(directions_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1529,8 +1524,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     light_dim_fig = create_dimensional_light_animation()
-    light_dim_fig
-    return (create_dimensional_light_animation, light_dim_fig)
+    return (create_dimensional_light_animation, mo.ui.plotly(light_dim_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1713,8 +1707,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     quantum_fig = create_quantum_time_animation()
-    quantum_fig
-    return (create_quantum_time_animation, quantum_fig)
+    return (create_quantum_time_animation, mo.ui.plotly(quantum_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -1884,8 +1877,7 @@ def _(COLORS, go, np):
         return fig
 
     signature_fig = create_signature_comparison()
-    signature_fig
-    return (create_signature_comparison, signature_fig)
+    return (create_signature_comparison, mo.ui.plotly(signature_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -2064,8 +2056,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     entropy_fig = create_entropy_arrow_animation()
-    entropy_fig
-    return (create_entropy_arrow_animation, entropy_fig)
+    return (create_entropy_arrow_animation, mo.ui.plotly(entropy_fig, config=get_plotly_config()))
 
 
 @app.cell

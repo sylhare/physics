@@ -12,6 +12,7 @@ def _():
     from physics.constants import G, AU
     from physics.integrators import rk4_step, gravity_acceleration
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -355,7 +356,7 @@ def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
 
 @app.cell
 def _(fig8_animation, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             fig8_animation,
             mo.md(
@@ -364,7 +365,6 @@ def _(fig8_animation, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -441,7 +441,7 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(chaos_animation, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             chaos_animation,
             mo.md(
@@ -450,7 +450,6 @@ def _(chaos_animation, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -668,7 +667,7 @@ def _(COLORS, create_play_pause_buttons, go, np, simulate_three_body):
 
 @app.cell
 def _(butterfly_fig, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             butterfly_fig,
             mo.md(
@@ -677,7 +676,6 @@ def _(butterfly_fig, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -956,7 +954,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
 @app.cell
 def _(mo, trisolaris_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             trisolaris_fig,
             mo.md(
@@ -965,7 +963,6 @@ def _(mo, trisolaris_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1249,7 +1246,7 @@ def _(COLORS, go, np):
 
 @app.cell
 def _(mo, stable_trisolaris_fig):
-    mo.vstack(
+    return mo.vstack(
         [
             stable_trisolaris_fig,
             mo.md(
@@ -1258,7 +1255,6 @@ def _(mo, stable_trisolaris_fig):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1333,7 +1329,7 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(eject_animation, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             eject_animation,
             mo.md(
@@ -1342,7 +1338,6 @@ def _(eject_animation, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
@@ -1401,7 +1396,7 @@ def _(COLORS, create_three_body_animation, np, simulate_three_body):
 
 @app.cell
 def _(hier_animation, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             hier_animation,
             mo.md(
@@ -1410,7 +1405,6 @@ def _(hier_animation, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell

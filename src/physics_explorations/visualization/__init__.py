@@ -10,6 +10,7 @@ from physics_explorations.visualization.styles import (
     get_color_palette,
     get_physics_palette,
     get_trace_style,
+    get_plotly_config,
 )
 from physics_explorations.visualization.animations import (
     create_animation_figure,
@@ -28,6 +29,7 @@ __all__ = [
     "get_color_palette",
     "get_physics_palette",
     "get_trace_style",
+    "get_plotly_config",
     # Animations
     "create_animation_figure",
     "create_play_pause_buttons",

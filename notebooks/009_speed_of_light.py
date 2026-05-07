@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from physics.constants import C, AU, PLANETS
     from physics_explorations.visualization import (
+        get_plotly_config,
         COLORS,
         DARK_THEME,
         create_play_pause_buttons,
@@ -188,8 +189,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     romer_fig = create_romer_animation()
-    romer_fig
-    return (create_romer_animation, romer_fig)
+    return (create_romer_animation, mo.ui.plotly(romer_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -339,8 +339,7 @@ def _(go, np):
         return fig
 
     fizeau_fig = create_fizeau_animation()
-    fizeau_fig
-    return (create_fizeau_animation, fizeau_fig)
+    return (create_fizeau_animation, mo.ui.plotly(fizeau_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -497,8 +496,7 @@ def _(go, np):
         return fig
 
     em_wave_fig = create_em_wave_animation()
-    em_wave_fig
-    return (create_em_wave_animation, em_wave_fig)
+    return (create_em_wave_animation, mo.ui.plotly(em_wave_fig, config=get_plotly_config()))
 
 
 @app.cell
@@ -583,7 +581,7 @@ def _(go, np):
 
 @app.cell
 def _(history_fig, mo):
-    mo.vstack(
+    return mo.vstack(
         [
             history_fig,
             mo.md(
@@ -592,7 +590,6 @@ def _(history_fig, mo):
         ],
         align="center",
     )
-    return
 
 
 @app.cell
