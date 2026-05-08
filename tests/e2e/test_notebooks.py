@@ -5,15 +5,16 @@ These tests verify that:
 2. HTML export works correctly
 3. Math content renders properly (LaTeX/KaTeX)
 4. Plotly visualizations are generated
-5. No Python errors appear in output
+5. All plotly figures render in each notebook
+6. No Python errors appear in output
 """
 
+import json
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
 
 import pytest
 
@@ -21,10 +22,10 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 from physics_explorations.export import (
-    get_all_notebooks,
-    extract_metadata,
-    export_notebook,
     export_all,
+    export_notebook,
+    extract_metadata,
+    get_all_notebooks,
 )
 
 
@@ -58,9 +59,7 @@ class TestNotebookExecution:
                 output_path = export_notebook(notebook, output_dir)
             except subprocess.CalledProcessError as e:
                 pytest.fail(
-                    f"Export failed for {notebook.name}:\n"
-                    f"stdout: {e.stdout}\n"
-                    f"stderr: {e.stderr}"
+                    f"Export failed for {notebook.name}:\nstdout: {e.stdout}\nstderr: {e.stderr}"
                 )
 
             # Verify output file was created
@@ -72,11 +71,11 @@ class TestNotebookContent:
     """Test that exported notebooks have proper content."""
 
     # Size limits for exported HTML (in bytes)
-    MIN_HTML_SIZE = 100 * 1024        # 100 KB minimum
+    MIN_HTML_SIZE = 100 * 1024  # 100 KB minimum
     MAX_HTML_SIZE = 50 * 1024 * 1024  # 50 MB maximum (physics notebooks have large animations)
 
     @pytest.fixture(scope="class")
-    def exported_html(self) -> Dict[str, Tuple[str, int]]:
+    def exported_html(self) -> dict[str, tuple[str, int]]:
         """Export all notebooks and return their HTML content and size."""
         html_content = {}
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -92,19 +91,19 @@ class TestNotebookContent:
                     pass  # Skip failed exports for this fixture
         return html_content
 
-    def test_output_size_reasonable(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_output_size_reasonable(self, exported_html: dict[str, tuple[str, int]]):
         """Verify exported HTML is neither too small nor too large."""
-        for name, (content, size) in exported_html.items():
+        for name, (_content, size) in exported_html.items():
             assert size >= self.MIN_HTML_SIZE, (
                 f"{name}: Output too small ({size / 1024:.1f} KB). "
                 f"Expected at least {self.MIN_HTML_SIZE / 1024:.0f} KB."
             )
             assert size <= self.MAX_HTML_SIZE, (
-                f"{name}: Output too large ({size / (1024*1024):.1f} MB). "
-                f"Expected at most {self.MAX_HTML_SIZE / (1024*1024):.0f} MB."
+                f"{name}: Output too large ({size / (1024 * 1024):.1f} MB). "
+                f"Expected at most {self.MAX_HTML_SIZE / (1024 * 1024):.0f} MB."
             )
 
-    def test_html_is_valid(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_html_is_valid(self, exported_html: dict[str, tuple[str, int]]):
         """Verify exported HTML has basic structure."""
         for name, (html, _size) in exported_html.items():
             assert "<!DOCTYPE html>" in html or "<html" in html, (
@@ -112,22 +111,24 @@ class TestNotebookContent:
             )
             assert "</html>" in html, f"{name}: HTML not properly closed"
 
-    def test_katex_is_loaded(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_katex_is_loaded(self, exported_html: dict[str, tuple[str, int]]):
         """Verify KaTeX is loaded for math rendering."""
         for name, (html, _size) in exported_html.items():
             assert "katex" in html.lower(), f"{name}: KaTeX not loaded"
 
-    def test_plotly_visualizations_present(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_plotly_visualizations_present(self, exported_html: dict[str, tuple[str, int]]):
         """Verify Plotly visualizations are embedded in the output."""
         for name, (html, _size) in exported_html.items():
-            has_plotly = any([
-                "plotly" in html.lower(),
-                "Plotly.newPlot" in html,
-                '"data":' in html and '"layout":' in html,
-            ])
+            has_plotly = any(
+                [
+                    "plotly" in html.lower(),
+                    "Plotly.newPlot" in html,
+                    '"data":' in html and '"layout":' in html,
+                ]
+            )
             assert has_plotly, f"{name}: Expected Plotly visualizations but found none"
 
-    def test_no_error_messages(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_no_error_messages(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no Python error messages appear in output."""
         error_patterns = [
             r"Traceback \(most recent call last\)",
@@ -151,30 +152,26 @@ class TestNotebookContent:
         for name, (html, _size) in exported_html.items():
             for pattern in error_patterns:
                 matches = re.findall(pattern, html)
-                if matches:
-                    # Check context - might be educational content
-                    if not any(
-                        ctx in html.lower()
-                        for ctx in ["example of error", "error handling"]
-                    ):
-                        # Extract context around the error
-                        idx = html.find(matches[0])
-                        context = html[max(0, idx - 50) : idx + 150]
-                        assert False, (
-                            f"{name}: Found error pattern '{pattern}' in output\n"
-                            f"Context: ...{context}..."
-                        )
+                if matches and not any(
+                    ctx in html.lower() for ctx in ["example of error", "error handling"]
+                ):
+                    idx = html.find(matches[0])
+                    context = html[max(0, idx - 50) : idx + 150]
+                    pytest.fail(
+                        f"{name}: Found error pattern '{pattern}' in output\n"
+                        f"Context: ...{context}..."
+                    )
 
-    def test_no_output_too_large(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_no_output_too_large(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no 'output too large' warnings from marimo."""
         for name, (html, _size) in exported_html.items():
             if "Your output is too large" in html:
-                assert False, (
+                pytest.fail(
                     f"{name}: Found 'output too large' warning. "
                     f"Some visualizations have too many frames or data points."
                 )
 
-    def test_no_katex_errors(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_no_katex_errors(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no KaTeX parsing errors in output."""
         error_indicators = [
             "katex-error",
@@ -187,10 +184,10 @@ class TestNotebookContent:
                 if error.lower() in html.lower():
                     # Find context around error
                     idx = html.lower().find(error.lower())
-                    context = html[max(0, idx-50):idx+100]
-                    assert False, f"{name}: KaTeX error found: {context}"
+                    context = html[max(0, idx - 50) : idx + 100]
+                    pytest.fail(f"{name}: KaTeX error found: {context}")
 
-    def test_no_marimo_errors(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_no_marimo_errors(self, exported_html: dict[str, tuple[str, int]]):
         """Verify no marimo-specific errors appear in the notebook output."""
         error_patterns = [
             r'"type"\s*:\s*"error"',  # ErrorOutput in cell outputs
@@ -200,8 +197,8 @@ class TestNotebookContent:
             r'"type"\s*:\s*"interruption"',
             r'"type"\s*:\s*"internal"',
             r'"type"\s*:\s*"unknown"',
-            r'application/vnd\.marimo\+error',
-            r'application/vnd\.marimo\+traceback',
+            r"application/vnd\.marimo\+error",
+            r"application/vnd\.marimo\+traceback",
             r'"channel"\s*:\s*"marimo-error"',
         ]
 
@@ -212,20 +209,19 @@ class TestNotebookContent:
                     # Extract error details for reporting
                     enames = re.findall(r'"ename"\s*:\s*"([^"]+)"', html)
                     evalues = re.findall(r'"evalue"\s*:\s*"([^"]*)"', html)
-                    details = [f"{n}: {v[:80]}" for n, v in zip(enames, evalues)]
+                    details = [f"{n}: {v[:80]}" for n, v in zip(enames, evalues, strict=False)]
 
-                    assert False, (
-                        f"{name}: Found marimo error pattern '{pattern}'\n"
-                        f"Errors: {details[:5]}"
+                    pytest.fail(
+                        f"{name}: Found marimo error pattern '{pattern}'\nErrors: {details[:5]}"
                     )
 
-    def test_aligned_equations_render(self, exported_html: Dict[str, Tuple[str, int]]):
+    def test_aligned_equations_render(self, exported_html: dict[str, tuple[str, int]]):
         """Verify LaTeX aligned environments are rendered (not shown as raw text)."""
         # If aligned environments aren't rendered, they show up as raw text
         raw_latex_patterns = [
             r"\\begin\{aligned\}",  # Raw \begin{aligned}
-            r"\\end\{aligned\}",    # Raw \end{aligned}
-            r"&amp;=",              # HTML-escaped &= (alignment marker not processed)
+            r"\\end\{aligned\}",  # Raw \end{aligned}
+            r"&amp;=",  # HTML-escaped &= (alignment marker not processed)
         ]
 
         for name, (html, _size) in exported_html.items():
@@ -234,7 +230,7 @@ class TestNotebookContent:
                 # Some raw LaTeX might appear in code examples or source views
                 # but shouldn't appear many times if rendering works
                 if len(matches) > 20:  # Allow some for code display
-                    assert False, (
+                    pytest.fail(
                         f"{name}: Found many instances of raw LaTeX '{pattern}' ({len(matches)}x). "
                         f"LaTeX aligned environments may not be rendering correctly."
                     )
@@ -254,9 +250,7 @@ class TestNotebookStructure:
     def test_notebook_has_main_guard(self, notebook: Path):
         """Verify notebook has proper main guard for execution."""
         content = notebook.read_text()
-        assert 'if __name__ == "__main__"' in content, (
-            f"{notebook.name}: Missing __main__ guard"
-        )
+        assert 'if __name__ == "__main__"' in content, f"{notebook.name}: Missing __main__ guard"
 
     @pytest.mark.parametrize("notebook", get_all_notebooks(), ids=lambda p: p.stem)
     def test_notebook_imports(self, notebook: Path):
@@ -280,8 +274,15 @@ class TestNoRuntimeWarnings:
 
             result = subprocess.run(
                 [
-                    sys.executable, "-m", "marimo", "export", "html",
-                    str(notebook), "-o", str(output_path), "--no-include-code"
+                    sys.executable,
+                    "-m",
+                    "marimo",
+                    "export",
+                    "html",
+                    str(notebook),
+                    "-o",
+                    str(output_path),
+                    "--no-include-code",
                 ],
                 capture_output=True,
                 text=True,
@@ -298,9 +299,7 @@ class TestNoRuntimeWarnings:
 
             for pattern in warning_patterns:
                 if pattern in result.stderr:
-                    pytest.fail(
-                        f"{notebook.name}: RuntimeWarning during export:\n{result.stderr}"
-                    )
+                    pytest.fail(f"{notebook.name}: RuntimeWarning during export:\n{result.stderr}")
 
 
 class TestMetadataExtraction:
@@ -355,6 +354,104 @@ class TestExportAll:
             index_content = (output_dir / "index.html").read_text()
             for notebook in get_all_notebooks():
                 html_name = f"{notebook.stem}.html"
-                assert html_name in index_content, (
-                    f"index.html missing link to {html_name}"
-                )
+                assert html_name in index_content, f"index.html missing link to {html_name}"
+
+
+def _count_expected_figures(notebook_path: Path) -> int:
+    """Count expected plotly figures from notebook source code.
+
+    Detects two patterns:
+    1. mo.ui.plotly() calls — explicit plotly widgets
+    2. Display cells (mo.vstack/mo.hstack) that receive raw plotly
+       figure variables without wrapping them in mo.ui.plotly()
+    """
+    content = notebook_path.read_text()
+    count = 0
+
+    # Pattern 1: each mo.ui.plotly() call renders one figure
+    count += len(re.findall(r"mo\.ui\.plotly\(", content))
+
+    # Pattern 2: display cells with raw plotly figures
+    cells = content.split("@app.cell\n")
+    for cell in cells:
+        has_display = "mo.vstack(" in cell or "mo.hstack(" in cell
+        has_plotly_widget = "mo.ui.plotly" in cell
+        if has_display and not has_plotly_widget:
+            sig_match = re.match(r"def _\(([^)]*)\)", cell)
+            if not sig_match:
+                continue
+            params = [p.strip() for p in sig_match.group(1).split(",")]
+            fig_vars = set(re.findall(r"\b(\w+_fig|\w+_animation)\b", cell))
+            count += sum(1 for var in fig_vars if var in params)
+
+    return count
+
+
+def _count_rendered_figures(html: str) -> int:
+    """Count actually rendered plotly figures in exported HTML.
+
+    Parses the marimo session JSON embedded in the HTML and counts
+    cells whose output contains a <marimo-plotly> element.
+    """
+    match = re.search(
+        r"window\.__MARIMO_MOUNT_CONFIG__\s*=\s*(\{.*?\});\s*$",
+        html,
+        re.DOTALL | re.MULTILINE,
+    )
+    if not match:
+        return 0
+
+    # marimo's JS config contains trailing commas — strip them for json.loads
+    json_str = re.sub(r",\s*([}\]])", r"\1", match.group(1))
+    try:
+        config = json.loads(json_str)
+    except json.JSONDecodeError:
+        return 0
+
+    count = 0
+    for cell in config.get("session", {}).get("cells", []):
+        for output in cell.get("outputs", []):
+            data = output.get("data", {})
+            for content in data.values():
+                if isinstance(content, str) and "marimo-plotly" in content:
+                    count += 1
+    return count
+
+
+class TestPlotlyFigureRendering:
+    """Verify every plotly figure in each notebook actually renders."""
+
+    @pytest.fixture(scope="class")
+    def figure_counts(self) -> dict[str, tuple[int, int]]:
+        """Export all notebooks and return (expected, actual) figure counts."""
+        counts: dict[str, tuple[int, int]] = {}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            for notebook in get_all_notebooks():
+                expected = _count_expected_figures(notebook)
+                try:
+                    output_path = export_notebook(notebook, output_dir)
+                    html = output_path.read_text()
+                    actual = _count_rendered_figures(html)
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    actual = 0
+                counts[notebook.stem] = (expected, actual)
+        return counts
+
+    @pytest.mark.parametrize("notebook", get_all_notebooks(), ids=lambda p: p.stem)
+    def test_all_figures_render(
+        self,
+        notebook: Path,
+        figure_counts: dict[str, tuple[int, int]],
+    ):
+        """Verify every expected plotly figure renders in the exported HTML."""
+        expected, actual = figure_counts[notebook.stem]
+        assert expected > 0, (
+            f"{notebook.stem}: no plotly figures detected in source — "
+            f"every notebook should have at least one visualization"
+        )
+        assert actual == expected, (
+            f"{notebook.stem}: only {actual}/{expected} plotly figures rendered. "
+            f"Check that cells producing figures have all required dependencies "
+            f"(mo, get_plotly_config, etc.) in their function parameters."
+        )

@@ -40,9 +40,7 @@ def true_anomaly_from_eccentric(E: float, e: float) -> float:
     Returns:
         theta: True anomaly (radians)
     """
-    return 2 * np.arctan2(
-        np.sqrt(1 + e) * np.sin(E / 2), np.sqrt(1 - e) * np.cos(E / 2)
-    )
+    return 2 * np.arctan2(np.sqrt(1 + e) * np.sin(E / 2), np.sqrt(1 - e) * np.cos(E / 2))
 
 
 def ellipse_from_eccentricity(
@@ -159,12 +157,9 @@ def projectile_trajectory(
         t_max = 2 * v0 / g * (1 + v_norm)
         t = np.linspace(0, t_max, n_points)
 
-        # Initial position at surface
-        x0, y0 = 0, R
-
-        # Simplified trajectory (parabolic)
+        # Simplified trajectory (parabolic) starting at surface
         x = v0 * t
-        y = y0 - 0.5 * g * t**2
+        y = R - 0.5 * g * t**2
 
         # Clip to surface
         below_surface = x**2 + y**2 < R**2
@@ -185,9 +180,7 @@ def projectile_trajectory(
             e = 1.0 + 2 * specific_energy * R / (g * R**2)
             e = min(e, 0.95)  # Cap for visualization
         else:
-            # Bound orbit
-            a = -g * R**2 / (2 * specific_energy)  # Semi-major axis
-            # Eccentricity from energy and angular momentum
+            # Bound orbit — eccentricity from energy and angular momentum
             L = v0 * R  # Angular momentum per unit mass
             e = np.sqrt(1 + 2 * specific_energy * L**2 / (g * R) ** 2)
             e = min(max(e, 0), 0.95)  # Bound for visualization

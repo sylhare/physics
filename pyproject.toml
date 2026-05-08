@@ -15,6 +15,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-timeout>=2.3.0",
+    "ruff>=0.11.0",
 ]
 
 [tool.marimo]
@@ -27,6 +28,26 @@ timeout = 180  # 3 minute timeout per test (notebooks can be slow)
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific rules
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["physics", "physics_explorations"]
 
 [build-system]
 requires = ["hatchling"]

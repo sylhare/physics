@@ -1,9 +1,9 @@
 """Consistent dark theme styling for physics visualizations."""
 
-from typing import Any, Dict
-import plotly.io as pio
-import plotly.graph_objects as go
+from typing import Any
 
+import plotly.graph_objects as go
+import plotly.io as pio
 
 # Dark theme color palette - physics-specific
 COLORS = {
@@ -14,28 +14,28 @@ COLORS = {
     "text_secondary": "#a0a0a0",
     "grid": "#2d3a4f",
     # Primary palette
-    "primary": "#00d4ff",       # Cyan - main elements
-    "secondary": "#ff6b6b",     # Coral - secondary/contrast
-    "tertiary": "#4ecdc4",      # Teal - tertiary elements
-    "quaternary": "#ffe66d",    # Yellow - highlights
+    "primary": "#00d4ff",  # Cyan - main elements
+    "secondary": "#ff6b6b",  # Coral - secondary/contrast
+    "tertiary": "#4ecdc4",  # Teal - tertiary elements
+    "quaternary": "#ffe66d",  # Yellow - highlights
     # Physics-specific colors
-    "spacetime": "#a78bfa",     # Purple - spacetime/relativity
-    "quantum": "#60a5fa",       # Blue - quantum mechanics
-    "gravity": "#f97316",       # Orange - gravity/mass
-    "electric": "#facc15",      # Yellow - electric fields
-    "magnetic": "#22d3ee",      # Cyan - magnetic fields
-    "photon": "#fbbf24",        # Gold - light/photons
-    "particle": "#f472b6",      # Pink - particles
-    "wave": "#34d399",          # Green - waves
+    "spacetime": "#a78bfa",  # Purple - spacetime/relativity
+    "quantum": "#60a5fa",  # Blue - quantum mechanics
+    "gravity": "#f97316",  # Orange - gravity/mass
+    "electric": "#facc15",  # Yellow - electric fields
+    "magnetic": "#22d3ee",  # Cyan - magnetic fields
+    "photon": "#fbbf24",  # Gold - light/photons
+    "particle": "#f472b6",  # Pink - particles
+    "wave": "#34d399",  # Green - waves
     # Accent colors
-    "accent1": "#95e1d3",       # Mint
-    "accent2": "#f38181",       # Salmon
-    "accent3": "#aa96da",       # Lavender
-    "accent4": "#fcbad3",       # Pink
+    "accent1": "#95e1d3",  # Mint
+    "accent2": "#f38181",  # Salmon
+    "accent3": "#aa96da",  # Lavender
+    "accent4": "#fcbad3",  # Pink
 }
 
 # Plotly layout template
-DARK_THEME: Dict[str, Any] = {
+DARK_THEME: dict[str, Any] = {
     "paper_bgcolor": COLORS["paper"],
     "plot_bgcolor": COLORS["background"],
     "autosize": True,
@@ -94,7 +94,7 @@ DARK_THEME: Dict[str, Any] = {
 }
 
 # 3D Scene settings
-SCENE_3D: Dict[str, Any] = {
+SCENE_3D: dict[str, Any] = {
     "xaxis": {
         "gridcolor": COLORS["grid"],
         "zerolinecolor": COLORS["text_secondary"],
@@ -113,13 +113,11 @@ SCENE_3D: Dict[str, Any] = {
         "showbackground": True,
         "backgroundcolor": COLORS["background"],
     },
-    "camera": {
-        "eye": {"x": 1.5, "y": 1.5, "z": 1.5}
-    },
+    "camera": {"eye": {"x": 1.5, "y": 1.5, "z": 1.5}},
 }
 
 # Animation settings
-ANIMATION_SETTINGS: Dict[str, Any] = {
+ANIMATION_SETTINGS: dict[str, Any] = {
     "frame_duration": 50,
     "transition_duration": 0,
     "redraw": True,
@@ -127,7 +125,7 @@ ANIMATION_SETTINGS: Dict[str, Any] = {
 }
 
 # Slider styling
-SLIDER_STYLE: Dict[str, Any] = {
+SLIDER_STYLE: dict[str, Any] = {
     "bgcolor": COLORS["paper"],
     "bordercolor": COLORS["grid"],
     "borderwidth": 1,
@@ -150,7 +148,7 @@ def apply_dark_theme(fig: Any) -> Any:
     return fig
 
 
-def get_plotly_config() -> Dict[str, Any]:
+def get_plotly_config() -> dict[str, Any]:
     """Get the recommended Plotly configuration for responsiveness and clean UI."""
     return {
         "responsive": True,

@@ -1,6 +1,6 @@
 """Physics helpers for Feynman Gravitation visualizations."""
 
-from physics.constants import G, PLANETS, PlanetData
+from physics.constants import PLANETS, G, PlanetData
 from physics.orbital_mechanics import (
     ellipse_from_eccentricity,
     kepler_orbit,
@@ -9,8 +9,8 @@ from physics.orbital_mechanics import (
 )
 
 __all__ = [
-    "G",
     "PLANETS",
+    "G",
     "PlanetData",
     "ellipse_from_eccentricity",
     "kepler_orbit",

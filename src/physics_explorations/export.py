@@ -13,7 +13,6 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
 
 # Project paths
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -36,8 +35,13 @@ class NotebookMetadata:
 
 # Notebooks that are part of the Feynman Lectures series
 FEYNMAN_NOTEBOOKS = {
-    "006_gravitation", "009_speed_of_light", "008_spacetime", "011_wave_particle",
-    "007_magnetism", "003_charged_motion", "002_black_holes"
+    "006_gravitation",
+    "009_speed_of_light",
+    "008_spacetime",
+    "011_wave_particle",
+    "007_magnetism",
+    "003_charged_motion",
+    "002_black_holes",
 }
 
 # Explicit tags for each notebook (avoids false matches from keyword inference)
@@ -58,7 +62,7 @@ NOTEBOOK_TAGS = {
 }
 
 
-def get_all_notebooks() -> List[Path]:
+def get_all_notebooks() -> list[Path]:
     """Get all notebook files in the notebooks directory, sorted by name."""
     return sorted(NOTEBOOKS_DIR.glob("*.py"))
 
@@ -93,10 +97,7 @@ def extract_metadata(notebook_path: Path) -> NotebookMetadata:
         title = stem.replace("_", " ").title()
 
     # Extract description from first substantial paragraph after title
-    desc_match = re.search(
-        r'mo\.md\(\s*r?"""[^"]*?#[^\n]+\n+([^#\n][^\n]+)',
-        content
-    )
+    desc_match = re.search(r'mo\.md\(\s*r?"""[^"]*?#[^\n]+\n+([^#\n][^\n]+)', content)
     if desc_match:
         description = desc_match.group(1).strip()
     else:
@@ -134,15 +135,11 @@ def _infer_tags(content: str, stem: str) -> list[str]:
 def _markdown_links_to_html(text: str) -> str:
     """Convert markdown links [text](url) to HTML <a> tags."""
     # Pattern matches [link text](url)
-    pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+    pattern = r"\[([^\]]+)\]\(([^)]+)\)"
     return re.sub(pattern, r'<a href="\2" target="_blank">\1</a>', text)
 
 
-def export_notebook(
-    notebook_path: Path,
-    output_dir: Path,
-    include_code: bool = False
-) -> Path:
+def export_notebook(notebook_path: Path, output_dir: Path, include_code: bool = False) -> Path:
     """Export a single notebook to HTML.
 
     Args:
@@ -160,9 +157,14 @@ def export_notebook(
     output_path = output_dir / f"{notebook_path.stem}.html"
 
     cmd = [
-        "python3", "-m", "marimo", "export", "html",
+        "python3",
+        "-m",
+        "marimo",
+        "export",
+        "html",
         str(notebook_path),
-        "-o", str(output_path),
+        "-o",
+        str(output_path),
     ]
     if not include_code:
         cmd.append("--no-include-code")
@@ -180,14 +182,12 @@ def export_notebook(
     )
 
     if result.returncode != 0:
-        raise subprocess.CalledProcessError(
-            result.returncode, cmd, result.stdout, result.stderr
-        )
+        raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)
 
     return output_path
 
 
-def generate_index_html(notebooks: List[NotebookMetadata], output_dir: Path) -> Path:
+def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> Path:
     """Generate the index.html page from notebook metadata.
 
     Args:
@@ -225,7 +225,8 @@ def generate_index_html(notebooks: List[NotebookMetadata], output_dir: Path) -> 
         }}
 
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #e4e4e7;
             min-height: 100vh;
@@ -425,7 +426,8 @@ def generate_index_html(notebooks: List[NotebookMetadata], output_dir: Path) -> 
             <h1>Feynman Physics Visualizations</h1>
             <p class="subtitle">
                 Interactive notebooks exploring physics concepts from the
-                <a href="https://www.feynmanlectures.caltech.edu/" target="_blank">Feynman Lectures on Physics</a>
+                <a href="https://www.feynmanlectures.caltech.edu/"
+                    target="_blank">Feynman Lectures on Physics</a>
             </p>
         </header>
 
@@ -461,9 +463,7 @@ def generate_index_html(notebooks: List[NotebookMetadata], output_dir: Path) -> 
 
 def _generate_card(nb: NotebookMetadata) -> str:
     """Generate HTML for a single notebook card."""
-    tags_html = "\n                    ".join(
-        f'<span class="tag">{tag}</span>' for tag in nb.tags
-    )
+    tags_html = "\n                    ".join(f'<span class="tag">{tag}</span>' for tag in nb.tags)
 
     # Convert markdown links to HTML in description
     description_html = _markdown_links_to_html(nb.description)
@@ -480,7 +480,7 @@ def _generate_card(nb: NotebookMetadata) -> str:
             </div>'''
 
 
-def export_all(output_dir: Optional[Path] = None, include_code: bool = False) -> List[Path]:
+def export_all(output_dir: Path | None = None, include_code: bool = False) -> list[Path]:
     """Export all notebooks and generate index.html.
 
     Args:
