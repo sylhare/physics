@@ -9,9 +9,9 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
-    from physics.constants import G, C, M_SUN
+
+    from physics.constants import M_SUN, C, G
     from physics_explorations.visualization import (
-        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -111,28 +111,37 @@ def _(go, np):
             else:
                 # Collapse accelerates
                 remaining = (progress - 0.7) / 0.3
-                r_current = r_schwarzschild * 1.5 - (r_schwarzschild * 1.5 - r_schwarzschild * 0.3) * remaining
+                r_current = (
+                    r_schwarzschild * 1.5
+                    - (r_schwarzschild * 1.5 - r_schwarzschild * 0.3) * remaining
+                )
 
             # Schwarzschild radius (constant, shown as dashed circle)
             theta = np.linspace(0, 2 * np.pi, 100)
-            frame_data.append(go.Scatter(
-                x=r_schwarzschild * np.cos(theta),
-                y=r_schwarzschild * np.sin(theta),
-                mode="lines",
-                line=dict(color="red", width=2, dash="dash"),
-                name=f"Event horizon (r_s = {r_schwarzschild})",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_schwarzschild * np.cos(theta),
+                    y=r_schwarzschild * np.sin(theta),
+                    mode="lines",
+                    line=dict(color="red", width=2, dash="dash"),
+                    name=f"Event horizon (r_s = {r_schwarzschild})",
+                )
+            )
 
             # Collapsing star
-            frame_data.append(go.Scatter(
-                x=r_current * np.cos(theta),
-                y=r_current * np.sin(theta),
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(255, 200, 100, 0.5)" if r_current > r_schwarzschild else "rgba(50, 50, 50, 0.9)",
-                line=dict(color="orange" if r_current > r_schwarzschild else "black", width=2),
-                name="Collapsing star",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_current * np.cos(theta),
+                    y=r_current * np.sin(theta),
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(255, 200, 100, 0.5)"
+                    if r_current > r_schwarzschild
+                    else "rgba(50, 50, 50, 0.9)",
+                    line=dict(color="orange" if r_current > r_schwarzschild else "black", width=2),
+                    name="Collapsing star",
+                )
+            )
 
             # Light rays trying to escape
             n_rays = 8
@@ -156,14 +165,16 @@ def _(go, np):
                 x_end = (start_r + ray_length) * np.cos(angle)
                 y_end = (start_r + ray_length) * np.sin(angle)
 
-                frame_data.append(go.Scatter(
-                    x=[x_start, x_end],
-                    y=[y_start, y_end],
-                    mode="lines",
-                    line=dict(color=ray_color, width=2),
-                    showlegend=(i == 0),
-                    name="Light rays" if i == 0 else None,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x_start, x_end],
+                        y=[y_start, y_end],
+                        mode="lines",
+                        line=dict(color=ray_color, width=2),
+                        showlegend=(i == 0),
+                        name="Light rays" if i == 0 else None,
+                    )
+                )
 
             # Escape velocity indicator
             if r_current > r_schwarzschild:
@@ -171,36 +182,42 @@ def _(go, np):
             else:
                 v_escape = 1.0  # Already beyond c
 
-            frame_data.append(go.Scatter(
-                x=[3.5], y=[2],
-                mode="text",
-                text=[f"v_escape = {v_escape:.2f}c"],
-                textfont=dict(size=14, color="yellow" if v_escape < 1 else "red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3.5],
+                    y=[2],
+                    mode="text",
+                    text=[f"v_escape = {v_escape:.2f}c"],
+                    textfont=dict(size=14, color="yellow" if v_escape < 1 else "red"),
+                    showlegend=False,
+                )
+            )
 
             # Status
-            if r_current > r_schwarzschild:
-                status = "Star collapsing..."
-            else:
-                status = "BLACK HOLE FORMED!"
+            status = "Star collapsing..." if r_current > r_schwarzschild else "BLACK HOLE FORMED!"
 
-            frame_data.append(go.Scatter(
-                x=[0], y=[3.5],
-                mode="text",
-                text=[status],
-                textfont=dict(size=16, color="white" if r_current > r_schwarzschild else "red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[3.5],
+                    mode="text",
+                    text=[status],
+                    textfont=dict(size=16, color="white" if r_current > r_schwarzschild else "red"),
+                    showlegend=False,
+                )
+            )
 
             # Radius indicator
-            frame_data.append(go.Scatter(
-                x=[3.5], y=[1.5],
-                mode="text",
-                text=[f"r = {r_current:.2f} r_s"],
-                textfont=dict(size=12, color="orange"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3.5],
+                    y=[1.5],
+                    mode="text",
+                    text=[f"r = {r_current:.2f} r_s"],
+                    textfont=dict(size=12, color="orange"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -212,7 +229,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-4, 4], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-4, 4], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(
+                    range=[-4, 4],
+                    scaleanchor="x",
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                ),
                 showlegend=True,
                 template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
@@ -237,7 +260,10 @@ def _(go, np):
         return fig
 
     schwarzschild_fig = create_schwarzschild_animation()
-    return (create_schwarzschild_animation, mo.ui.plotly(schwarzschild_fig, config=get_plotly_config()))
+    return (
+        create_schwarzschild_animation,
+        mo.ui.plotly(schwarzschild_fig, config=get_plotly_config()),
+    )
 
 
 @app.cell
@@ -311,28 +337,32 @@ def _(go, np):
             frame_data = []
 
             # Draw the event horizon
-            frame_data.append(go.Scatter(
-                x=[r_s, r_s],
-                y=[-3, 8],
-                mode="lines",
-                line=dict(color="red", width=3),
-                name="Event horizon",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[r_s, r_s],
+                    y=[-3, 8],
+                    mode="lines",
+                    line=dict(color="red", width=3),
+                    name="Event horizon",
+                )
+            )
 
             # Singularity
-            frame_data.append(go.Scatter(
-                x=[0, 0],
-                y=[-3, 8],
-                mode="lines",
-                line=dict(color="white", width=4),
-                name="Singularity (r=0)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 0],
+                    y=[-3, 8],
+                    mode="lines",
+                    line=dict(color="white", width=4),
+                    name="Singularity (r=0)",
+                )
+            )
 
             # Draw light cones at various positions
             positions = [5.5, 4.5, 3.5, 2.5, 1.5, 0.5]
             times = [0, 1.5, 3, 4.5, 6, 7.5]
 
-            for r, t in zip(positions, times):
+            for r, t in zip(positions, times, strict=False):
                 # Light cone tilt increases as we approach horizon
                 # At infinity: 45°, at horizon: 90° (fully tilted inward)
                 if r > r_s:
@@ -362,69 +392,90 @@ def _(go, np):
                     color = "rgba(255, 100, 100, 0.6)"
 
                 # Draw light cone
-                frame_data.append(go.Scatter(
-                    x=[x_left, r, x_right],
-                    y=[t + cone_height, t, t + cone_height],
-                    mode="lines",
-                    fill="toself",
-                    fillcolor=color,
-                    line=dict(color="yellow" if r > r_s else "red", width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x_left, r, x_right],
+                        y=[t + cone_height, t, t + cone_height],
+                        mode="lines",
+                        fill="toself",
+                        fillcolor=color,
+                        line=dict(color="yellow" if r > r_s else "red", width=2),
+                        showlegend=False,
+                    )
+                )
 
                 # Event point
-                frame_data.append(go.Scatter(
-                    x=[r], y=[t],
-                    mode="markers",
-                    marker=dict(size=8, color="white"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[r],
+                        y=[t],
+                        mode="markers",
+                        marker=dict(size=8, color="white"),
+                        showlegend=False,
+                    )
+                )
 
             # Observer's current position
             t_observer = progress * 7.5
-            frame_data.append(go.Scatter(
-                x=[r_observer], y=[t_observer],
-                mode="markers",
-                marker=dict(size=15, color="cyan", symbol="star",
-                           line=dict(color="white", width=2)),
-                name="Falling observer",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[r_observer],
+                    y=[t_observer],
+                    mode="markers",
+                    marker=dict(
+                        size=15, color="cyan", symbol="star", line=dict(color="white", width=2)
+                    ),
+                    name="Falling observer",
+                )
+            )
 
             # Worldline of observer
             r_trace = np.linspace(6.0, r_observer, 50)
             t_trace = np.linspace(0, t_observer, 50)
-            frame_data.append(go.Scatter(
-                x=r_trace, y=t_trace,
-                mode="lines",
-                line=dict(color="cyan", width=2, dash="dot"),
-                name="Observer's worldline",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_trace,
+                    y=t_trace,
+                    mode="lines",
+                    line=dict(color="cyan", width=2, dash="dot"),
+                    name="Observer's worldline",
+                )
+            )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[5], y=[-2],
-                mode="text",
-                text=["Outside: can escape"],
-                textfont=dict(size=11, color="yellow"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[1], y=[-2],
-                mode="text",
-                text=["Inside: must fall to r=0"],
-                textfont=dict(size=11, color="red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[5],
+                    y=[-2],
+                    mode="text",
+                    text=["Outside: can escape"],
+                    textfont=dict(size=11, color="yellow"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[1],
+                    y=[-2],
+                    mode="text",
+                    text=["Inside: must fall to r=0"],
+                    textfont=dict(size=11, color="red"),
+                    showlegend=False,
+                )
+            )
 
             # Current radius
             status = f"r = {r_observer:.2f}" + (" (outside)" if r_observer > r_s else " (INSIDE!)")
-            frame_data.append(go.Scatter(
-                x=[5], y=[8.5],
-                mode="text",
-                text=[status],
-                textfont=dict(size=14, color="cyan" if r_observer > r_s else "red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[5],
+                    y=[8.5],
+                    mode="text",
+                    text=[status],
+                    textfont=dict(size=14, color="cyan" if r_observer > r_s else "red"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -435,10 +486,15 @@ def _(go, np):
                     text="<b>Light Cones Near a Black Hole</b><br><sub>Cones tilt inward; inside horizon, all futures lead to singularity</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(range=[-0.5, 7], title="Radius r", showgrid=True,
-                          gridcolor="rgba(100,100,100,0.3)"),
-                yaxis=dict(range=[-3, 9], title="Time t", showgrid=True,
-                          gridcolor="rgba(100,100,100,0.3)"),
+                xaxis=dict(
+                    range=[-0.5, 7],
+                    title="Radius r",
+                    showgrid=True,
+                    gridcolor="rgba(100,100,100,0.3)",
+                ),
+                yaxis=dict(
+                    range=[-3, 9], title="Time t", showgrid=True, gridcolor="rgba(100,100,100,0.3)"
+                ),
                 showlegend=True,
                 legend=dict(x=0.65, y=0.35),
                 plot_bgcolor="rgba(0, 0, 20, 1)",
@@ -449,14 +505,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -547,21 +617,23 @@ def _(go, np):
 
             # Black hole
             theta_bh = np.linspace(0, 2 * np.pi, 100)
-            frame_data.append(go.Scatter(
-                x=r_s * np.cos(theta_bh),
-                y=r_s * np.sin(theta_bh),
-                mode="lines",
-                fill="toself",
-                fillcolor="black",
-                line=dict(color="red", width=2),
-                name="Event horizon",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_s * np.cos(theta_bh),
+                    y=r_s * np.sin(theta_bh),
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="black",
+                    line=dict(color="red", width=2),
+                    name="Event horizon",
+                )
+            )
 
             # Clocks at different radii
             radii = [1.2, 1.5, 2.0, 3.0, 5.0]
             colors = ["red", "orange", "yellow", "lime", "cyan"]
 
-            for r, color in zip(radii, colors):
+            for r, color in zip(radii, colors, strict=False):
                 # Time dilation factor
                 gamma = np.sqrt(1 - r_s / r)
 
@@ -575,83 +647,103 @@ def _(go, np):
                 # Draw clock face
                 clock_r = 0.2
                 clock_theta = np.linspace(0, 2 * np.pi, 30)
-                frame_data.append(go.Scatter(
-                    x=x_clock + clock_r * np.cos(clock_theta),
-                    y=y_clock + clock_r * np.sin(clock_theta),
-                    mode="lines",
-                    line=dict(color=color, width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=x_clock + clock_r * np.cos(clock_theta),
+                        y=y_clock + clock_r * np.sin(clock_theta),
+                        mode="lines",
+                        line=dict(color=color, width=2),
+                        showlegend=False,
+                    )
+                )
 
                 # Clock hand
                 hand_angle = local_time  # Rotates with local time
                 hand_x = x_clock + clock_r * 0.8 * np.sin(hand_angle)
                 hand_y = y_clock + clock_r * 0.8 * np.cos(hand_angle)
 
-                frame_data.append(go.Scatter(
-                    x=[x_clock, hand_x],
-                    y=[y_clock, hand_y],
-                    mode="lines",
-                    line=dict(color=color, width=3),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x_clock, hand_x],
+                        y=[y_clock, hand_y],
+                        mode="lines",
+                        line=dict(color=color, width=3),
+                        showlegend=False,
+                    )
+                )
 
                 # Time dilation label
-                frame_data.append(go.Scatter(
-                    x=[x_clock], y=[y_clock - 0.4],
-                    mode="text",
-                    text=[f"γ={gamma:.2f}"],
-                    textfont=dict(size=10, color=color),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x_clock],
+                        y=[y_clock - 0.4],
+                        mode="text",
+                        text=[f"γ={gamma:.2f}"],
+                        textfont=dict(size=10, color=color),
+                        showlegend=False,
+                    )
+                )
 
             # Reference clock at infinity (top)
             ref_x, ref_y = 0, 3
             clock_r = 0.3
-            frame_data.append(go.Scatter(
-                x=ref_x + clock_r * np.cos(clock_theta),
-                y=ref_y + clock_r * np.sin(clock_theta),
-                mode="lines",
-                line=dict(color="white", width=2),
-                name="Reference clock (r=∞)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=ref_x + clock_r * np.cos(clock_theta),
+                    y=ref_y + clock_r * np.sin(clock_theta),
+                    mode="lines",
+                    line=dict(color="white", width=2),
+                    name="Reference clock (r=∞)",
+                )
+            )
 
             # Reference hand (runs at full speed)
             hand_x = ref_x + clock_r * 0.8 * np.sin(t)
             hand_y = ref_y + clock_r * 0.8 * np.cos(t)
-            frame_data.append(go.Scatter(
-                x=[ref_x, hand_x],
-                y=[ref_y, hand_y],
-                mode="lines",
-                line=dict(color="white", width=3),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[ref_x, hand_x],
+                    y=[ref_y, hand_y],
+                    mode="lines",
+                    line=dict(color="white", width=3),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[ref_x], y=[ref_y + 0.5],
-                mode="text",
-                text=["t (coordinate time)"],
-                textfont=dict(size=12, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[ref_x],
+                    y=[ref_y + 0.5],
+                    mode="text",
+                    text=["t (coordinate time)"],
+                    textfont=dict(size=12, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Formula
-            frame_data.append(go.Scatter(
-                x=[4], y=[2.5],
-                mode="text",
-                text=["dτ/dt = √(1 - r_s/r)"],
-                textfont=dict(size=12, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[4],
+                    y=[2.5],
+                    mode="text",
+                    text=["dτ/dt = √(1 - r_s/r)"],
+                    textfont=dict(size=12, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Explanation
-            frame_data.append(go.Scatter(
-                x=[4], y=[-2],
-                mode="text",
-                text=["Closer to horizon = slower time"],
-                textfont=dict(size=11, color="yellow"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[4],
+                    y=[-2],
+                    mode="text",
+                    text=["Closer to horizon = slower time"],
+                    textfont=dict(size=11, color="yellow"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -674,14 +766,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -691,7 +797,10 @@ def _(go, np):
         return fig
 
     time_dilation_fig = create_time_dilation_animation()
-    return (create_time_dilation_animation, mo.ui.plotly(time_dilation_fig, config=get_plotly_config()))
+    return (
+        create_time_dilation_animation,
+        mo.ui.plotly(time_dilation_fig, config=get_plotly_config()),
+    )
 
 
 @app.cell
@@ -767,15 +876,17 @@ def _(go, np):
 
             # Black hole
             theta = np.linspace(0, 2 * np.pi, 100)
-            frame_data.append(go.Scatter(
-                x=r_s * np.cos(theta),
-                y=r_s * np.sin(theta),
-                mode="lines",
-                fill="toself",
-                fillcolor="black",
-                line=dict(color="red", width=2),
-                name="Black hole",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_s * np.cos(theta),
+                    y=r_s * np.sin(theta),
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="black",
+                    line=dict(color="red", width=2),
+                    name="Black hole",
+                )
+            )
 
             # Emitter at different radii (moves closer over time)
             r_emit = 4.0 - progress * 2.8  # From r=4 to r=1.2
@@ -808,81 +919,110 @@ def _(go, np):
             emit_x = r_emit
             emit_y = 0
 
-            frame_data.append(go.Scatter(
-                x=[emit_x], y=[emit_y],
-                mode="markers",
-                marker=dict(size=15, color="green", symbol="star"),
-                name="Light source (green)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[emit_x],
+                    y=[emit_y],
+                    mode="markers",
+                    marker=dict(size=15, color="green", symbol="star"),
+                    name="Light source (green)",
+                )
+            )
 
             # Light wave traveling outward
             wave_positions = np.linspace(r_emit, 6, 50)
-            wave_y = 0.2 * np.sin(2 * np.pi * (wave_positions - r_emit) / (0.3 * (1 + z_factor)) - progress * 10)
+            wave_y = 0.2 * np.sin(
+                2 * np.pi * (wave_positions - r_emit) / (0.3 * (1 + z_factor)) - progress * 10
+            )
 
-            frame_data.append(go.Scatter(
-                x=wave_positions, y=wave_y,
-                mode="lines",
-                line=dict(color=color, width=3),
-                name="Light wave (observed)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=wave_positions,
+                    y=wave_y,
+                    mode="lines",
+                    line=dict(color=color, width=3),
+                    name="Light wave (observed)",
+                )
+            )
 
             # Observer
-            frame_data.append(go.Scatter(
-                x=[6], y=[0],
-                mode="markers",
-                marker=dict(size=20, color="white", symbol="circle"),
-                name="Observer",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[6],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=20, color="white", symbol="circle"),
+                    name="Observer",
+                )
+            )
 
             # Info display
-            frame_data.append(go.Scatter(
-                x=[3.5], y=[2.5],
-                mode="text",
-                text=[f"r/r_s = {r_emit/r_s:.2f}"],
-                textfont=dict(size=14, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3.5],
+                    y=[2.5],
+                    mode="text",
+                    text=[f"r/r_s = {r_emit / r_s:.2f}"],
+                    textfont=dict(size=14, color="white"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[3.5], y=[2.0],
-                mode="text",
-                text=[f"Redshift z = {z_factor:.2f}"],
-                textfont=dict(size=12, color="orange"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3.5],
+                    y=[2.0],
+                    mode="text",
+                    text=[f"Redshift z = {z_factor:.2f}"],
+                    textfont=dict(size=12, color="orange"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[3.5], y=[1.5],
-                mode="text",
-                text=[f"λ_obs = {lambda_obs:.0f} nm"],
-                textfont=dict(size=12, color=color),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3.5],
+                    y=[1.5],
+                    mode="text",
+                    text=[f"λ_obs = {lambda_obs:.0f} nm"],
+                    textfont=dict(size=12, color=color),
+                    showlegend=False,
+                )
+            )
 
             # Color bar showing redshift
             colors_bar = ["green", "yellow", "orange", "red", "darkred"]
             for i, c in enumerate(colors_bar):
-                frame_data.append(go.Scatter(
-                    x=[5 + i * 0.3], y=[-2],
-                    mode="markers",
-                    marker=dict(size=20, color=c, symbol="square"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[5 + i * 0.3],
+                        y=[-2],
+                        mode="markers",
+                        marker=dict(size=20, color=c, symbol="square"),
+                        showlegend=False,
+                    )
+                )
 
-            frame_data.append(go.Scatter(
-                x=[5], y=[-2.6],
-                mode="text",
-                text=["Emitted"],
-                textfont=dict(size=10, color="green"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[6.2], y=[-2.6],
-                mode="text",
-                text=["→ Observed"],
-                textfont=dict(size=10, color="darkred"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[5],
+                    y=[-2.6],
+                    mode="text",
+                    text=["Emitted"],
+                    textfont=dict(size=10, color="green"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[6.2],
+                    y=[-2.6],
+                    mode="text",
+                    text=["→ Observed"],
+                    textfont=dict(size=10, color="darkred"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -905,14 +1045,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1008,13 +1162,17 @@ def _(go, np):
         fig = go.Figure()
 
         # Curved space surface
-        fig.add_trace(go.Surface(
-            x=X, y=Y, z=-Z,  # Negative Z to show "well"
-            colorscale=[[0, 'darkblue'], [0.5, 'blue'], [1, 'cyan']],
-            showscale=False,
-            opacity=0.8,
-            name="Curved spacetime",
-        ))
+        fig.add_trace(
+            go.Surface(
+                x=X,
+                y=Y,
+                z=-Z,  # Negative Z to show "well"
+                colorscale=[[0, "darkblue"], [0.5, "blue"], [1, "cyan"]],
+                showscale=False,
+                opacity=0.8,
+                name="Curved spacetime",
+            )
+        )
 
         # Event horizon circle
         theta_eh = np.linspace(0, 2 * np.pi, 100)
@@ -1022,27 +1180,35 @@ def _(go, np):
         y_eh = r_s * np.sin(theta_eh)
         z_eh = np.zeros_like(theta_eh)
 
-        fig.add_trace(go.Scatter3d(
-            x=x_eh, y=y_eh, z=z_eh,
-            mode="lines",
-            line=dict(color="red", width=8),
-            name="Event horizon",
-        ))
+        fig.add_trace(
+            go.Scatter3d(
+                x=x_eh,
+                y=y_eh,
+                z=z_eh,
+                mode="lines",
+                line=dict(color="red", width=8),
+                name="Event horizon",
+            )
+        )
 
         # Add some geodesics (paths of falling objects)
-        for phi_start in [0, np.pi/2, np.pi, 3*np.pi/2]:
+        for phi_start in [0, np.pi / 2, np.pi, 3 * np.pi / 2]:
             r_path = np.linspace(5, r_s * 1.05, 50)
             x_path = r_path * np.cos(phi_start)
             y_path = r_path * np.sin(phi_start)
             z_path = -2 * np.sqrt(r_s * (r_path - r_s))
 
-            fig.add_trace(go.Scatter3d(
-                x=x_path, y=y_path, z=z_path,
-                mode="lines",
-                line=dict(color="yellow", width=4),
-                showlegend=bool(phi_start == 0),
-                name="Falling geodesic" if phi_start == 0 else None,
-            ))
+            fig.add_trace(
+                go.Scatter3d(
+                    x=x_path,
+                    y=y_path,
+                    z=z_path,
+                    mode="lines",
+                    line=dict(color="yellow", width=4),
+                    showlegend=bool(phi_start == 0),
+                    name="Falling geodesic" if phi_start == 0 else None,
+                )
+            )
 
         # Add radial grid lines
         for phi in np.linspace(0, 2 * np.pi, 12, endpoint=False):
@@ -1051,12 +1217,16 @@ def _(go, np):
             y_line = r_line * np.sin(phi)
             z_line = -2 * np.sqrt(r_s * (r_line - r_s))
 
-            fig.add_trace(go.Scatter3d(
-                x=x_line, y=y_line, z=z_line,
-                mode="lines",
-                line=dict(color="rgba(255,255,255,0.3)", width=1),
-                showlegend=False,
-            ))
+            fig.add_trace(
+                go.Scatter3d(
+                    x=x_line,
+                    y=y_line,
+                    z=z_line,
+                    mode="lines",
+                    line=dict(color="rgba(255,255,255,0.3)", width=1),
+                    showlegend=False,
+                )
+            )
 
         fig.update_layout(
             title=dict(
@@ -1164,50 +1334,63 @@ def _(go, np):
 
             # Draw regions
             # Region I: Outside (right)
-            frame_data.append(go.Scatter(
-                x=[0, 4, 4, 0],
-                y=[0, 4, -4, 0],
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(0, 100, 200, 0.2)",
-                line=dict(color="rgba(0,100,200,0.5)", width=1),
-                name="Region I (our universe)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 4, 4, 0],
+                    y=[0, 4, -4, 0],
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(0, 100, 200, 0.2)",
+                    line=dict(color="rgba(0,100,200,0.5)", width=1),
+                    name="Region I (our universe)",
+                )
+            )
 
             # Region II: Inside (future)
-            frame_data.append(go.Scatter(
-                x=[0, 4, -4, 0],
-                y=[0, 4, 4, 0],
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(100, 0, 0, 0.3)",
-                line=dict(color="rgba(100,0,0,0.5)", width=1),
-                name="Region II (inside BH)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 4, -4, 0],
+                    y=[0, 4, 4, 0],
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100, 0, 0, 0.3)",
+                    line=dict(color="rgba(100,0,0,0.5)", width=1),
+                    name="Region II (inside BH)",
+                )
+            )
 
             # Singularity (future)
             sing_x = np.linspace(-3, 3, 100)
             sing_y = np.sqrt(sing_x**2 + 1) * 2  # Hyperbola
-            frame_data.append(go.Scatter(
-                x=sing_x, y=sing_y,
-                mode="lines",
-                line=dict(color="white", width=4),
-                name="Singularity (r=0)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=sing_x,
+                    y=sing_y,
+                    mode="lines",
+                    line=dict(color="white", width=4),
+                    name="Singularity (r=0)",
+                )
+            )
 
             # Horizons (45° lines)
-            frame_data.append(go.Scatter(
-                x=[-4, 4], y=[-4, 4],
-                mode="lines",
-                line=dict(color="red", width=2),
-                name="Event horizon",
-            ))
-            frame_data.append(go.Scatter(
-                x=[-4, 4], y=[4, -4],
-                mode="lines",
-                line=dict(color="red", width=2, dash="dash"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-4, 4],
+                    y=[-4, 4],
+                    mode="lines",
+                    line=dict(color="red", width=2),
+                    name="Event horizon",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[-4, 4],
+                    y=[4, -4],
+                    mode="lines",
+                    line=dict(color="red", width=2, dash="dash"),
+                    showlegend=False,
+                )
+            )
 
             # Infalling observer worldline
             # Start outside, cross horizon, hit singularity
@@ -1222,20 +1405,26 @@ def _(go, np):
             y_obs = y_obs[valid]
 
             if len(x_obs) > 0:
-                frame_data.append(go.Scatter(
-                    x=x_obs, y=y_obs,
-                    mode="lines",
-                    line=dict(color="cyan", width=3),
-                    name="Falling observer",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=x_obs,
+                        y=y_obs,
+                        mode="lines",
+                        line=dict(color="cyan", width=3),
+                        name="Falling observer",
+                    )
+                )
 
                 # Current position
-                frame_data.append(go.Scatter(
-                    x=[x_obs[-1]], y=[y_obs[-1]],
-                    mode="markers",
-                    marker=dict(size=12, color="cyan", symbol="star"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x_obs[-1]],
+                        y=[y_obs[-1]],
+                        mode="markers",
+                        marker=dict(size=12, color="cyan", symbol="star"),
+                        showlegend=False,
+                    )
+                )
 
                 # Light cone at current position
                 cone_size = 0.5
@@ -1243,48 +1432,61 @@ def _(go, np):
 
                 # Inside horizon, light cone tilts toward singularity
                 if cx < cy:  # Inside
-                    frame_data.append(go.Scatter(
-                        x=[cx - cone_size, cx, cx + cone_size],
-                        y=[cy + cone_size, cy, cy + cone_size],
-                        mode="lines",
-                        fill="toself",
-                        fillcolor="rgba(255, 100, 100, 0.4)",
-                        line=dict(color="red", width=2),
-                        name="Light cone (tilted!)",
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[cx - cone_size, cx, cx + cone_size],
+                            y=[cy + cone_size, cy, cy + cone_size],
+                            mode="lines",
+                            fill="toself",
+                            fillcolor="rgba(255, 100, 100, 0.4)",
+                            line=dict(color="red", width=2),
+                            name="Light cone (tilted!)",
+                        )
+                    )
                 else:  # Outside
-                    frame_data.append(go.Scatter(
-                        x=[cx - cone_size, cx, cx + cone_size],
-                        y=[cy + cone_size, cy, cy + cone_size],
-                        mode="lines",
-                        fill="toself",
-                        fillcolor="rgba(255, 255, 100, 0.4)",
-                        line=dict(color="yellow", width=2),
-                        name="Light cone",
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[cx - cone_size, cx, cx + cone_size],
+                            y=[cy + cone_size, cy, cy + cone_size],
+                            mode="lines",
+                            fill="toself",
+                            fillcolor="rgba(255, 255, 100, 0.4)",
+                            line=dict(color="yellow", width=2),
+                            name="Light cone",
+                        )
+                    )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[2.5], y=[-2],
-                mode="text",
-                text=["OUTSIDE"],
-                textfont=dict(size=14, color="cyan"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[0], y=[3],
-                mode="text",
-                text=["INSIDE"],
-                textfont=dict(size=14, color="red"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[0], y=[5],
-                mode="text",
-                text=["Singularity: inevitable future"],
-                textfont=dict(size=11, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[2.5],
+                    y=[-2],
+                    mode="text",
+                    text=["OUTSIDE"],
+                    textfont=dict(size=14, color="cyan"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[3],
+                    mode="text",
+                    text=["INSIDE"],
+                    textfont=dict(size=14, color="red"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[5],
+                    mode="text",
+                    text=["Singularity: inevitable future"],
+                    textfont=dict(size=11, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Status
             if len(x_obs) > 0 and x_obs[-1] < y_obs[-1]:
@@ -1294,13 +1496,16 @@ def _(go, np):
                 status = "Outside: can still escape"
                 status_color = "cyan"
 
-            frame_data.append(go.Scatter(
-                x=[0], y=[-3.5],
-                mode="text",
-                text=[status],
-                textfont=dict(size=12, color=status_color),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[-3.5],
+                    mode="text",
+                    text=[status],
+                    textfont=dict(size=12, color=status_color),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -1311,10 +1516,19 @@ def _(go, np):
                     text="<b>Kruskal Diagram: Inside the Black Hole</b><br><sub>Once inside, the singularity is your inevitable future</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(range=[-4.5, 4.5], title="Space", showgrid=True,
-                          gridcolor="rgba(100,100,100,0.2)"),
-                yaxis=dict(range=[-4, 6], title="Time", showgrid=True,
-                          gridcolor="rgba(100,100,100,0.2)", scaleanchor="x"),
+                xaxis=dict(
+                    range=[-4.5, 4.5],
+                    title="Space",
+                    showgrid=True,
+                    gridcolor="rgba(100,100,100,0.2)",
+                ),
+                yaxis=dict(
+                    range=[-4, 6],
+                    title="Time",
+                    showgrid=True,
+                    gridcolor="rgba(100,100,100,0.2)",
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(x=0.65, y=0.3),
                 plot_bgcolor="rgba(0, 0, 20, 1)",
@@ -1325,14 +1539,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1421,9 +1649,6 @@ def _(go, np):
 
         # Event horizon radius (outer)
         r_plus = M + np.sqrt(M**2 - a**2)
-        # Ergosphere radius at equator
-        r_ergo_eq = 2 * M
-
         fig = go.Figure()
 
         # Ergosphere (oblate spheroid)
@@ -1432,43 +1657,53 @@ def _(go, np):
         U, V = np.meshgrid(u, v)
 
         # Ergosphere boundary: r = M + sqrt(M^2 - a^2 cos^2(theta))
-        r_ergo = M + np.sqrt(M**2 - a**2 * np.cos(V)**2)
+        r_ergo = M + np.sqrt(M**2 - a**2 * np.cos(V) ** 2)
 
         X_ergo = r_ergo * np.sin(V) * np.cos(U)
         Y_ergo = r_ergo * np.sin(V) * np.sin(U)
         Z_ergo = r_ergo * np.cos(V)
 
-        fig.add_trace(go.Surface(
-            x=X_ergo, y=Y_ergo, z=Z_ergo,
-            colorscale=[[0, 'rgba(255,100,100,0.3)'], [1, 'rgba(255,100,100,0.3)']],
-            showscale=False,
-            opacity=0.3,
-            name="Ergosphere",
-        ))
+        fig.add_trace(
+            go.Surface(
+                x=X_ergo,
+                y=Y_ergo,
+                z=Z_ergo,
+                colorscale=[[0, "rgba(255,100,100,0.3)"], [1, "rgba(255,100,100,0.3)"]],
+                showscale=False,
+                opacity=0.3,
+                name="Ergosphere",
+            )
+        )
 
         # Event horizon (smaller sphere/oblate)
         X_eh = r_plus * np.sin(V) * np.cos(U)
         Y_eh = r_plus * np.sin(V) * np.sin(U)
         Z_eh = r_plus * np.cos(V)
 
-        fig.add_trace(go.Surface(
-            x=X_eh, y=Y_eh, z=Z_eh,
-            colorscale=[[0, 'black'], [1, 'darkgray']],
-            showscale=False,
-            opacity=1.0,
-            name="Event horizon",
-        ))
+        fig.add_trace(
+            go.Surface(
+                x=X_eh,
+                y=Y_eh,
+                z=Z_eh,
+                colorscale=[[0, "black"], [1, "darkgray"]],
+                showscale=False,
+                opacity=1.0,
+                name="Event horizon",
+            )
+        )
 
         # Ring singularity (at equator, radius a)
         theta_ring = np.linspace(0, 2 * np.pi, 100)
-        fig.add_trace(go.Scatter3d(
-            x=a * np.cos(theta_ring),
-            y=a * np.sin(theta_ring),
-            z=np.zeros(100),
-            mode="lines",
-            line=dict(color="white", width=6),
-            name="Ring singularity",
-        ))
+        fig.add_trace(
+            go.Scatter3d(
+                x=a * np.cos(theta_ring),
+                y=a * np.sin(theta_ring),
+                z=np.zeros(100),
+                mode="lines",
+                line=dict(color="white", width=6),
+                name="Ring singularity",
+            )
+        )
 
         # Rotation direction arrows
         for z_pos in [0.5, -0.5]:
@@ -1480,24 +1715,34 @@ def _(go, np):
                 dx = -0.3 * np.sin(theta_arr)
                 dy = 0.3 * np.cos(theta_arr)
 
-                fig.add_trace(go.Cone(
-                    x=[x_arr], y=[y_arr], z=[z_pos],
-                    u=[dx], v=[dy], w=[0],
-                    colorscale=[[0, 'cyan'], [1, 'cyan']],
-                    showscale=False,
-                    sizemode="absolute",
-                    sizeref=0.15,
-                    name="Rotation" if theta_arr == 0 and z_pos == 0.5 else None,
-                    showlegend=bool(theta_arr == 0 and z_pos == 0.5),
-                ))
+                fig.add_trace(
+                    go.Cone(
+                        x=[x_arr],
+                        y=[y_arr],
+                        z=[z_pos],
+                        u=[dx],
+                        v=[dy],
+                        w=[0],
+                        colorscale=[[0, "cyan"], [1, "cyan"]],
+                        showscale=False,
+                        sizemode="absolute",
+                        sizeref=0.15,
+                        name="Rotation" if theta_arr == 0 and z_pos == 0.5 else None,
+                        showlegend=bool(theta_arr == 0 and z_pos == 0.5),
+                    )
+                )
 
         # Spin axis
-        fig.add_trace(go.Scatter3d(
-            x=[0, 0], y=[0, 0], z=[-2.5, 2.5],
-            mode="lines",
-            line=dict(color="yellow", width=3, dash="dash"),
-            name="Spin axis",
-        ))
+        fig.add_trace(
+            go.Scatter3d(
+                x=[0, 0],
+                y=[0, 0],
+                z=[-2.5, 2.5],
+                mode="lines",
+                line=dict(color="yellow", width=3, dash="dash"),
+                name="Spin axis",
+            )
+        )
 
         fig.update_layout(
             title=dict(
@@ -1616,15 +1861,17 @@ def _(go, np):
             r_current = r_s * shrink_factor
 
             theta = np.linspace(0, 2 * np.pi, 100)
-            frame_data.append(go.Scatter(
-                x=r_current * np.cos(theta),
-                y=r_current * np.sin(theta),
-                mode="lines",
-                fill="toself",
-                fillcolor="black",
-                line=dict(color="red", width=2),
-                name="Black hole",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=r_current * np.cos(theta),
+                    y=r_current * np.sin(theta),
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="black",
+                    line=dict(color="red", width=2),
+                    name="Black hole",
+                )
+            )
 
             # Virtual particle pairs appearing and one escaping
             n_pairs = 5
@@ -1644,91 +1891,113 @@ def _(go, np):
                     # Pair appears
                     separation = cycle / 0.3 * 0.15
                     # Particle (escaping)
-                    frame_data.append(go.Scatter(
-                        x=[x_center + separation * np.cos(angle)],
-                        y=[y_center + separation * np.sin(angle)],
-                        mode="markers",
-                        marker=dict(size=8, color="cyan"),
-                        showlegend=(i == 0 and cycle > 0.1),
-                        name="Escaping particle" if i == 0 else None,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[x_center + separation * np.cos(angle)],
+                            y=[y_center + separation * np.sin(angle)],
+                            mode="markers",
+                            marker=dict(size=8, color="cyan"),
+                            showlegend=(i == 0 and cycle > 0.1),
+                            name="Escaping particle" if i == 0 else None,
+                        )
+                    )
                     # Antiparticle (falling in)
-                    frame_data.append(go.Scatter(
-                        x=[x_center - separation * np.cos(angle)],
-                        y=[y_center - separation * np.sin(angle)],
-                        mode="markers",
-                        marker=dict(size=8, color="red"),
-                        showlegend=(i == 0 and cycle > 0.1),
-                        name="Falling antiparticle" if i == 0 else None,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[x_center - separation * np.cos(angle)],
+                            y=[y_center - separation * np.sin(angle)],
+                            mode="markers",
+                            marker=dict(size=8, color="red"),
+                            showlegend=(i == 0 and cycle > 0.1),
+                            name="Falling antiparticle" if i == 0 else None,
+                        )
+                    )
                 elif cycle < 0.8:
                     # Separation phase
                     progress = (cycle - 0.3) / 0.5
                     # Escaping particle moves out
                     r_escape = r_pair + progress * 1.5
-                    frame_data.append(go.Scatter(
-                        x=[r_escape * np.cos(angle)],
-                        y=[r_escape * np.sin(angle)],
-                        mode="markers",
-                        marker=dict(size=8, color="cyan"),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[r_escape * np.cos(angle)],
+                            y=[r_escape * np.sin(angle)],
+                            mode="markers",
+                            marker=dict(size=8, color="cyan"),
+                            showlegend=False,
+                        )
+                    )
                     # Falling particle moves in
                     r_fall = r_pair - progress * (r_pair - r_current * 0.5)
                     if r_fall > r_current * 0.3:
-                        frame_data.append(go.Scatter(
-                            x=[r_fall * np.cos(angle)],
-                            y=[r_fall * np.sin(angle)],
-                            mode="markers",
-                            marker=dict(size=8, color="red"),
-                            showlegend=False,
-                        ))
+                        frame_data.append(
+                            go.Scatter(
+                                x=[r_fall * np.cos(angle)],
+                                y=[r_fall * np.sin(angle)],
+                                mode="markers",
+                                marker=dict(size=8, color="red"),
+                                showlegend=False,
+                            )
+                        )
 
             # Thermal glow around horizon
             glow_r = np.linspace(r_current, r_current + 0.3, 10)
             for gr in glow_r:
                 alpha_raw = 0.3 * (1 - (gr - r_current) / 0.3) * (0.5 + 0.5 * np.sin(t * 3))
                 alpha = max(0.0, min(1.0, alpha_raw))
-                frame_data.append(go.Scatter(
-                    x=gr * np.cos(theta),
-                    y=gr * np.sin(theta),
-                    mode="lines",
-                    line=dict(color=f"rgba(255, 200, 100, {alpha:.2f})", width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=gr * np.cos(theta),
+                        y=gr * np.sin(theta),
+                        mode="lines",
+                        line=dict(color=f"rgba(255, 200, 100, {alpha:.2f})", width=2),
+                        showlegend=False,
+                    )
+                )
 
             # Temperature indicator (increases as BH shrinks)
             T_relative = 1 / shrink_factor
-            frame_data.append(go.Scatter(
-                x=[3], y=[1.5],
-                mode="text",
-                text=[f"T ∝ 1/M (hotter as it shrinks!)"],
-                textfont=dict(size=11, color="orange"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[1.5],
+                    mode="text",
+                    text=["T ∝ 1/M (hotter as it shrinks!)"],
+                    textfont=dict(size=11, color="orange"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[3], y=[1.0],
-                mode="text",
-                text=[f"Relative T: {T_relative:.2f}"],
-                textfont=dict(size=12, color="yellow"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[1.0],
+                    mode="text",
+                    text=[f"Relative T: {T_relative:.2f}"],
+                    textfont=dict(size=12, color="yellow"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[3], y=[-1.5],
-                mode="text",
-                text=["Virtual pairs form at horizon"],
-                textfont=dict(size=10, color="white"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[3], y=[-2],
-                mode="text",
-                text=["One escapes, one falls in"],
-                textfont=dict(size=10, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[-1.5],
+                    mode="text",
+                    text=["Virtual pairs form at horizon"],
+                    textfont=dict(size=10, color="white"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[-2],
+                    mode="text",
+                    text=["One escapes, one falls in"],
+                    textfont=dict(size=10, color="white"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -1751,14 +2020,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],

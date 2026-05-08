@@ -9,9 +9,9 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
-    from physics.constants import C, AU, PLANETS
+
+    from physics.constants import AU, PLANETS, C
     from physics_explorations.visualization import (
-        get_plotly_config,
         COLORS,
         DARK_THEME,
         create_play_pause_buttons,
@@ -115,7 +115,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
             # Earth completes ~1 orbit while Jupiter moves ~1/12 of orbit
             earth_angle = 2 * np.pi * i / n_frames
             earth_years = i / n_frames
-            jupiter_angle = 2 * np.pi * (earth_years / PLANETS["Jupiter"].orbital_period_years) + np.pi
+            jupiter_angle = (
+                2 * np.pi * (earth_years / PLANETS["Jupiter"].orbital_period_years) + np.pi
+            )
 
             earth_x = earth_r * np.cos(earth_angle)
             earth_y = earth_r * np.sin(earth_angle)
@@ -124,7 +126,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
             jupiter_y = jupiter_r * np.sin(jupiter_angle)
 
             # Distance between Earth and Jupiter
-            distance_au = np.sqrt((jupiter_x - earth_x)**2 + (jupiter_y - earth_y)**2)
+            distance_au = np.sqrt((jupiter_x - earth_x) ** 2 + (jupiter_y - earth_y) ** 2)
             distance_km = distance_au * AU / 1000
 
             # Light ray from Jupiter to Earth
@@ -133,24 +135,53 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
             frame_data = [
                 # Sun
-                go.Scatter(x=[0], y=[0], mode="markers",
-                          marker=dict(size=20, color=COLORS["gravity"]), name="Sun"),
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=20, color=COLORS["gravity"]),
+                    name="Sun",
+                ),
                 # Earth orbit
-                go.Scatter(x=earth_orbit_x, y=earth_orbit_y, mode="lines",
-                          line=dict(color=COLORS["primary"], width=1, dash="dot"), name="Earth orbit"),
+                go.Scatter(
+                    x=earth_orbit_x,
+                    y=earth_orbit_y,
+                    mode="lines",
+                    line=dict(color=COLORS["primary"], width=1, dash="dot"),
+                    name="Earth orbit",
+                ),
                 # Jupiter orbit
-                go.Scatter(x=jupiter_orbit_x, y=jupiter_orbit_y, mode="lines",
-                          line=dict(color=COLORS["quaternary"], width=1, dash="dot"), name="Jupiter orbit"),
+                go.Scatter(
+                    x=jupiter_orbit_x,
+                    y=jupiter_orbit_y,
+                    mode="lines",
+                    line=dict(color=COLORS["quaternary"], width=1, dash="dot"),
+                    name="Jupiter orbit",
+                ),
                 # Earth
-                go.Scatter(x=[earth_x], y=[earth_y], mode="markers",
-                          marker=dict(size=12, color=COLORS["quantum"]), name="Earth"),
+                go.Scatter(
+                    x=[earth_x],
+                    y=[earth_y],
+                    mode="markers",
+                    marker=dict(size=12, color=COLORS["quantum"]),
+                    name="Earth",
+                ),
                 # Jupiter
-                go.Scatter(x=[jupiter_x], y=[jupiter_y], mode="markers",
-                          marker=dict(size=16, color=COLORS["gravity"]), name="Jupiter"),
+                go.Scatter(
+                    x=[jupiter_x],
+                    y=[jupiter_y],
+                    mode="markers",
+                    marker=dict(size=16, color=COLORS["gravity"]),
+                    name="Jupiter",
+                ),
                 # Light path
-                go.Scatter(x=light_x, y=light_y, mode="lines",
-                          line=dict(color=COLORS["photon"], width=2, dash="dash"),
-                          name=f"Distance: {distance_au:.2f} AU ({distance_km/1e6:.1f}M km)"),
+                go.Scatter(
+                    x=light_x,
+                    y=light_y,
+                    mode="lines",
+                    line=dict(color=COLORS["photon"], width=2, dash="dash"),
+                    name=f"Distance: {distance_au:.2f} AU ({distance_km / 1e6:.1f}M km)",
+                ),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -162,7 +193,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     text="<b>Rømer's Method:</b> Earth-Jupiter Distance Changes<br><sub>Watch how the light travel time varies as Earth orbits</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(scaleanchor="y", range=[-6, 6], showgrid=False, zeroline=False, showticklabels=False),
+                xaxis=dict(
+                    scaleanchor="y",
+                    range=[-6, 6],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                ),
                 yaxis=dict(range=[-6, 6], showgrid=False, zeroline=False, showticklabels=False),
                 showlegend=True,
                 template="plotly_dark",
@@ -277,25 +314,50 @@ def _(go, np):
 
             frame_data = [
                 # Wheel
-                go.Scatter(x=wheel_x, y=wheel_y, mode="lines", fill="toself",
-                          fillcolor="rgba(100,100,100,0.5)", line=dict(color="gray", width=2),
-                          name="Toothed wheel"),
+                go.Scatter(
+                    x=wheel_x,
+                    y=wheel_y,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100,100,100,0.5)",
+                    line=dict(color="gray", width=2),
+                    name="Toothed wheel",
+                ),
                 # Light source
-                go.Scatter(x=[-3], y=[0], mode="markers",
-                          marker=dict(size=15, color="white", line=dict(color="yellow", width=2)),
-                          name="Light source"),
+                go.Scatter(
+                    x=[-3],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=15, color="white", line=dict(color="yellow", width=2)),
+                    name="Light source",
+                ),
                 # Mirror
-                go.Scatter(x=mirror_x, y=mirror_y, mode="lines",
-                          line=dict(color="silver", width=8), name="Mirror (8.6 km away)"),
+                go.Scatter(
+                    x=mirror_x,
+                    y=mirror_y,
+                    mode="lines",
+                    line=dict(color="silver", width=8),
+                    name="Mirror (8.6 km away)",
+                ),
                 # Outgoing light
-                go.Scatter(x=light_out_x, y=light_out_y, mode="lines",
-                          line=dict(color=light_color, width=4), name="Light beam"),
+                go.Scatter(
+                    x=light_out_x,
+                    y=light_out_y,
+                    mode="lines",
+                    line=dict(color=light_color, width=4),
+                    name="Light beam",
+                ),
             ]
 
             if light_ret_x:
                 frame_data.append(
-                    go.Scatter(x=light_ret_x, y=light_ret_y, mode="lines",
-                              line=dict(color="yellow", width=4), name="Returning light")
+                    go.Scatter(
+                        x=light_ret_x,
+                        y=light_ret_y,
+                        mode="lines",
+                        line=dict(color="yellow", width=4),
+                        name="Returning light",
+                    )
                 )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -308,7 +370,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-4, 3], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-1.5, 1.5], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(
+                    range=[-1.5, 1.5],
+                    scaleanchor="x",
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                ),
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
@@ -319,14 +387,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -433,24 +516,30 @@ def _(go, np):
             frame_data = [
                 # E field
                 go.Scatter3d(
-                    x=x, y=np.zeros_like(x), z=E,
+                    x=x,
+                    y=np.zeros_like(x),
+                    z=E,
                     mode="lines",
                     line=dict(color="red", width=4),
-                    name="Electric field (E)"
+                    name="Electric field (E)",
                 ),
                 # B field
                 go.Scatter3d(
-                    x=x, y=B, z=np.zeros_like(x),
+                    x=x,
+                    y=B,
+                    z=np.zeros_like(x),
                     mode="lines",
                     line=dict(color="blue", width=4),
-                    name="Magnetic field (B)"
+                    name="Magnetic field (B)",
                 ),
                 # Propagation axis
                 go.Scatter3d(
-                    x=[0, 4*np.pi], y=[0, 0], z=[0, 0],
+                    x=[0, 4 * np.pi],
+                    y=[0, 0],
+                    z=[0, 0],
                     mode="lines",
                     line=dict(color="white", width=2, dash="dash"),
-                    name="Direction of propagation"
+                    name="Direction of propagation",
                 ),
             ]
 
@@ -478,14 +567,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -551,19 +655,25 @@ def _(go, np):
     history_fig = go.Figure()
 
     # Measurements
-    history_fig.add_trace(go.Scatter(
-        x=years,
-        y=values,
-        mode="markers+text",
-        text=names,
-        textposition="top center",
-        marker=dict(size=12, color="steelblue"),
-        name="Measurements"
-    ))
+    history_fig.add_trace(
+        go.Scatter(
+            x=years,
+            y=values,
+            mode="markers+text",
+            text=names,
+            textposition="top center",
+            marker=dict(size=12, color="steelblue"),
+            name="Measurements",
+        )
+    )
 
     # Modern value line
-    history_fig.add_hline(y=modern_c, line_dash="dash", line_color="red",
-                         annotation_text=f"Modern value: {modern_c} km/s")
+    history_fig.add_hline(
+        y=modern_c,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=f"Modern value: {modern_c} km/s",
+    )
 
     history_fig.update_layout(
         title=dict(

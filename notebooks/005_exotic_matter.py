@@ -10,9 +10,9 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+
     from physics.constants import C, G
     from physics_explorations.visualization import (
-        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -143,44 +143,50 @@ def _(go, np):
             (2011, "Casimir\nRepulsion", "Repulsive Casimir force measured"),
         ]
 
-        years = [e[0] for e in events]
-        labels = [e[1] for e in events]
-        descriptions = [e[2] for e in events]
-
         fig = go.Figure()
 
         # Timeline
-        fig.add_trace(go.Scatter(
-            x=[1930, 2020], y=[0, 0],
-            mode="lines",
-            line=dict(color="white", width=2),
-            showlegend=False,
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[1930, 2020],
+                y=[0, 0],
+                mode="lines",
+                line=dict(color="white", width=2),
+                showlegend=False,
+            )
+        )
 
         # Events
         colors = ["cyan", "yellow", "magenta", "green", "orange", "red", "purple", "cyan", "yellow"]
-        for i, (year, label, desc) in enumerate(events):
+        for i, (year, label, _desc) in enumerate(events):
             y_offset = 0.5 if i % 2 == 0 else -0.5
 
             # Vertical line
-            fig.add_trace(go.Scatter(
-                x=[year, year], y=[0, y_offset * 0.8],
-                mode="lines",
-                line=dict(color=colors[i], width=2),
-                showlegend=False,
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[year, year],
+                    y=[0, y_offset * 0.8],
+                    mode="lines",
+                    line=dict(color=colors[i], width=2),
+                    showlegend=False,
+                )
+            )
 
             # Event marker
-            fig.add_trace(go.Scatter(
-                x=[year], y=[0],
-                mode="markers",
-                marker=dict(size=12, color=colors[i]),
-                showlegend=False,
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[year],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=12, color=colors[i]),
+                    showlegend=False,
+                )
+            )
 
             # Label
             fig.add_annotation(
-                x=year, y=y_offset,
+                x=year,
+                y=y_offset,
                 text=f"<b>{label}</b><br><sub>{year}</sub>",
                 showarrow=False,
                 font=dict(size=10, color=colors[i]),
@@ -192,8 +198,13 @@ def _(go, np):
                 text="<b>Timeline of Exotic Matter Research</b><br><sub>From mathematical curiosity to experimental physics</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Year", range=[1930, 2020], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)", dtick=10),
+            xaxis=dict(
+                title="Year",
+                range=[1930, 2020],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+                dtick=10,
+            ),
             yaxis=dict(range=[-1, 1], showgrid=False, showticklabels=False, zeroline=False),
             plot_bgcolor="rgba(0,0,30,0.95)",
             height=400,
@@ -314,65 +325,80 @@ def _(go, np):
         # Create ρ-p diagram
         rho = np.linspace(-2, 3, 100)
         p = np.linspace(-2, 3, 100)
-        Rho, P = np.meshgrid(rho, p)
+        _Rho, _P = np.meshgrid(rho, p)
 
         fig = go.Figure()
 
         # WEC region: ρ ≥ 0
-        fig.add_trace(go.Scatter(
-            x=[0, 0, 3, 3, 0], y=[-2, 3, 3, -2, -2],
-            fill="toself",
-            fillcolor="rgba(0, 255, 255, 0.15)",
-            line=dict(color="cyan", width=2),
-            name="WEC satisfied (ρ ≥ 0)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[0, 0, 3, 3, 0],
+                y=[-2, 3, 3, -2, -2],
+                fill="toself",
+                fillcolor="rgba(0, 255, 255, 0.15)",
+                line=dict(color="cyan", width=2),
+                name="WEC satisfied (ρ ≥ 0)",
+            )
+        )
 
         # NEC region: ρ + p ≥ 0 (line is ρ = -p)
-        fig.add_trace(go.Scatter(
-            x=[-2, 3], y=[2, -3],
-            mode="lines",
-            line=dict(color="yellow", width=3),
-            name="NEC boundary (ρ + p = 0)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[-2, 3],
+                y=[2, -3],
+                mode="lines",
+                line=dict(color="yellow", width=3),
+                name="NEC boundary (ρ + p = 0)",
+            )
+        )
 
         # NEC satisfied region
         nec_x = [3, -2, 3]
         nec_y = [-3, 2, 3]
-        fig.add_trace(go.Scatter(
-            x=nec_x, y=nec_y,
-            fill="toself",
-            fillcolor="rgba(255, 255, 0, 0.1)",
-            line=dict(width=0),
-            name="NEC satisfied region",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=nec_x,
+                y=nec_y,
+                fill="toself",
+                fillcolor="rgba(255, 255, 0, 0.1)",
+                line=dict(width=0),
+                name="NEC satisfied region",
+            )
+        )
 
         # SEC region: ρ + 3p ≥ 0 (line is ρ = -3p)
-        fig.add_trace(go.Scatter(
-            x=[-2, 3], y=[2/3, -1],
-            mode="lines",
-            line=dict(color="magenta", width=2, dash="dash"),
-            name="SEC boundary (ρ + 3p = 0)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[-2, 3],
+                y=[2 / 3, -1],
+                mode="lines",
+                line=dict(color="magenta", width=2, dash="dash"),
+                name="SEC boundary (ρ + 3p = 0)",
+            )
+        )
 
         # Example points
         examples = [
             (1, 0, "Normal matter", "green"),
-            (1, 1/3, "Radiation", "yellow"),
+            (1, 1 / 3, "Radiation", "yellow"),
             (0.5, -0.5, "Dark energy (w=-1)", "orange"),
             (-0.5, 0.5, "Wormhole throat", "red"),
             (-1, -0.3, "Warp bubble wall", "red"),
         ]
 
         for rho_val, p_val, label, color in examples:
-            fig.add_trace(go.Scatter(
-                x=[rho_val], y=[p_val],
-                mode="markers+text",
-                marker=dict(size=12, color=color),
-                text=[label],
-                textposition="top right",
-                textfont=dict(size=10, color=color),
-                showlegend=False,
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[rho_val],
+                    y=[p_val],
+                    mode="markers+text",
+                    marker=dict(size=12, color=color),
+                    text=[label],
+                    textposition="top right",
+                    textfont=dict(size=10, color=color),
+                    showlegend=False,
+                )
+            )
 
         # Axes
         fig.add_hline(y=0, line_color="white", line_width=1, opacity=0.5)
@@ -380,7 +406,8 @@ def _(go, np):
 
         # Exotic matter region label
         fig.add_annotation(
-            x=-1, y=-1,
+            x=-1,
+            y=-1,
             text="<b>EXOTIC MATTER</b><br>Violates WEC & NEC",
             font=dict(size=12, color="red"),
             showarrow=False,
@@ -392,19 +419,33 @@ def _(go, np):
                 text="<b>Energy Conditions:</b> What 'Normal' Matter Satisfies<br><sub>Exotic matter lives in the forbidden regions</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Energy density ρ", range=[-2.5, 3.5], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)", zeroline=False),
-            yaxis=dict(title="Pressure p", range=[-2.5, 3.5], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)", zeroline=False),
+            xaxis=dict(
+                title="Energy density ρ",
+                range=[-2.5, 3.5],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+                zeroline=False,
+            ),
+            yaxis=dict(
+                title="Pressure p",
+                range=[-2.5, 3.5],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+                zeroline=False,
+            ),
             showlegend=True,
-            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10, color="white")),
+            legend=dict(
+                yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10, color="white")
+            ),
             plot_bgcolor="rgba(0,0,30,0.95)",
         )
 
         return fig
 
     energy_conditions_fig = create_energy_conditions_visualization()
-    return create_energy_conditions_visualization, mo.ui.plotly(energy_conditions_fig, config=get_plotly_config())
+    return create_energy_conditions_visualization, mo.ui.plotly(
+        energy_conditions_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -476,18 +517,24 @@ def _(go, np):
 
             # Plates
             plate_height = 2
-            frame_data.append(go.Scatter(
-                x=[-1, -1], y=[-plate_height/2, plate_height/2],
-                mode="lines",
-                line=dict(color="silver", width=8),
-                name="Conducting plates",
-            ))
-            frame_data.append(go.Scatter(
-                x=[1, 1], y=[-plate_height/2, plate_height/2],
-                mode="lines",
-                line=dict(color="silver", width=8),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-1, -1],
+                    y=[-plate_height / 2, plate_height / 2],
+                    mode="lines",
+                    line=dict(color="silver", width=8),
+                    name="Conducting plates",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[1, 1],
+                    y=[-plate_height / 2, plate_height / 2],
+                    mode="lines",
+                    line=dict(color="silver", width=8),
+                    showlegend=False,
+                )
+            )
 
             # Vacuum fluctuations outside (all wavelengths)
             for j in range(6):
@@ -499,84 +546,110 @@ def _(go, np):
                 y_offset = (j - 2.5) * 0.35
                 alpha = 0.3 + 0.1 * np.sin(phase)
 
-                frame_data.append(go.Scatter(
-                    x=x_left, y=y_wave + y_offset,
-                    mode="lines",
-                    line=dict(color=f"rgba(100, 200, 255, {alpha})", width=1),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=x_left,
+                        y=y_wave + y_offset,
+                        mode="lines",
+                        line=dict(color=f"rgba(100, 200, 255, {alpha})", width=1),
+                        showlegend=False,
+                    )
+                )
 
                 # Right side
                 x_right = np.linspace(1.2, 4, 100)
                 y_wave_r = 0.15 * np.sin(2 * np.pi * x_right / wavelength + phase)
-                frame_data.append(go.Scatter(
-                    x=x_right, y=y_wave_r + y_offset,
-                    mode="lines",
-                    line=dict(color=f"rgba(100, 200, 255, {alpha})", width=1),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=x_right,
+                        y=y_wave_r + y_offset,
+                        mode="lines",
+                        line=dict(color=f"rgba(100, 200, 255, {alpha})", width=1),
+                        showlegend=False,
+                    )
+                )
 
             # Inside - only modes that fit (fewer!)
             for j in range(2):  # Only 2 modes fit
                 x_inside = np.linspace(-0.9, 0.9, 100)
                 n_mode = j + 1
-                wavelength_inside = 2 * 1.8 / n_mode  # Standing wave condition
                 phase = t
                 y_wave = 0.2 * np.sin(n_mode * np.pi * (x_inside + 0.9) / 1.8) * np.cos(phase)
                 y_offset = (j - 0.5) * 0.6
 
-                frame_data.append(go.Scatter(
-                    x=x_inside, y=y_wave + y_offset,
-                    mode="lines",
-                    line=dict(color="rgba(255, 200, 100, 0.6)", width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=x_inside,
+                        y=y_wave + y_offset,
+                        mode="lines",
+                        line=dict(color="rgba(255, 200, 100, 0.6)", width=2),
+                        showlegend=False,
+                    )
+                )
 
             # Energy density indicators
             # Outside: higher (normal vacuum)
-            frame_data.append(go.Scatter(
-                x=[-3], y=[1.3],
-                mode="text",
-                text=["ρ = 0<br>(vacuum reference)"],
-                textfont=dict(size=11, color="cyan"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-3],
+                    y=[1.3],
+                    mode="text",
+                    text=["ρ = 0<br>(vacuum reference)"],
+                    textfont=dict(size=11, color="cyan"),
+                    showlegend=False,
+                )
+            )
 
             # Inside: lower (negative!)
-            frame_data.append(go.Scatter(
-                x=[0], y=[1.3],
-                mode="text",
-                text=["<b>ρ < 0</b><br>(negative energy!)"],
-                textfont=dict(size=11, color="orange"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[1.3],
+                    mode="text",
+                    text=["<b>ρ < 0</b><br>(negative energy!)"],
+                    textfont=dict(size=11, color="orange"),
+                    showlegend=False,
+                )
+            )
 
             # Arrows showing attraction
             arrow_phase = 0.1 * np.sin(2 * t)
-            frame_data.append(go.Scatter(
-                x=[-1.5 + arrow_phase, -1.1], y=[0, 0],
-                mode="lines",
-                line=dict(color="red", width=3),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[1.5 - arrow_phase, 1.1], y=[0, 0],
-                mode="lines",
-                line=dict(color="red", width=3),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[-1.5 + arrow_phase], y=[0],
-                mode="markers",
-                marker=dict(size=10, color="red", symbol="triangle-right"),
-                name="Casimir force",
-            ))
-            frame_data.append(go.Scatter(
-                x=[1.5 - arrow_phase], y=[0],
-                mode="markers",
-                marker=dict(size=10, color="red", symbol="triangle-left"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-1.5 + arrow_phase, -1.1],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="red", width=3),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[1.5 - arrow_phase, 1.1],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="red", width=3),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[-1.5 + arrow_phase],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=10, color="red", symbol="triangle-right"),
+                    name="Casimir force",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[1.5 - arrow_phase],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=10, color="red", symbol="triangle-left"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -600,14 +673,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -695,9 +783,9 @@ def _(go, np):
                 p = progress / 0.33
                 tau1 = 0.2 + 0.3 * (1 - p)  # Width decreases
                 amplitude1 = 1.0 / (tau1**2)  # Amplitude increases to compensate
-                rho1_neg = -amplitude1 * np.exp(-t**2 / (2 * tau1**2))
+                rho1_neg = -amplitude1 * np.exp(-(t**2) / (2 * tau1**2))
                 # Must be followed by positive (interest!)
-                rho1_pos = amplitude1 * 1.2 * np.exp(-(t - 1.5)**2 / (2 * (tau1 * 1.5)**2))
+                rho1_pos = amplitude1 * 1.2 * np.exp(-((t - 1.5) ** 2) / (2 * (tau1 * 1.5) ** 2))
                 rho1 = rho1_neg + rho1_pos
                 title_extra = "Brief & intense (must repay quickly)"
                 color = "magenta"
@@ -706,8 +794,8 @@ def _(go, np):
                 p = (progress - 0.33) / 0.33
                 tau2 = 0.5 + 0.5 * p
                 amplitude2 = 0.3 / (tau2**2)
-                rho2_neg = -amplitude2 * np.exp(-t**2 / (2 * tau2**2))
-                rho2_pos = amplitude2 * 1.1 * np.exp(-(t - 2)**2 / (2 * tau2**2))
+                rho2_neg = -amplitude2 * np.exp(-(t**2) / (2 * tau2**2))
+                rho2_pos = amplitude2 * 1.1 * np.exp(-((t - 2) ** 2) / (2 * tau2**2))
                 rho1 = rho2_neg + rho2_pos
                 title_extra = "Extended & weak (less interest needed)"
                 color = "cyan"
@@ -716,57 +804,74 @@ def _(go, np):
                 p = (progress - 0.66) / 0.34
                 tau3 = 0.3
                 amplitude3 = 0.5 + 0.5 * np.sin(4 * np.pi * p)
-                rho1 = -amplitude3 * np.exp(-t**2 / (2 * tau3**2))
-                rho1 += amplitude3 * 1.3 * np.exp(-(t - 1.5)**2 / (2 * (tau3 * 1.2)**2))
+                rho1 = -amplitude3 * np.exp(-(t**2) / (2 * tau3**2))
+                rho1 += amplitude3 * 1.3 * np.exp(-((t - 1.5) ** 2) / (2 * (tau3 * 1.2) ** 2))
                 title_extra = "Constraint: |ρ| × τ⁴ ≤ ℏ/c"
                 color = "yellow"
 
             # Energy density plot
-            frame_data.append(go.Scatter(
-                x=t, y=rho1,
-                mode="lines",
-                fill="tozeroy",
-                line=dict(color=color, width=2),
-                fillcolor=f"rgba(255, 255, 0, 0.2)" if color == "yellow"
-                         else ("rgba(255, 0, 255, 0.2)" if color == "magenta"
-                               else "rgba(0, 255, 255, 0.2)"),
-                name="Energy density ρ(t)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=t,
+                    y=rho1,
+                    mode="lines",
+                    fill="tozeroy",
+                    line=dict(color=color, width=2),
+                    fillcolor="rgba(255, 255, 0, 0.2)"
+                    if color == "yellow"
+                    else (
+                        "rgba(255, 0, 255, 0.2)" if color == "magenta" else "rgba(0, 255, 255, 0.2)"
+                    ),
+                    name="Energy density ρ(t)",
+                )
+            )
 
             # Zero line
-            frame_data.append(go.Scatter(
-                x=[-2, 4], y=[0, 0],
-                mode="lines",
-                line=dict(color="white", width=1),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-2, 4],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="white", width=1),
+                    showlegend=False,
+                )
+            )
 
             # Negative region label
-            frame_data.append(go.Scatter(
-                x=[0], y=[min(rho1) * 0.5],
-                mode="text",
-                text=["BORROW"],
-                textfont=dict(size=12, color="red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[min(rho1) * 0.5],
+                    mode="text",
+                    text=["BORROW"],
+                    textfont=dict(size=12, color="red"),
+                    showlegend=False,
+                )
+            )
 
             # Positive region label
-            frame_data.append(go.Scatter(
-                x=[1.5], y=[max(rho1) * 0.7],
-                mode="text",
-                text=["REPAY\n(with interest)"],
-                textfont=dict(size=10, color="green"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[1.5],
+                    y=[max(rho1) * 0.7],
+                    mode="text",
+                    text=["REPAY\n(with interest)"],
+                    textfont=dict(size=10, color="green"),
+                    showlegend=False,
+                )
+            )
 
             # Title with current state
-            frame_data.append(go.Scatter(
-                x=[1], y=[2],
-                mode="text",
-                text=[f"<b>{title_extra}</b>"],
-                textfont=dict(size=12, color=color),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[1],
+                    y=[2],
+                    mode="text",
+                    text=[f"<b>{title_extra}</b>"],
+                    textfont=dict(size=12, color=color),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -777,10 +882,18 @@ def _(go, np):
                     text="<b>Quantum Inequalities:</b> Borrow Negative Energy, Pay It Back<br><sub>Nature enforces energy conservation with 'interest'</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Time", range=[-2.5, 4.5], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)"),
-                yaxis=dict(title="Energy density ρ", range=[-3, 3], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)"),
+                xaxis=dict(
+                    title="Time",
+                    range=[-2.5, 4.5],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
+                yaxis=dict(
+                    title="Energy density ρ",
+                    range=[-3, 3],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -792,14 +905,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -811,7 +939,9 @@ def _(go, np):
         return fig
 
     quantum_inequality_fig = create_quantum_inequality_animation()
-    return create_quantum_inequality_animation, mo.ui.plotly(quantum_inequality_fig, config=get_plotly_config())
+    return create_quantum_inequality_animation, mo.ui.plotly(
+        quantum_inequality_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -910,22 +1040,28 @@ def _(go, np):
 
             # Phase space plot (left side concept)
             # Normal vacuum circle
-            frame_data.append(go.Scatter(
-                x=x_vac - 5, y=y_vac,
-                mode="lines",
-                line=dict(color="cyan", width=2, dash="dash"),
-                name="Normal vacuum",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=x_vac - 5,
+                    y=y_vac,
+                    mode="lines",
+                    line=dict(color="cyan", width=2, dash="dash"),
+                    name="Normal vacuum",
+                )
+            )
 
             # Squeezed ellipse
-            frame_data.append(go.Scatter(
-                x=x_sq_rot - 5, y=y_sq_rot,
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(255, 200, 0, 0.3)",
-                line=dict(color="yellow", width=2),
-                name="Squeezed vacuum",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=x_sq_rot - 5,
+                    y=y_sq_rot,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(255, 200, 0, 0.3)",
+                    line=dict(color="yellow", width=2),
+                    name="Squeezed vacuum",
+                )
+            )
 
             # Current field value (point on ellipse)
             phase_angle = t
@@ -934,67 +1070,87 @@ def _(go, np):
             x_point_rot = x_point * np.cos(angle) - y_point * np.sin(angle)
             y_point_rot = x_point * np.sin(angle) + y_point * np.cos(angle)
 
-            frame_data.append(go.Scatter(
-                x=[x_point_rot - 5], y=[y_point_rot],
-                mode="markers",
-                marker=dict(size=10, color="white"),
-                name="Field state",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[x_point_rot - 5],
+                    y=[y_point_rot],
+                    mode="markers",
+                    marker=dict(size=10, color="white"),
+                    name="Field state",
+                )
+            )
 
             # Energy density plot (right side)
-            frame_data.append(go.Scatter(
-                x=time_array, y=rho_normalized,
-                mode="lines",
-                line=dict(color="magenta", width=2),
-                fill="tozeroy",
-                fillcolor="rgba(255, 0, 255, 0.2)",
-                name="Energy density ρ(t)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=time_array,
+                    y=rho_normalized,
+                    mode="lines",
+                    line=dict(color="magenta", width=2),
+                    fill="tozeroy",
+                    fillcolor="rgba(255, 0, 255, 0.2)",
+                    name="Energy density ρ(t)",
+                )
+            )
 
             # Zero line
-            frame_data.append(go.Scatter(
-                x=[0, 4 * np.pi], y=[0, 0],
-                mode="lines",
-                line=dict(color="white", width=1),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 4 * np.pi],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="white", width=1),
+                    showlegend=False,
+                )
+            )
 
             # Current time marker
-            frame_data.append(go.Scatter(
-                x=[t], y=[current_rho],
-                mode="markers",
-                marker=dict(size=12, color="white", symbol="star"),
-                name=f"ρ = {current_rho:.2f}",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[t],
+                    y=[current_rho],
+                    mode="markers",
+                    marker=dict(size=12, color="white", symbol="star"),
+                    name=f"ρ = {current_rho:.2f}",
+                )
+            )
 
             # Negative region shading
             neg_times = time_array[rho_normalized < 0]
             if len(neg_times) > 0:
-                frame_data.append(go.Scatter(
-                    x=[neg_times[0], neg_times[-1]],
-                    y=[-0.1, -0.1],
-                    mode="text",
-                    text=["← NEGATIVE →", ""],
-                    textfont=dict(size=10, color="red"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[neg_times[0], neg_times[-1]],
+                        y=[-0.1, -0.1],
+                        mode="text",
+                        text=["← NEGATIVE →", ""],
+                        textfont=dict(size=10, color="red"),
+                        showlegend=False,
+                    )
+                )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[-5], y=[1.5],
-                mode="text",
-                text=["<b>Phase Space</b>"],
-                textfont=dict(size=11, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-5],
+                    y=[1.5],
+                    mode="text",
+                    text=["<b>Phase Space</b>"],
+                    textfont=dict(size=11, color="white"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[6], y=[3],
-                mode="text",
-                text=["<b>Energy Density</b>"],
-                textfont=dict(size=11, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[6],
+                    y=[3],
+                    mode="text",
+                    text=["<b>Energy Density</b>"],
+                    textfont=dict(size=11, color="white"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -1006,7 +1162,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-7, 14], showgrid=False, showticklabels=False, zeroline=False),
-                yaxis=dict(range=[-2, 4], showgrid=False, showticklabels=False, zeroline=False, scaleanchor="x"),
+                yaxis=dict(
+                    range=[-2, 4],
+                    showgrid=False,
+                    showticklabels=False,
+                    zeroline=False,
+                    scaleanchor="x",
+                ),
                 template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
                 plot_bgcolor=COLORS["background"],
@@ -1032,7 +1194,9 @@ def _(go, np):
         return fig
 
     squeezed_vacuum_fig = create_squeezed_vacuum_animation()
-    return create_squeezed_vacuum_animation, mo.ui.plotly(squeezed_vacuum_fig, config=get_plotly_config())
+    return create_squeezed_vacuum_animation, mo.ui.plotly(
+        squeezed_vacuum_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -1105,12 +1269,12 @@ def _(go, np):
 
         # Energy densities in J/m³ (approximate)
         values = [
-            1e-3,      # Casimir at 100nm
-            1e9,       # Casimir at 1nm (scales as 1/a^4)
-            1e2,       # Squeezed vacuum (lab scale)
-            1e47,      # Optimized Alcubierre
-            1e65,      # Original Alcubierre
-            1e55,      # Wormhole
+            1e-3,  # Casimir at 100nm
+            1e9,  # Casimir at 1nm (scales as 1/a^4)
+            1e2,  # Squeezed vacuum (lab scale)
+            1e47,  # Optimized Alcubierre
+            1e65,  # Original Alcubierre
+            1e55,  # Wormhole
         ]
 
         colors = ["cyan", "cyan", "yellow", "red", "red", "red"]
@@ -1118,26 +1282,34 @@ def _(go, np):
         fig = go.Figure()
 
         # Bar chart
-        fig.add_trace(go.Bar(
-            x=categories,
-            y=np.log10(values),
-            marker_color=colors,
-            text=[f"10^{int(np.log10(v))}" for v in values],
-            textposition="outside",
-            textfont=dict(size=12, color="white"),
-        ))
+        fig.add_trace(
+            go.Bar(
+                x=categories,
+                y=np.log10(values),
+                marker_color=colors,
+                text=[f"10^{int(np.log10(v))}" for v in values],
+                textposition="outside",
+                textfont=dict(size=12, color="white"),
+            )
+        )
 
         # Achievable line
-        fig.add_hline(y=10, line_dash="dash", line_color="green",
-                     annotation_text="Current achievable")
+        fig.add_hline(
+            y=10, line_dash="dash", line_color="green", annotation_text="Current achievable"
+        )
 
         # Need line
-        fig.add_hline(y=50, line_dash="dash", line_color="red",
-                     annotation_text="Minimum for spacetime engineering")
+        fig.add_hline(
+            y=50,
+            line_dash="dash",
+            line_color="red",
+            annotation_text="Minimum for spacetime engineering",
+        )
 
         # Gap annotation
         fig.add_annotation(
-            x=2.5, y=30,
+            x=2.5,
+            y=30,
             text="<b>THE GAP</b><br>~40 orders of magnitude",
             font=dict(size=14, color="orange"),
             showarrow=False,
@@ -1158,7 +1330,9 @@ def _(go, np):
         return fig
 
     research_fig = create_research_directions_visualization()
-    return create_research_directions_visualization, mo.ui.plotly(research_fig, config=get_plotly_config())
+    return create_research_directions_visualization, mo.ui.plotly(
+        research_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -1250,7 +1424,7 @@ def _(go, np):
             c_sound = 1.0
 
             # Horizon is where v_flow = c_sound
-            horizon_x = np.sqrt((1.5 / c_sound - 1) / 0.3) if 1.5 > c_sound else 0
+            horizon_x = np.sqrt((1.5 / c_sound - 1) / 0.3) if c_sound < 1.5 else 0
 
             # Sound waves trying to propagate upstream
             wave_positions = []
@@ -1268,65 +1442,84 @@ def _(go, np):
             for j in range(0, len(x), 3):
                 for k in range(0, len(y), 2):
                     vx = v_flow[k, j]
-                    frame_data.append(go.Scatter(
-                        x=[X[k, j], X[k, j] - vx * 0.3],
-                        y=[Y[k, j], Y[k, j]],
-                        mode="lines",
-                        line=dict(color=f"rgba(100, 150, 255, {min(vx/1.5, 1) * 0.5})", width=1),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[X[k, j], X[k, j] - vx * 0.3],
+                            y=[Y[k, j], Y[k, j]],
+                            mode="lines",
+                            line=dict(
+                                color=f"rgba(100, 150, 255, {min(vx / 1.5, 1) * 0.5})", width=1
+                            ),
+                            showlegend=False,
+                        )
+                    )
 
             # Acoustic horizon
-            frame_data.append(go.Scatter(
-                x=[horizon_x, horizon_x], y=[-2, 2],
-                mode="lines",
-                line=dict(color="red", width=3, dash="dash"),
-                name="Acoustic horizon (v = c_sound)",
-            ))
-            frame_data.append(go.Scatter(
-                x=[-horizon_x, -horizon_x], y=[-2, 2],
-                mode="lines",
-                line=dict(color="red", width=3, dash="dash"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[horizon_x, horizon_x],
+                    y=[-2, 2],
+                    mode="lines",
+                    line=dict(color="red", width=3, dash="dash"),
+                    name="Acoustic horizon (v = c_sound)",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[-horizon_x, -horizon_x],
+                    y=[-2, 2],
+                    mode="lines",
+                    line=dict(color="red", width=3, dash="dash"),
+                    showlegend=False,
+                )
+            )
 
             # Sound waves
             for wave_x, start_x in wave_positions:
-                if abs(start_x) < horizon_x:
-                    color = "red"  # Trapped
-                else:
-                    color = "cyan"  # Can escape
+                color = "red" if abs(start_x) < horizon_x else "cyan"
 
-                frame_data.append(go.Scatter(
-                    x=[wave_x], y=[0],
-                    mode="markers",
-                    marker=dict(size=8, color=color, symbol="circle"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[wave_x],
+                        y=[0],
+                        mode="markers",
+                        marker=dict(size=8, color=color, symbol="circle"),
+                        showlegend=False,
+                    )
+                )
 
             # Central "drain" (analogous to black hole)
-            frame_data.append(go.Scatter(
-                x=[0], y=[0],
-                mode="markers",
-                marker=dict(size=20, color="black", line=dict(color="white", width=2)),
-                name="Drain (analog black hole)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=20, color="black", line=dict(color="white", width=2)),
+                    name="Drain (analog black hole)",
+                )
+            )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[3], y=[1.5],
-                mode="text",
-                text=["Sound escapes ↗"],
-                textfont=dict(size=10, color="cyan"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[0], y=[1.5],
-                mode="text",
-                text=["Sound trapped ↓"],
-                textfont=dict(size=10, color="red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[1.5],
+                    mode="text",
+                    text=["Sound escapes ↗"],
+                    textfont=dict(size=10, color="cyan"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[1.5],
+                    mode="text",
+                    text=["Sound trapped ↓"],
+                    textfont=dict(size=10, color="red"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -1337,11 +1530,21 @@ def _(go, np):
                     text="<b>Analog Gravity:</b> Acoustic Black Hole in Flowing Fluid<br><sub>Sound waves behave like light near a black hole horizon</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Position", range=[-5.5, 5.5], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)"),
+                xaxis=dict(
+                    title="Position",
+                    range=[-5.5, 5.5],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
                 yaxis=dict(title="", range=[-2.5, 2.5], showgrid=False, showticklabels=False),
                 showlegend=True,
-                legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99, font=dict(size=10, color="white")),
+                legend=dict(
+                    yanchor="top",
+                    y=0.99,
+                    xanchor="right",
+                    x=0.99,
+                    font=dict(size=10, color="white"),
+                ),
                 plot_bgcolor="rgba(0,0,50,0.95)",
                 updatemenus=[
                     dict(
@@ -1351,14 +1554,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1370,7 +1588,9 @@ def _(go, np):
         return fig
 
     analog_gravity_fig = create_analog_gravity_animation()
-    return create_analog_gravity_animation, mo.ui.plotly(analog_gravity_fig, config=get_plotly_config())
+    return create_analog_gravity_animation, mo.ui.plotly(
+        analog_gravity_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -1626,31 +1846,28 @@ def _(go, np):
 
             # Show the feedback loop: exotic matter -> curvature -> allows exotic matter
 
-            # Circle representing the self-consistency condition
-            theta = np.linspace(0, 2 * np.pi, 100)
-            circle_x = 2 * np.cos(theta)
-            circle_y = 2 * np.sin(theta)
-
             # Arrows showing the feedback loop
-            arrow_angle = 2 * np.pi * progress
 
             # Three stages of the loop
             stages = [
                 (0, "Exotic Matter\n(negative ρ)"),
-                (2*np.pi/3, "Spacetime\nCurvature"),
-                (4*np.pi/3, "Modified\nQuantum Bounds"),
+                (2 * np.pi / 3, "Spacetime\nCurvature"),
+                (4 * np.pi / 3, "Modified\nQuantum Bounds"),
             ]
 
             frame_data = []
 
             # Central label
-            frame_data.append(go.Scatter(
-                x=[0], y=[0],
-                mode="text",
-                text=["<b>Self-Consistency</b><br>Challenge"],
-                textfont=dict(size=14, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="text",
+                    text=["<b>Self-Consistency</b><br>Challenge"],
+                    textfont=dict(size=14, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Draw stages
             for angle, label in stages:
@@ -1658,66 +1875,71 @@ def _(go, np):
                 y = 3 * np.sin(angle)
 
                 # Stage marker
-                frame_data.append(go.Scatter(
-                    x=[x], y=[y],
-                    mode="markers+text",
-                    marker=dict(size=40, color="rgba(100,100,255,0.5)",
-                               line=dict(color="cyan", width=2)),
-                    text=[label],
-                    textposition="middle center",
-                    textfont=dict(size=10, color="white"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x],
+                        y=[y],
+                        mode="markers+text",
+                        marker=dict(
+                            size=40, color="rgba(100,100,255,0.5)", line=dict(color="cyan", width=2)
+                        ),
+                        text=[label],
+                        textposition="middle center",
+                        textfont=dict(size=10, color="white"),
+                        showlegend=False,
+                    )
+                )
 
             # Animated arrows between stages
             for j, (angle, _) in enumerate(stages):
                 next_angle = stages[(j + 1) % 3][0]
-
-                # Arrow from this stage to next
-                mid_angle = (angle + next_angle) / 2
-                if j == 2:  # Handle wrap-around
-                    mid_angle = angle + np.pi/3
 
                 # Arrow position based on animation
                 arrow_progress = (progress * 3 - j) % 1
 
                 if j == int(progress * 3) % 3:
                     # This arrow is active
-                    start_x = 3 * np.cos(angle) + 0.5 * np.cos(angle + np.pi/2)
-                    start_y = 3 * np.sin(angle) + 0.5 * np.sin(angle + np.pi/2)
-                    end_x = 3 * np.cos(next_angle) - 0.5 * np.cos(next_angle + np.pi/2)
-                    end_y = 3 * np.sin(next_angle) - 0.5 * np.sin(next_angle + np.pi/2)
+                    start_x = 3 * np.cos(angle) + 0.5 * np.cos(angle + np.pi / 2)
+                    start_y = 3 * np.sin(angle) + 0.5 * np.sin(angle + np.pi / 2)
+                    end_x = 3 * np.cos(next_angle) - 0.5 * np.cos(next_angle + np.pi / 2)
+                    end_y = 3 * np.sin(next_angle) - 0.5 * np.sin(next_angle + np.pi / 2)
 
                     # Interpolate
                     arrow_x = start_x + arrow_progress * (end_x - start_x)
                     arrow_y = start_y + arrow_progress * (end_y - start_y)
 
-                    frame_data.append(go.Scatter(
-                        x=[arrow_x], y=[arrow_y],
-                        mode="markers",
-                        marker=dict(size=15, color="yellow", symbol="circle"),
-                        name="Energy flow",
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[arrow_x],
+                            y=[arrow_y],
+                            mode="markers",
+                            marker=dict(size=15, color="yellow", symbol="circle"),
+                            name="Energy flow",
+                        )
+                    )
 
             # Curved arrows (static)
             for j in range(3):
                 angle_start = stages[j][0] + 0.3
-                angle_end = stages[(j+1) % 3][0] - 0.3
+                angle_end = stages[(j + 1) % 3][0] - 0.3
 
                 if j == 2:
-                    angles = np.linspace(angle_start, angle_end + 2*np.pi, 30)
+                    angles = np.linspace(angle_start, angle_end + 2 * np.pi, 30)
                 else:
                     angles = np.linspace(angle_start, angle_end, 30)
 
                 arc_x = 3 * np.cos(angles)
                 arc_y = 3 * np.sin(angles)
 
-                frame_data.append(go.Scatter(
-                    x=arc_x, y=arc_y,
-                    mode="lines",
-                    line=dict(color="rgba(255,255,0,0.5)", width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=arc_x,
+                        y=arc_y,
+                        mode="lines",
+                        line=dict(color="rgba(255,255,0,0.5)", width=2),
+                        showlegend=False,
+                    )
+                )
 
             # Equations
             equations = [
@@ -1726,13 +1948,16 @@ def _(go, np):
             ]
 
             for x, y, eq in equations:
-                frame_data.append(go.Scatter(
-                    x=[x], y=[y],
-                    mode="text",
-                    text=[eq],
-                    textfont=dict(size=11, color="cyan"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[x],
+                        y=[y],
+                        mode="text",
+                        text=[eq],
+                        textfont=dict(size=11, color="cyan"),
+                        showlegend=False,
+                    )
+                )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -1744,8 +1969,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-5, 6], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-4, 4], showgrid=False, zeroline=False, showticklabels=False,
-                          scaleanchor="x"),
+                yaxis=dict(
+                    range=[-4, 4],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 showlegend=False,
                 plot_bgcolor="rgba(0,0,30,0.95)",
                 updatemenus=[
@@ -1756,14 +1986,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1775,7 +2020,9 @@ def _(go, np):
         return fig
 
     self_consistency_fig = create_self_consistency_visualization()
-    return create_self_consistency_visualization, mo.ui.plotly(self_consistency_fig, config=get_plotly_config())
+    return create_self_consistency_visualization, mo.ui.plotly(
+        self_consistency_fig, config=get_plotly_config()
+    )
 
 
 @app.cell

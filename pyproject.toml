@@ -46,6 +46,15 @@ select = [
     "RUF", # ruff-specific rules
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*.py" = [
+    "F821",    # undefined names — marimo cells share state across functions
+    "E501",    # line length — markdown strings with formulas and long plot configs
+    "RUF001",  # ambiguous unicode — Greek letters (γ, ρ, etc.) are intentional physics notation
+    "RUF002",  # ambiguous unicode in docstrings
+    "RUF003",  # ambiguous unicode in comments
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["physics", "physics_explorations"]
 

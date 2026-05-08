@@ -9,10 +9,10 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
-    from physics.constants import G, AU
-    from physics.integrators import rk4_step, gravity_acceleration
+
+    from physics.constants import AU, G
+    from physics.integrators import gravity_acceleration, rk4_step
     from physics_explorations.visualization import (
-        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -151,9 +151,7 @@ def _(mo):
 
 @app.cell
 def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
-    def simulate_three_body(
-        positions, velocities, masses, dt=0.001, n_steps=10000, G=G
-    ):
+    def simulate_three_body(positions, velocities, masses, dt=0.001, n_steps=10000, G=G):
         """Simulate three-body gravitational dynamics using RK4."""
         pos = np.array(positions, dtype=float)
         vel = np.array(velocities, dtype=float)
@@ -168,22 +166,22 @@ def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
 
         def derivative_func(s):
             # Extract pos and vel from state
-            p = s[:n_bodies*dim].reshape(n_bodies, dim)
-            v = s[n_bodies*dim:].reshape(n_bodies, dim)
-            
+            p = s[: n_bodies * dim].reshape(n_bodies, dim)
+            v = s[n_bodies * dim :].reshape(n_bodies, dim)
+
             # Accelerations using centralized vectorized function
             a = gravity_acceleration(p, m, G=G, softening=0.01)
-            
+
             # Return [vel.flatten(), acc.flatten()]
             return np.concatenate([v.flatten(), a.flatten()])
 
         for step in range(n_steps):
             # RK4 Step
             state = rk4_step(state, derivative_func, dt)
-            
+
             # Store positions every few steps if needed or every step for chaotic detail
             if step % 2 == 0:
-                p_curr = state[:n_bodies*dim].reshape(n_bodies, dim)
+                p_curr = state[: n_bodies * dim].reshape(n_bodies, dim)
                 for i in range(n_bodies):
                     trajectories[i].append(p_curr[i].copy())
 
@@ -589,12 +587,8 @@ def _(COLORS, create_play_pause_buttons, go, np, simulate_three_body):
             frames.append(go.Frame(data=frame_data, name=str(frame_idx)))
 
         # Axis range
-        all_x = np.concatenate(
-            [t[:, 0] for t in traj_base] + [t[:, 0] for t in traj_perturbed]
-        )
-        all_y = np.concatenate(
-            [t[:, 1] for t in traj_base] + [t[:, 1] for t in traj_perturbed]
-        )
+        all_x = np.concatenate([t[:, 0] for t in traj_base] + [t[:, 0] for t in traj_perturbed])
+        all_y = np.concatenate([t[:, 1] for t in traj_base] + [t[:, 1] for t in traj_perturbed])
         margin = 0.3
         x_range = [all_x.min() - margin, all_x.max() + margin]
         y_range = [all_y.min() - margin, all_y.max() + margin]
@@ -708,22 +702,25 @@ def _(COLORS, create_play_pause_buttons, go, np):
         """Simulate a planet in a triple-star system."""
         # Three suns - hierarchical system (binary pair + distant third)
         # Using normalized units
-        sun_positions = np.array([
-            [-0.5, 0.0],   # Sun 1 (binary pair)
-            [0.5, 0.0],    # Sun 2 (binary pair)
-            [2.5, 0.0],    # Sun 3 (distant)
-        ])
-        sun_velocities = np.array([
-            [0.0, -0.4],
-            [0.0, 0.4],
-            [0.0, -0.15],
-        ])
+        sun_positions = np.array(
+            [
+                [-0.5, 0.0],  # Sun 1 (binary pair)
+                [0.5, 0.0],  # Sun 2 (binary pair)
+                [2.5, 0.0],  # Sun 3 (distant)
+            ]
+        )
+        sun_velocities = np.array(
+            [
+                [0.0, -0.4],
+                [0.0, 0.4],
+                [0.0, -0.15],
+            ]
+        )
         sun_masses = np.array([1.0, 1.0, 0.8])
 
         # Planet - starts orbiting the binary pair
         planet_pos = np.array([0.0, 1.2])
         planet_vel = np.array([0.6, 0.0])
-        planet_mass = 0.0001  # Negligible mass
 
         # Storage
         sun_trajectories = [[pos.copy()] for pos in sun_positions]
@@ -834,9 +831,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
             # Planet IR temperature (Irradiance)
             irradiance = 0
             for sun_idx in range(3):
-                dist = np.sqrt(np.sum((planet_traj[data_idx] - sun_trajs[sun_idx][data_idx])**2))
-                irradiance += 0.5 / (dist**2 + 0.1) # Simplified units
-            
+                dist = np.sqrt(np.sum((planet_traj[data_idx] - sun_trajs[sun_idx][data_idx]) ** 2))
+                irradiance += 0.5 / (dist**2 + 0.1)  # Simplified units
+
             temp_status = "STABLE"
             temp_color = COLORS["quantum"]
             if irradiance > 1.5:
@@ -849,17 +846,19 @@ def _(COLORS, create_play_pause_buttons, go, np):
             # Stability Zones (Hill spheres - approximate)
             for sun_idx in range(3):
                 sun_pos = sun_trajs[sun_idx][data_idx]
-                r_hill = 0.5 # Visualization constant
-                theta_h = np.linspace(0, 2*np.pi, 30)
-                frame_data.append(go.Scatter(
-                    x=sun_pos[0] + r_hill * np.cos(theta_h),
-                    y=sun_pos[1] + r_hill * np.sin(theta_h),
-                    mode="lines",
-                    line=dict(color=sun_colors[sun_idx], width=1, dash="dot"),
-                    opacity=0.2,
-                    showlegend=False,
-                    hoverinfo="skip"
-                ))
+                r_hill = 0.5  # Visualization constant
+                theta_h = np.linspace(0, 2 * np.pi, 30)
+                frame_data.append(
+                    go.Scatter(
+                        x=sun_pos[0] + r_hill * np.cos(theta_h),
+                        y=sun_pos[1] + r_hill * np.sin(theta_h),
+                        mode="lines",
+                        line=dict(color=sun_colors[sun_idx], width=1, dash="dot"),
+                        opacity=0.2,
+                        showlegend=False,
+                        hoverinfo="skip",
+                    )
+                )
 
             # Planet
             frame_data.append(
@@ -997,22 +996,26 @@ def _(COLORS, go, np):
         """
         # Tight binary pair
         binary_sep = 0.8
-        sun_positions = np.array([
-            [-binary_sep/2, 0.0],   # Sun 1 (binary)
-            [binary_sep/2, 0.0],    # Sun 2 (binary)
-            [8.0, 0.0],             # Sun 3 (distant - 10x binary separation)
-        ])
+        sun_positions = np.array(
+            [
+                [-binary_sep / 2, 0.0],  # Sun 1 (binary)
+                [binary_sep / 2, 0.0],  # Sun 2 (binary)
+                [8.0, 0.0],  # Sun 3 (distant - 10x binary separation)
+            ]
+        )
 
         # Binary orbital velocity (circular orbit around center of mass)
         v_binary = np.sqrt(1.0 / binary_sep) * 0.7
         # Third star velocity (slow orbit around system)
         v_third = np.sqrt(2.0 / 8.0) * 0.5
 
-        sun_velocities = np.array([
-            [0.0, -v_binary],
-            [0.0, v_binary],
-            [0.0, v_third],
-        ])
+        sun_velocities = np.array(
+            [
+                [0.0, -v_binary],
+                [0.0, v_binary],
+                [0.0, v_third],
+            ]
+        )
         sun_masses = np.array([1.0, 1.0, 0.6])
 
         # Planet in stable circumbinary orbit
@@ -1356,8 +1359,8 @@ def _(COLORS, create_three_body_animation, np, simulate_three_body):
     v_third = np.sqrt(2.0 / third_dist) * 0.95
 
     positions_hier = [
-        (-binary_sep/2, 0.0),
-        (binary_sep/2, 0.0),
+        (-binary_sep / 2, 0.0),
+        (binary_sep / 2, 0.0),
         (third_dist, 0.0),
     ]
     velocities_hier = [

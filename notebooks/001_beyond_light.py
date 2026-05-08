@@ -10,15 +10,15 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+
     from physics.constants import C
     from physics.relativity import lorentz_factor, lorentz_transform
     from physics_explorations.visualization import (
-        get_plotly_config,
         COLORS,
         DARK_THEME,
         SCENE_3D,
-        get_physics_palette,
         create_play_pause_buttons,
+        get_physics_palette,
     )
 
     return (
@@ -136,13 +136,11 @@ def _(go, np):
             # Velocity through space (0 to 0.95c)
             v_ratio = 0.95 * i / n_frames
             v_space = v_ratio * C
-            
+
             # The Lorentz factor determines the rate of coordinate time vs proper time (dt/dτ)
             gamma = lorentz_factor(v_ratio)
             v_time = gamma * C
-            
-            # Rate of proper time (aging): dτ/dt = 1/gamma
-            aging_rate = 1.0 / gamma
+
             v_time = np.sqrt(1 - v_space**2) if v_space < 1 else 0  # As fraction of c
 
             # For the circle visualization (Euclidean analogy)
@@ -150,33 +148,34 @@ def _(go, np):
             circle_x = np.cos(theta)
             circle_y = np.sin(theta)
 
-            # Current velocity vector
-            angle = np.arcsin(v_space) if v_space <= 1 else np.pi/2
-
             frame_data = [
                 # Unit circle (represents c)
                 go.Scatter(
-                    x=circle_x, y=circle_y,
+                    x=circle_x,
+                    y=circle_y,
                     mode="lines",
                     line=dict(color="rgba(255,255,255,0.3)", width=2, dash="dot"),
                     name="|v| = c",
                 ),
                 # Axes
                 go.Scatter(
-                    x=[-1.3, 1.3], y=[0, 0],
+                    x=[-1.3, 1.3],
+                    y=[0, 0],
                     mode="lines",
                     line=dict(color="rgba(255,255,255,0.5)", width=1),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[0, 0], y=[-0.3, 1.3],
+                    x=[0, 0],
+                    y=[-0.3, 1.3],
                     mode="lines",
                     line=dict(color="rgba(255,255,255,0.5)", width=1),
                     showlegend=False,
                 ),
                 # Velocity vector
                 go.Scatter(
-                    x=[0, v_space], y=[0, v_time],
+                    x=[0, v_space],
+                    y=[0, v_time],
                     mode="lines+markers",
                     line=dict(color="cyan", width=4),
                     marker=dict(size=[0, 12], color="cyan"),
@@ -184,20 +183,23 @@ def _(go, np):
                 ),
                 # Components
                 go.Scatter(
-                    x=[0, v_space], y=[0, 0],
+                    x=[0, v_space],
+                    y=[0, 0],
                     mode="lines",
                     line=dict(color="orange", width=3),
                     name=f"Space velocity: {v_space:.2f}c",
                 ),
                 go.Scatter(
-                    x=[0, 0], y=[0, v_time],
+                    x=[0, 0],
+                    y=[0, v_time],
                     mode="lines",
                     line=dict(color="yellow", width=3),
                     name=f"Time velocity: {v_time:.2f}c",
                 ),
                 # Info text
                 go.Scatter(
-                    x=[0.7], y=[-0.2],
+                    x=[0.7],
+                    y=[-0.2],
                     mode="text",
                     text=[f"γ = {gamma:.2f}" if gamma < 100 else "γ → ∞"],
                     textfont=dict(size=14, color="white"),
@@ -214,10 +216,19 @@ def _(go, np):
                     text="<b>Spacetime Velocity:</b> Trading Time for Space<br><sub>As you move faster through space, you move slower through time</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Velocity through SPACE (v/c)", range=[-0.3, 1.4],
-                          showgrid=False, zeroline=False),
-                yaxis=dict(title="Velocity through TIME (fraction of c)", range=[-0.3, 1.4],
-                          showgrid=False, zeroline=False, scaleanchor="x"),
+                xaxis=dict(
+                    title="Velocity through SPACE (v/c)",
+                    range=[-0.3, 1.4],
+                    showgrid=False,
+                    zeroline=False,
+                ),
+                yaxis=dict(
+                    title="Velocity through TIME (fraction of c)",
+                    range=[-0.3, 1.4],
+                    showgrid=False,
+                    zeroline=False,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -229,14 +240,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -248,7 +274,9 @@ def _(go, np):
         return fig
 
     spacetime_velocity_fig = create_spacetime_velocity_animation()
-    return create_spacetime_velocity_animation, mo.ui.plotly(spacetime_velocity_fig, config=get_plotly_config())
+    return create_spacetime_velocity_animation, mo.ui.plotly(
+        spacetime_velocity_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -304,15 +332,13 @@ def _(go, np):
             energy = gamma  # In units of rest mass energy
 
             # Marker position
-            if v_current > 0:
-                gamma_current = 1 / np.sqrt(1 - v_current**2)
-            else:
-                gamma_current = 1
+            gamma_current = 1 / np.sqrt(1 - v_current**2) if v_current > 0 else 1
 
             frame_data = [
                 # Energy curve
                 go.Scatter(
-                    x=v, y=energy,
+                    x=v,
+                    y=energy,
                     mode="lines",
                     line=dict(color="cyan", width=3),
                     name="E = γmc²",
@@ -321,14 +347,16 @@ def _(go, np):
                 ),
                 # Speed of light barrier
                 go.Scatter(
-                    x=[1, 1], y=[0, 50],
+                    x=[1, 1],
+                    y=[0, 50],
                     mode="lines",
                     line=dict(color="red", width=3, dash="dash"),
                     name="c (light barrier)",
                 ),
                 # Current position marker
                 go.Scatter(
-                    x=[v_current], y=[gamma_current],
+                    x=[v_current],
+                    y=[gamma_current],
                     mode="markers",
                     marker=dict(size=15, color="yellow", symbol="star"),
                     name=f"v = {v_current:.3f}c, E = {gamma_current:.1f}mc²",
@@ -353,10 +381,18 @@ def _(go, np):
                     text="<b>The Energy Barrier:</b> E → ∞ as v → c<br><sub>No finite energy can accelerate mass to light speed</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Velocity (v/c)", range=[0, 1.1], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)"),
-                yaxis=dict(title="Energy (units of mc²)", range=[0, 25], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)"),
+                xaxis=dict(
+                    title="Velocity (v/c)",
+                    range=[0, 1.1],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
+                yaxis=dict(
+                    title="Energy (units of mc²)",
+                    range=[0, 25],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -368,14 +404,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -387,7 +438,9 @@ def _(go, np):
         return fig
 
     energy_barrier_fig = create_energy_barrier_animation()
-    return create_energy_barrier_animation, mo.ui.plotly(energy_barrier_fig, config=get_plotly_config())
+    return create_energy_barrier_animation, mo.ui.plotly(
+        energy_barrier_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -445,51 +498,76 @@ def _(go, np):
         v_tachyon = np.linspace(1.01, 5, 200)
         E_tachyon = 1 / np.sqrt(v_tachyon**2 - 1)
 
-        # Photons (v = c, E depends on frequency, not mass)
-        v_photon = [1]
-        E_photon = [0]  # Zero rest mass, but finite energy
-
         fig = go.Figure()
 
         # Normal matter
-        fig.add_trace(go.Scatter(
-            x=v_normal, y=E_normal,
-            mode="lines",
-            line=dict(color="cyan", width=3),
-            name="Normal matter (v < c)",
-            fill="tozeroy",
-            fillcolor="rgba(0, 255, 255, 0.2)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v_normal,
+                y=E_normal,
+                mode="lines",
+                line=dict(color="cyan", width=3),
+                name="Normal matter (v < c)",
+                fill="tozeroy",
+                fillcolor="rgba(0, 255, 255, 0.2)",
+            )
+        )
 
         # Tachyons
-        fig.add_trace(go.Scatter(
-            x=v_tachyon, y=E_tachyon,
-            mode="lines",
-            line=dict(color="magenta", width=3),
-            name="Tachyons (v > c)",
-            fill="tozeroy",
-            fillcolor="rgba(255, 0, 255, 0.2)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v_tachyon,
+                y=E_tachyon,
+                mode="lines",
+                line=dict(color="magenta", width=3),
+                name="Tachyons (v > c)",
+                fill="tozeroy",
+                fillcolor="rgba(255, 0, 255, 0.2)",
+            )
+        )
 
         # Light barrier
-        fig.add_vline(x=1, line_dash="dash", line_color="yellow",
-                     annotation_text="c (barrier)", annotation_position="top")
+        fig.add_vline(
+            x=1,
+            line_dash="dash",
+            line_color="yellow",
+            annotation_text="c (barrier)",
+            annotation_position="top",
+        )
 
         # Annotations
-        fig.add_annotation(x=0.5, y=3, text="Accelerating →<br>needs MORE energy",
-                          showarrow=False, font=dict(color="cyan", size=12))
-        fig.add_annotation(x=2.5, y=1.5, text="← Accelerating<br>needs LESS energy!",
-                          showarrow=False, font=dict(color="magenta", size=12))
+        fig.add_annotation(
+            x=0.5,
+            y=3,
+            text="Accelerating →<br>needs MORE energy",
+            showarrow=False,
+            font=dict(color="cyan", size=12),
+        )
+        fig.add_annotation(
+            x=2.5,
+            y=1.5,
+            text="← Accelerating<br>needs LESS energy!",
+            showarrow=False,
+            font=dict(color="magenta", size=12),
+        )
 
         fig.update_layout(
             title=dict(
                 text="<b>Energy vs Velocity:</b> Two Separate Worlds<br><sub>Normal matter and tachyons can't cross the light barrier</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Velocity (v/c)", range=[0, 4], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Energy (units of |m|c²)", range=[0, 10], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
+            xaxis=dict(
+                title="Velocity (v/c)",
+                range=[0, 4],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
+            yaxis=dict(
+                title="Energy (units of |m|c²)",
+                range=[0, 10],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
             showlegend=True,
             legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
             plot_bgcolor="rgba(0,0,30,0.95)",
@@ -569,58 +647,89 @@ def _(go, np):
         gamma_1 = 1 / np.sqrt(1 - v**2)
 
         # c' = 2c (so v/c' = v/2)
-        gamma_2 = 1 / np.sqrt(1 - (v/2)**2)
+        gamma_2 = 1 / np.sqrt(1 - (v / 2) ** 2)
 
         # c' = 0.5c (so v/c' = 2v, only valid for v < 0.5)
         v_small = np.linspace(0, 0.49, 100)
-        gamma_half = 1 / np.sqrt(1 - (2*v_small)**2)
+        gamma_half = 1 / np.sqrt(1 - (2 * v_small) ** 2)
 
         fig = go.Figure()
 
         # Our universe
-        fig.add_trace(go.Scatter(
-            x=v, y=gamma_1,
-            mode="lines",
-            line=dict(color="cyan", width=3),
-            name="Our universe (c)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v,
+                y=gamma_1,
+                mode="lines",
+                line=dict(color="cyan", width=3),
+                name="Our universe (c)",
+            )
+        )
 
         # Larger c
-        fig.add_trace(go.Scatter(
-            x=v, y=gamma_2,
-            mode="lines",
-            line=dict(color="green", width=3),
-            name="Larger c (c' = 2c)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v,
+                y=gamma_2,
+                mode="lines",
+                line=dict(color="green", width=3),
+                name="Larger c (c' = 2c)",
+            )
+        )
 
         # Smaller c
-        fig.add_trace(go.Scatter(
-            x=v_small, y=gamma_half,
-            mode="lines",
-            line=dict(color="red", width=3),
-            name="Smaller c (c' = 0.5c)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v_small,
+                y=gamma_half,
+                mode="lines",
+                line=dict(color="red", width=3),
+                name="Smaller c (c' = 0.5c)",
+            )
+        )
 
         # Reference line
         fig.add_hline(y=1, line_dash="dot", line_color="white", opacity=0.5)
 
         # Annotations
-        fig.add_annotation(x=0.7, y=8, text="Smaller c:<br>Relativistic effects<br>kick in sooner",
-                          showarrow=True, arrowhead=2, ax=0, ay=-40,
-                          font=dict(color="red", size=11))
-        fig.add_annotation(x=0.8, y=1.5, text="Larger c:<br>More Newtonian<br>behavior",
-                          showarrow=True, arrowhead=2, ax=0, ay=40,
-                          font=dict(color="green", size=11))
+        fig.add_annotation(
+            x=0.7,
+            y=8,
+            text="Smaller c:<br>Relativistic effects<br>kick in sooner",
+            showarrow=True,
+            arrowhead=2,
+            ax=0,
+            ay=-40,
+            font=dict(color="red", size=11),
+        )
+        fig.add_annotation(
+            x=0.8,
+            y=1.5,
+            text="Larger c:<br>More Newtonian<br>behavior",
+            showarrow=True,
+            arrowhead=2,
+            ax=0,
+            ay=40,
+            font=dict(color="green", size=11),
+        )
 
         fig.update_layout(
             title=dict(
                 text="<b>What if c Were Different?</b><br><sub>Time dilation (γ) vs velocity for different light speeds</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Velocity (in units of our c)", range=[0, 1], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Lorentz factor γ (time dilation)", range=[0.8, 12], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
+            xaxis=dict(
+                title="Velocity (in units of our c)",
+                range=[0, 1],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
+            yaxis=dict(
+                title="Lorentz factor γ (time dilation)",
+                range=[0.8, 12],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
             showlegend=True,
             legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
             plot_bgcolor="rgba(0,0,30,0.95)",
@@ -686,12 +795,10 @@ def _(go, np):
         frames = []
 
         for i in range(n_frames):
-            t = 2 * np.pi * i / n_frames
-
             # Light cone edges
             x_cone = np.linspace(-3, 3, 100)
             t_future = np.abs(x_cone)  # Future light cone
-            t_past = -np.abs(x_cone)   # Past light cone
+            t_past = -np.abs(x_cone)  # Past light cone
 
             # A "signal" trying different speeds
             signal_speed = 0.3 + 1.7 * (i / n_frames)  # 0.3c to 2c
@@ -711,7 +818,8 @@ def _(go, np):
             frame_data = [
                 # Future light cone
                 go.Scatter(
-                    x=x_cone, y=t_future,
+                    x=x_cone,
+                    y=t_future,
                     mode="lines",
                     line=dict(color="yellow", width=2),
                     name="Light (c)",
@@ -720,7 +828,8 @@ def _(go, np):
                 ),
                 # Past light cone
                 go.Scatter(
-                    x=x_cone, y=t_past,
+                    x=x_cone,
+                    y=t_past,
                     mode="lines",
                     line=dict(color="yellow", width=2),
                     showlegend=False,
@@ -729,21 +838,24 @@ def _(go, np):
                 ),
                 # Origin event
                 go.Scatter(
-                    x=[0], y=[0],
+                    x=[0],
+                    y=[0],
                     mode="markers",
                     marker=dict(size=12, color="white"),
                     name="Event (here, now)",
                 ),
                 # Signal
                 go.Scatter(
-                    x=signal_x, y=signal_t,
+                    x=signal_x,
+                    y=signal_t,
                     mode="lines",
                     line=dict(color=signal_color, width=4),
                     name=signal_name,
                 ),
                 # Region label
                 go.Scatter(
-                    x=[2.5], y=[2.5],
+                    x=[2.5],
+                    y=[2.5],
                     mode="text",
                     text=[region],
                     textfont=dict(size=14, color=signal_color),
@@ -751,14 +863,16 @@ def _(go, np):
                 ),
                 # "Elsewhere" labels
                 go.Scatter(
-                    x=[-2.5, 2.5], y=[0, 0],
+                    x=[-2.5, 2.5],
+                    y=[0, 0],
                     mode="text",
                     text=["ELSEWHERE<br>(spacelike)", "ELSEWHERE<br>(spacelike)"],
                     textfont=dict(size=10, color="rgba(255,255,255,0.5)"),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[0], y=[2.5],
+                    x=[0],
+                    y=[2.5],
                     mode="text",
                     text=["FUTURE<br>(timelike)"],
                     textfont=dict(size=10, color="rgba(255,255,0,0.7)"),
@@ -775,10 +889,21 @@ def _(go, np):
                     text="<b>The Light Cone:</b> Boundary of Causality<br><sub>FTL signals exit the light cone and can violate causality</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Space (x)", range=[-4, 4], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)", zeroline=True),
-                yaxis=dict(title="Time (t)", range=[-3, 4], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)", zeroline=True, scaleanchor="x"),
+                xaxis=dict(
+                    title="Space (x)",
+                    range=[-4, 4],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                    zeroline=True,
+                ),
+                yaxis=dict(
+                    title="Time (t)",
+                    range=[-3, 4],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                    zeroline=True,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="bottom", y=0.01, xanchor="left", x=0.01),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -790,14 +915,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -865,32 +1005,41 @@ def _(go, np):
         fig = go.Figure()
 
         # Real proper time (v < c)
-        fig.add_trace(go.Scatter(
-            x=v_subluminal, y=tau_real,
-            mode="lines",
-            line=dict(color="cyan", width=3),
-            name="Real proper time (dτ/dt)",
-            fill="tozeroy",
-            fillcolor="rgba(0, 255, 255, 0.2)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v_subluminal,
+                y=tau_real,
+                mode="lines",
+                line=dict(color="cyan", width=3),
+                name="Real proper time (dτ/dt)",
+                fill="tozeroy",
+                fillcolor="rgba(0, 255, 255, 0.2)",
+            )
+        )
 
         # Zero at c
-        fig.add_trace(go.Scatter(
-            x=[1], y=[0],
-            mode="markers",
-            marker=dict(size=12, color="yellow", symbol="diamond"),
-            name="At c: time stops (dτ = 0)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[1],
+                y=[0],
+                mode="markers",
+                marker=dict(size=12, color="yellow", symbol="diamond"),
+                name="At c: time stops (dτ = 0)",
+            )
+        )
 
         # Imaginary proper time (v > c)
-        fig.add_trace(go.Scatter(
-            x=v_superluminal, y=tau_imag,
-            mode="lines",
-            line=dict(color="magenta", width=3, dash="dash"),
-            name="Imaginary time (i × shown)",
-            fill="tozeroy",
-            fillcolor="rgba(255, 0, 255, 0.2)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v_superluminal,
+                y=tau_imag,
+                mode="lines",
+                line=dict(color="magenta", width=3, dash="dash"),
+                name="Imaginary time (i × shown)",
+                fill="tozeroy",
+                fillcolor="rgba(255, 0, 255, 0.2)",
+            )
+        )
 
         # Zero line
         fig.add_hline(y=0, line_color="white", line_width=1)
@@ -899,22 +1048,41 @@ def _(go, np):
         fig.add_vline(x=1, line_dash="dash", line_color="yellow")
 
         # Annotations
-        fig.add_annotation(x=0.5, y=0.6, text="Time flows<br>(slower at high v)",
-                          font=dict(color="cyan", size=12), showarrow=False)
-        fig.add_annotation(x=1.5, y=0.8, text="Time is<br>IMAGINARY",
-                          font=dict(color="magenta", size=12), showarrow=False)
-        fig.add_annotation(x=1, y=-0.15, text="c",
-                          font=dict(color="yellow", size=14), showarrow=False)
+        fig.add_annotation(
+            x=0.5,
+            y=0.6,
+            text="Time flows<br>(slower at high v)",
+            font=dict(color="cyan", size=12),
+            showarrow=False,
+        )
+        fig.add_annotation(
+            x=1.5,
+            y=0.8,
+            text="Time is<br>IMAGINARY",
+            font=dict(color="magenta", size=12),
+            showarrow=False,
+        )
+        fig.add_annotation(
+            x=1, y=-0.15, text="c", font=dict(color="yellow", size=14), showarrow=False
+        )
 
         fig.update_layout(
             title=dict(
                 text="<b>Proper Time vs Velocity:</b> Real → Zero → Imaginary<br><sub>Above c, proper time becomes imaginary (not negative!)</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Velocity (v/c)", range=[0, 2], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Proper time factor |dτ/dt|", range=[-0.3, 1.5], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
+            xaxis=dict(
+                title="Velocity (v/c)",
+                range=[0, 2],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
+            yaxis=dict(
+                title="Proper time factor |dτ/dt|",
+                range=[-0.3, 1.5],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
             showlegend=True,
             legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
             plot_bgcolor="rgba(0,0,30,0.95)",
@@ -1023,12 +1191,20 @@ def _(go, np):
                 ),
                 # Moving object
                 go.Scatter(
-                    x=[-ship_width/2, ship_width/2, ship_width/2, -ship_width/2, -ship_width/2],
-                    y=[0 if v <= 1 else L_display - 0.15,
-                       0 if v <= 1 else L_display - 0.15,
-                       0.3 if v <= 1 else L_display + 0.15,
-                       0.3 if v <= 1 else L_display + 0.15,
-                       0 if v <= 1 else L_display - 0.15],
+                    x=[
+                        -ship_width / 2,
+                        ship_width / 2,
+                        ship_width / 2,
+                        -ship_width / 2,
+                        -ship_width / 2,
+                    ],
+                    y=[
+                        0 if v <= 1 else L_display - 0.15,
+                        0 if v <= 1 else L_display - 0.15,
+                        0.3 if v <= 1 else L_display + 0.15,
+                        0.3 if v <= 1 else L_display + 0.15,
+                        0 if v <= 1 else L_display - 0.15,
+                    ],
                     fill="toself",
                     fillcolor=bar_color,
                     line=dict(color=bar_color, width=2),
@@ -1036,21 +1212,24 @@ def _(go, np):
                 ),
                 # Velocity indicator
                 go.Scatter(
-                    x=[v], y=[-0.8],
+                    x=[v],
+                    y=[-0.8],
                     mode="markers",
                     marker=dict(size=15, color=bar_color, symbol="triangle-up"),
                     name=status,
                 ),
                 # Velocity axis
                 go.Scatter(
-                    x=[0, 2], y=[-0.8, -0.8],
+                    x=[0, 2],
+                    y=[-0.8, -0.8],
                     mode="lines",
                     line=dict(color="white", width=1),
                     showlegend=False,
                 ),
                 # c marker
                 go.Scatter(
-                    x=[1], y=[-0.8],
+                    x=[1],
+                    y=[-0.8],
                     mode="markers+text",
                     marker=dict(size=8, color="yellow"),
                     text=["c"],
@@ -1082,14 +1261,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1101,7 +1295,9 @@ def _(go, np):
         return fig
 
     length_contraction_fig = create_length_contraction_animation()
-    return create_length_contraction_animation, mo.ui.plotly(length_contraction_fig, config=get_plotly_config())
+    return create_length_contraction_animation, mo.ui.plotly(
+        length_contraction_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -1161,13 +1357,13 @@ def _(go, np):
             X, Y = np.meshgrid(x, y)
 
             # Distort grid around bubble
-            r = np.sqrt((X - bubble_x)**2 + Y**2)
-            warp_strength = 1.5 * np.exp(-r**2 / 0.5)
+            r = np.sqrt((X - bubble_x) ** 2 + Y**2)
+            warp_strength = 1.5 * np.exp(-(r**2) / 0.5)
 
             # Contracted in front, expanded behind
             X_warped = X.copy()
-            front_mask = X > bubble_x
-            back_mask = X < bubble_x
+            front_mask = bubble_x < X
+            back_mask = bubble_x > X
             X_warped[front_mask] -= warp_strength[front_mask] * 0.3
             X_warped[back_mask] += warp_strength[back_mask] * 0.3
 
@@ -1175,59 +1371,77 @@ def _(go, np):
 
             # Draw warped grid lines (horizontal)
             for j in range(len(y)):
-                frame_data.append(go.Scatter(
-                    x=X_warped[j, :], y=Y[j, :],
-                    mode="lines",
-                    line=dict(color="rgba(100, 100, 255, 0.4)", width=1),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=X_warped[j, :],
+                        y=Y[j, :],
+                        mode="lines",
+                        line=dict(color="rgba(100, 100, 255, 0.4)", width=1),
+                        showlegend=False,
+                    )
+                )
 
             # Draw warped grid lines (vertical)
             for k in range(len(x)):
-                frame_data.append(go.Scatter(
-                    x=X_warped[:, k], y=Y[:, k],
-                    mode="lines",
-                    line=dict(color="rgba(100, 100, 255, 0.4)", width=1),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=X_warped[:, k],
+                        y=Y[:, k],
+                        mode="lines",
+                        line=dict(color="rgba(100, 100, 255, 0.4)", width=1),
+                        showlegend=False,
+                    )
+                )
 
             # Warp bubble
             theta = np.linspace(0, 2 * np.pi, 50)
             bubble_x_pts = bubble_x + 0.4 * np.cos(theta)
             bubble_y_pts = 0.3 * np.sin(theta)
 
-            frame_data.append(go.Scatter(
-                x=bubble_x_pts, y=bubble_y_pts,
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(0, 255, 255, 0.3)",
-                line=dict(color="cyan", width=2),
-                name="Warp bubble",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=bubble_x_pts,
+                    y=bubble_y_pts,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(0, 255, 255, 0.3)",
+                    line=dict(color="cyan", width=2),
+                    name="Warp bubble",
+                )
+            )
 
             # Ship in bubble
-            frame_data.append(go.Scatter(
-                x=[bubble_x], y=[0],
-                mode="markers",
-                marker=dict(size=10, color="white", symbol="diamond"),
-                name="Ship (locally at rest)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[bubble_x],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=10, color="white", symbol="diamond"),
+                    name="Ship (locally at rest)",
+                )
+            )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[bubble_x + 1], y=[0.8],
-                mode="text",
-                text=["Space contracted →"],
-                textfont=dict(size=10, color="orange"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[bubble_x - 1], y=[0.8],
-                mode="text",
-                text=["← Space expanded"],
-                textfont=dict(size=10, color="green"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[bubble_x + 1],
+                    y=[0.8],
+                    mode="text",
+                    text=["Space contracted →"],
+                    textfont=dict(size=10, color="orange"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[bubble_x - 1],
+                    y=[0.8],
+                    mode="text",
+                    text=["← Space expanded"],
+                    textfont=dict(size=10, color="green"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -1239,8 +1453,14 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(title="Space", range=[-5, 5], showgrid=False, zeroline=False),
-                yaxis=dict(title="", range=[-2.5, 2.5], showgrid=False, zeroline=False,
-                          showticklabels=False, scaleanchor="x"),
+                yaxis=dict(
+                    title="",
+                    range=[-2.5, 2.5],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -1252,14 +1472,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1363,54 +1598,85 @@ def _(go, np):
         }
 
         # Our universe
-        fig.add_trace(go.Scatter(
-            x=v, y=gamma_our,
-            mode="lines",
-            line=dict(color="cyan", width=3),
-            name="Our universe (c)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v,
+                y=gamma_our,
+                mode="lines",
+                line=dict(color="cyan", width=3),
+                name="Our universe (c)",
+            )
+        )
 
         # 10x c
-        fig.add_trace(go.Scatter(
-            x=v, y=gamma_10,
-            mode="lines",
-            line=dict(color="yellow", width=3),
-            name="c' = 10c",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v,
+                y=gamma_10,
+                mode="lines",
+                line=dict(color="yellow", width=3),
+                name="c' = 10c",
+            )
+        )
 
         # 1000x c
-        fig.add_trace(go.Scatter(
-            x=v, y=gamma_1000,
-            mode="lines",
-            line=dict(color="green", width=3),
-            name="c' = 1000c (Newtonian)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=v,
+                y=gamma_1000,
+                mode="lines",
+                line=dict(color="green", width=3),
+                name="c' = 1000c (Newtonian)",
+            )
+        )
 
         # Newtonian baseline
-        fig.add_hline(y=1, line_dash="dot", line_color="white", opacity=0.5,
-                     annotation_text="Newtonian (γ=1)")
+        fig.add_hline(
+            y=1, line_dash="dot", line_color="white", opacity=0.5, annotation_text="Newtonian (γ=1)"
+        )
 
         # Noticeable threshold
-        fig.add_hline(y=1.1, line_dash="dash", line_color="orange", opacity=0.5,
-                     annotation_text="10% time dilation")
+        fig.add_hline(
+            y=1.1,
+            line_dash="dash",
+            line_color="orange",
+            opacity=0.5,
+            annotation_text="10% time dilation",
+        )
 
         # Reference speed markers
         for name, speed in reference_speeds.items():
             if speed <= 1e11:
                 fig.add_vline(x=speed, line_dash="dot", line_color="rgba(255,255,255,0.3)")
-                fig.add_annotation(x=np.log10(speed), y=0.1, text=name,
-                                  textangle=-90, font=dict(size=9, color="white"),
-                                  showarrow=False, xref="x", yref="paper")
+                fig.add_annotation(
+                    x=np.log10(speed),
+                    y=0.1,
+                    text=name,
+                    textangle=-90,
+                    font=dict(size=9, color="white"),
+                    showarrow=False,
+                    xref="x",
+                    yref="paper",
+                )
 
         fig.update_layout(
             title=dict(
                 text="<b>The Newtonian Universe:</b> When Does Relativity Matter?<br><sub>With larger c, you can go much faster before spacetime curves</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Velocity (m/s)", type="log", range=[0, 11.5],
-                      showgrid=True, gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Lorentz factor γ", range=[0.95, 5], showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
+            xaxis=dict(
+                title="Velocity (m/s)",
+                type="log",
+                range=[0, 11.5],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
+            yaxis=dict(
+                title="Lorentz factor γ",
+                range=[0.95, 5],
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.1)",
+            ),
             showlegend=True,
             legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
             plot_bgcolor="rgba(0,0,30,0.95)",
@@ -1522,60 +1788,69 @@ def _(go, np):
             frame_data = [
                 # Light cone
                 go.Scatter(
-                    x=x_cone, y=t_cone_up,
+                    x=x_cone,
+                    y=t_cone_up,
                     mode="lines",
                     line=dict(color="yellow", width=2),
                     name="Light cone (v=c)",
                 ),
                 go.Scatter(
-                    x=x_cone, y=t_cone_down,
+                    x=x_cone,
+                    y=t_cone_down,
                     mode="lines",
                     line=dict(color="yellow", width=2),
                     showlegend=False,
                 ),
                 # Timelike hyperbola
                 go.Scatter(
-                    x=x_hyp, y=t_hyp_future,
+                    x=x_hyp,
+                    y=t_hyp_future,
                     mode="lines",
                     line=dict(color="cyan", width=2, dash="dash"),
                     name="Constant proper time (τ=1)",
                 ),
                 go.Scatter(
-                    x=x_hyp, y=t_hyp_past,
+                    x=x_hyp,
+                    y=t_hyp_past,
                     mode="lines",
                     line=dict(color="cyan", width=2, dash="dash"),
                     showlegend=False,
                 ),
                 # Spacelike hyperbola
                 go.Scatter(
-                    x=x_hyp_right, y=t_hyp_space,
+                    x=x_hyp_right,
+                    y=t_hyp_space,
                     mode="lines",
                     line=dict(color="magenta", width=2, dash="dot"),
                     name="Constant proper distance (s=1)",
                 ),
                 go.Scatter(
-                    x=x_hyp_left, y=t_hyp_space,
+                    x=x_hyp_left,
+                    y=t_hyp_space,
                     mode="lines",
                     line=dict(color="magenta", width=2, dash="dot"),
                     showlegend=False,
                 ),
                 # Boosted worldline
                 go.Scatter(
-                    x=x_boosted, y=t_boosted,
+                    x=x_boosted,
+                    y=t_boosted,
                     mode="lines",
                     line=dict(color="white", width=3),
                     name=f"Observer (v={np.tanh(rapidity):.2f}c)",
                 ),
                 # Event marker
                 go.Scatter(
-                    x=[x_event], y=[t_event],
+                    x=[x_event],
+                    y=[t_event],
                     mode="markers",
                     marker=dict(size=12, color="cyan"),
                     name="τ=1 event",
                 ),
                 # Origin
                 go.Scatter(
-                    x=[0], y=[0],
+                    x=[0],
+                    y=[0],
                     mode="markers",
                     marker=dict(size=8, color="white"),
                     showlegend=False,
@@ -1591,10 +1866,21 @@ def _(go, np):
                     text="<b>Minkowski Geometry:</b> Hyperbolas, Not Circles<br><sub>The point moves along the hyperbola but never reaches the light cone</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Space (x)", range=[-4, 4], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)", zeroline=True),
-                yaxis=dict(title="Time (t)", range=[-3, 4], showgrid=True,
-                          gridcolor="rgba(255,255,255,0.1)", zeroline=True, scaleanchor="x"),
+                xaxis=dict(
+                    title="Space (x)",
+                    range=[-4, 4],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                    zeroline=True,
+                ),
+                yaxis=dict(
+                    title="Time (t)",
+                    range=[-3, 4],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                    zeroline=True,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10)),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -1606,14 +1892,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1625,7 +1926,9 @@ def _(go, np):
         return fig
 
     minkowski_fig = create_minkowski_geometry_animation()
-    return create_minkowski_geometry_animation, mo.ui.plotly(minkowski_fig, config=get_plotly_config())
+    return create_minkowski_geometry_animation, mo.ui.plotly(
+        minkowski_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -1722,21 +2025,27 @@ def _(go, np):
             frame_data = [
                 # Upper sheet
                 go.Surface(
-                    x=X, y=Y, z=Z_upper,
-                    colorscale=[[0, 'rgba(0,100,200,0.7)'], [1, 'rgba(0,200,255,0.7)']],
+                    x=X,
+                    y=Y,
+                    z=Z_upper,
+                    colorscale=[[0, "rgba(0,100,200,0.7)"], [1, "rgba(0,200,255,0.7)"]],
                     showscale=False,
                     name="Upper region",
                 ),
                 # Lower sheet
                 go.Surface(
-                    x=X, y=Y, z=Z_lower,
-                    colorscale=[[0, 'rgba(200,100,0,0.7)'], [1, 'rgba(255,200,0,0.7)']],
+                    x=X,
+                    y=Y,
+                    z=Z_lower,
+                    colorscale=[[0, "rgba(200,100,0,0.7)"], [1, "rgba(255,200,0,0.7)"]],
                     showscale=False,
                     name="Lower region",
                 ),
                 # Traveler
                 go.Scatter3d(
-                    x=[traveler_x], y=[traveler_y], z=[traveler_z],
+                    x=[traveler_x],
+                    y=[traveler_y],
+                    z=[traveler_z],
                     mode="markers",
                     marker=dict(size=8, color="white"),
                     name="Traveler",
@@ -1776,14 +2085,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1857,79 +2181,100 @@ def _(go, np):
         x = np.linspace(-5, 5, 200)
 
         # Normal matter (positive everywhere)
-        normal = np.exp(-x**2 / 2)
+        normal = np.exp(-(x**2) / 2)
 
         # Casimir effect (negative between plates)
-        casimir = np.where(np.abs(x) < 1, -0.3, 0) + 0.1 * np.exp(-x**2 / 4)
+        casimir = np.where(np.abs(x) < 1, -0.3, 0) + 0.1 * np.exp(-(x**2) / 4)
 
         # Warp bubble (negative at edges)
-        warp = np.exp(-(x-2)**2 / 0.3) + np.exp(-(x+2)**2 / 0.3) - \
-               0.8 * np.exp(-(x-1.5)**2 / 0.2) - 0.8 * np.exp(-(x+1.5)**2 / 0.2)
-
-        # Wormhole throat (negative to keep it open)
-        wormhole = np.exp(-x**2 / 0.5) - 1.5 * np.exp(-x**2 / 0.1)
+        warp = (
+            np.exp(-((x - 2) ** 2) / 0.3)
+            + np.exp(-((x + 2) ** 2) / 0.3)
+            - 0.8 * np.exp(-((x - 1.5) ** 2) / 0.2)
+            - 0.8 * np.exp(-((x + 1.5) ** 2) / 0.2)
+        )
 
         fig = go.Figure()
 
         # Normal matter
-        fig.add_trace(go.Scatter(
-            x=x, y=normal + 3,
-            mode="lines",
-            fill="tozeroy",
-            line=dict(color="cyan", width=2),
-            fillcolor="rgba(0, 255, 255, 0.3)",
-            name="Normal matter (ρ > 0)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=normal + 3,
+                mode="lines",
+                fill="tozeroy",
+                line=dict(color="cyan", width=2),
+                fillcolor="rgba(0, 255, 255, 0.3)",
+                name="Normal matter (ρ > 0)",
+            )
+        )
 
         # Zero line for normal matter
         fig.add_hline(y=3, line_dash="dot", line_color="white", opacity=0.3)
 
         # Casimir effect
-        fig.add_trace(go.Scatter(
-            x=x, y=casimir + 1.5,
-            mode="lines",
-            fill="tozeroy",
-            line=dict(color="yellow", width=2),
-            fillcolor="rgba(255, 255, 0, 0.3)",
-            name="Casimir effect",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=casimir + 1.5,
+                mode="lines",
+                fill="tozeroy",
+                line=dict(color="yellow", width=2),
+                fillcolor="rgba(255, 255, 0, 0.3)",
+                name="Casimir effect",
+            )
+        )
 
         # Plates
-        fig.add_vrect(x0=-1, x1=1, fillcolor="rgba(255,255,255,0.1)",
-                     line_width=0, layer="below")
-        fig.add_annotation(x=0, y=1.1, text="Between plates:<br>ρ < 0",
-                          font=dict(color="yellow", size=10), showarrow=False)
+        fig.add_vrect(x0=-1, x1=1, fillcolor="rgba(255,255,255,0.1)", line_width=0, layer="below")
+        fig.add_annotation(
+            x=0,
+            y=1.1,
+            text="Between plates:<br>ρ < 0",
+            font=dict(color="yellow", size=10),
+            showarrow=False,
+        )
 
         # Zero line for Casimir
         fig.add_hline(y=1.5, line_dash="dot", line_color="white", opacity=0.3)
 
         # Warp bubble
-        fig.add_trace(go.Scatter(
-            x=x, y=warp * 0.5,
-            mode="lines",
-            fill="tozeroy",
-            line=dict(color="magenta", width=2),
-            fillcolor="rgba(255, 0, 255, 0.3)",
-            name="Warp bubble edges",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=warp * 0.5,
+                mode="lines",
+                fill="tozeroy",
+                line=dict(color="magenta", width=2),
+                fillcolor="rgba(255, 0, 255, 0.3)",
+                name="Warp bubble edges",
+            )
+        )
 
         # Zero line for warp
         fig.add_hline(y=0, line_dash="dot", line_color="white", opacity=0.3)
 
         # Annotations
-        fig.add_annotation(x=-1.5, y=-0.4, text="Negative energy<br>(exotic matter)",
-                          font=dict(color="magenta", size=10), showarrow=True,
-                          arrowhead=2, ax=0, ay=-30)
+        fig.add_annotation(
+            x=-1.5,
+            y=-0.4,
+            text="Negative energy<br>(exotic matter)",
+            font=dict(color="magenta", size=10),
+            showarrow=True,
+            arrowhead=2,
+            ax=0,
+            ay=-30,
+        )
 
         fig.update_layout(
             title=dict(
                 text="<b>Exotic Matter:</b> Negative Energy Density<br><sub>Required for warp drives and wormholes</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Position", showgrid=True,
-                      gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Energy density (offset for clarity)", showgrid=False,
-                      showticklabels=False),
+            xaxis=dict(title="Position", showgrid=True, gridcolor="rgba(255,255,255,0.1)"),
+            yaxis=dict(
+                title="Energy density (offset for clarity)", showgrid=False, showticklabels=False
+            ),
             showlegend=True,
             legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
             plot_bgcolor="rgba(0,0,30,0.95)",
@@ -1938,7 +2283,9 @@ def _(go, np):
         return fig
 
     exotic_matter_fig = create_exotic_matter_visualization()
-    return create_exotic_matter_visualization, mo.ui.plotly(exotic_matter_fig, config=get_plotly_config())
+    return create_exotic_matter_visualization, mo.ui.plotly(
+        exotic_matter_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
@@ -2001,28 +2348,37 @@ def _(go, np):
 
             # Spacetime diagram: x (space) vs t (time)
             # Earth worldline (stationary)
-            frame_data.append(go.Scatter(
-                x=[0, 0], y=[0, 5],
-                mode="lines",
-                line=dict(color="cyan", width=3),
-                name="Earth",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 0],
+                    y=[0, 5],
+                    mode="lines",
+                    line=dict(color="cyan", width=3),
+                    name="Earth",
+                )
+            )
 
             # Distant star worldline (stationary, 2 light-years away)
-            frame_data.append(go.Scatter(
-                x=[2, 2], y=[0, 5],
-                mode="lines",
-                line=dict(color="orange", width=3),
-                name="Star (2 ly away)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[2, 2],
+                    y=[0, 5],
+                    mode="lines",
+                    line=dict(color="orange", width=3),
+                    name="Star (2 ly away)",
+                )
+            )
 
             # Light cones from origin
-            frame_data.append(go.Scatter(
-                x=[-5, 0, 5], y=[5, 0, 5],
-                mode="lines",
-                line=dict(color="yellow", width=1, dash="dash"),
-                name="Light cone",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-5, 0, 5],
+                    y=[5, 0, 5],
+                    mode="lines",
+                    line=dict(color="yellow", width=1, dash="dash"),
+                    name="Light cone",
+                )
+            )
 
             # The paradox journey:
             # 1. Warp from Earth to star (appears FTL in Earth frame)
@@ -2033,43 +2389,58 @@ def _(go, np):
                 p = progress / 0.3
                 ship_x = 0
                 ship_y = p * 1
-                frame_data.append(go.Scatter(
-                    x=[ship_x], y=[ship_y],
-                    mode="markers",
-                    marker=dict(size=12, color="white", symbol="diamond"),
-                    name="Ship",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[ship_x],
+                        y=[ship_y],
+                        mode="markers",
+                        marker=dict(size=12, color="white", symbol="diamond"),
+                        name="Ship",
+                    )
+                )
             elif progress < 0.5:
                 # Warp to star (FTL, nearly horizontal line)
                 p = (progress - 0.3) / 0.2
                 ship_x = p * 2
                 ship_y = 1 + p * 0.2  # Nearly horizontal = FTL
-                frame_data.append(go.Scatter(
-                    x=[0, ship_x], y=[1, ship_y],
-                    mode="lines",
-                    line=dict(color="magenta", width=3),
-                    name="Outbound (10c)",
-                ))
-                frame_data.append(go.Scatter(
-                    x=[ship_x], y=[ship_y],
-                    mode="markers",
-                    marker=dict(size=12, color="white", symbol="diamond"),
-                    name="Ship",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[0, ship_x],
+                        y=[1, ship_y],
+                        mode="lines",
+                        line=dict(color="magenta", width=3),
+                        name="Outbound (10c)",
+                    )
+                )
+                frame_data.append(
+                    go.Scatter(
+                        x=[ship_x],
+                        y=[ship_y],
+                        mode="markers",
+                        marker=dict(size=12, color="white", symbol="diamond"),
+                        name="Ship",
+                    )
+                )
             elif progress < 0.6:
                 # At star
-                frame_data.append(go.Scatter(
-                    x=[0, 2], y=[1, 1.2],
-                    mode="lines",
-                    line=dict(color="magenta", width=3),
-                    name="Outbound (10c)",
-                ))
-                frame_data.append(go.Scatter(
-                    x=[2], y=[1.2],
-                    mode="markers",
-                    marker=dict(size=12, color="white", symbol="diamond"),
-                    name="Ship at star",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[0, 2],
+                        y=[1, 1.2],
+                        mode="lines",
+                        line=dict(color="magenta", width=3),
+                        name="Outbound (10c)",
+                    )
+                )
+                frame_data.append(
+                    go.Scatter(
+                        x=[2],
+                        y=[1.2],
+                        mode="markers",
+                        marker=dict(size=12, color="white", symbol="diamond"),
+                        name="Ship at star",
+                    )
+                )
             else:
                 # Return trip in boosted frame - goes backward in Earth time!
                 p = (progress - 0.6) / 0.4
@@ -2077,46 +2448,61 @@ def _(go, np):
                 ship_y = 1.2 - p * 1.5  # Negative slope = backward in time!
 
                 # Show full outbound path
-                frame_data.append(go.Scatter(
-                    x=[0, 2], y=[1, 1.2],
-                    mode="lines",
-                    line=dict(color="magenta", width=3),
-                    name="Outbound (10c)",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[0, 2],
+                        y=[1, 1.2],
+                        mode="lines",
+                        line=dict(color="magenta", width=3),
+                        name="Outbound (10c)",
+                    )
+                )
                 # Return path
-                frame_data.append(go.Scatter(
-                    x=[2, ship_x], y=[1.2, ship_y],
-                    mode="lines",
-                    line=dict(color="red", width=3),
-                    name="Return (backward in time!)",
-                ))
-                frame_data.append(go.Scatter(
-                    x=[ship_x], y=[ship_y],
-                    mode="markers",
-                    marker=dict(size=12, color="white", symbol="diamond"),
-                    name="Ship",
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[2, ship_x],
+                        y=[1.2, ship_y],
+                        mode="lines",
+                        line=dict(color="red", width=3),
+                        name="Return (backward in time!)",
+                    )
+                )
+                frame_data.append(
+                    go.Scatter(
+                        x=[ship_x],
+                        y=[ship_y],
+                        mode="markers",
+                        marker=dict(size=12, color="white", symbol="diamond"),
+                        name="Ship",
+                    )
+                )
 
                 if progress > 0.95:
                     # Arrived before departure!
-                    frame_data.append(go.Scatter(
-                        x=[0.3], y=[0.5],
-                        mode="text",
-                        text=["ARRIVAL BEFORE<br>DEPARTURE!"],
-                        textfont=dict(size=14, color="red"),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[0.3],
+                            y=[0.5],
+                            mode="text",
+                            text=["ARRIVAL BEFORE<br>DEPARTURE!"],
+                            textfont=dict(size=14, color="red"),
+                            showlegend=False,
+                        )
+                    )
 
             # Departure event marker
-            frame_data.append(go.Scatter(
-                x=[0], y=[1],
-                mode="markers+text",
-                marker=dict(size=8, color="green"),
-                text=["Depart"],
-                textposition="middle left",
-                textfont=dict(size=10),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[1],
+                    mode="markers+text",
+                    marker=dict(size=8, color="green"),
+                    text=["Depart"],
+                    textposition="middle left",
+                    textfont=dict(size=10),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -2127,10 +2513,18 @@ def _(go, np):
                     text="<b>The Causality Paradox:</b> FTL Creates Time Loops<br><sub>Warp out fast enough, return in a different frame → arrive before you left</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(title="Space (light-years)", range=[-0.5, 3],
-                          showgrid=True, gridcolor="rgba(255,255,255,0.1)"),
-                yaxis=dict(title="Time (years)", range=[-0.5, 5],
-                          showgrid=True, gridcolor="rgba(255,255,255,0.1)"),
+                xaxis=dict(
+                    title="Space (light-years)",
+                    range=[-0.5, 3],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
+                yaxis=dict(
+                    title="Time (years)",
+                    range=[-0.5, 5],
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.1)",
+                ),
                 showlegend=True,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=10)),
                 plot_bgcolor="rgba(0,0,30,0.95)",
@@ -2142,14 +2536,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 60, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -2161,7 +2570,9 @@ def _(go, np):
         return fig
 
     causality_paradox_fig = create_causality_paradox_animation()
-    return create_causality_paradox_animation, mo.ui.plotly(causality_paradox_fig, config=get_plotly_config())
+    return create_causality_paradox_animation, mo.ui.plotly(
+        causality_paradox_fig, config=get_plotly_config()
+    )
 
 
 @app.cell
