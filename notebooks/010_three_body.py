@@ -354,15 +354,19 @@ def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
 
 @app.cell
 def _(fig8_animation, mo):
-    return mo.vstack(
-        [
-            fig8_animation,
-            mo.md(
-                "**The Figure-8 Orbit:** This remarkable solution, discovered in 1993 by Christopher Moore, shows three equal masses chasing each other along a figure-8 path. All three bodies follow the *exact same curve* in space, just offset in time. This is one of very few known stable periodic solutions to the three-body problem."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(fig8_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Figure-8 Orbit:** This remarkable solution, discovered in 1993 by Christopher Moore, shows three equal masses chasing each other along a figure-8 path. All three bodies follow the *exact same curve* in space, just offset in time. This is one of very few known stable periodic solutions to the three-body problem."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -439,15 +443,19 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(chaos_animation, mo):
-    return mo.vstack(
-        [
-            chaos_animation,
-            mo.md(
-                "**Chaotic Motion:** Three bodies with unequal masses (shown by size) interact gravitationally. Notice how the system alternates between close encounters and wider separations. The orange 'sun' dominates gravitationally, but the other bodies can temporarily escape its influence before being pulled back."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(chaos_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Chaotic Motion:** Three bodies with unequal masses (shown by size) interact gravitationally. Notice how the system alternates between close encounters and wider separations. The orange 'sun' dominates gravitationally, but the other bodies can temporarily escape its influence before being pulled back."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -661,15 +669,19 @@ def _(COLORS, create_play_pause_buttons, go, np, simulate_three_body):
 
 @app.cell
 def _(butterfly_fig, mo):
-    return mo.vstack(
-        [
-            butterfly_fig,
-            mo.md(
-                "**The Butterfly Effect:** Two identical three-body systems—except one body starts just 0.0001 units away. At first they move together (solid circles and dotted diamonds overlap). But tiny differences amplify exponentially. By the end, the systems have completely different configurations. This is why long-term prediction is fundamentally impossible."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(butterfly_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Butterfly Effect:** Two identical three-body systems—except one body starts just 0.0001 units away. At first they move together (solid circles and dotted diamonds overlap). But tiny differences amplify exponentially. By the end, the systems have completely different configurations. This is why long-term prediction is fundamentally impossible."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -953,15 +965,19 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
 @app.cell
 def _(mo, trisolaris_fig):
-    return mo.vstack(
-        [
-            trisolaris_fig,
-            mo.md(
-                "**The Trisolaran System (Chaotic):** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(trisolaris_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Trisolaran System (Chaotic):** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1249,15 +1265,19 @@ def _(COLORS, go, np):
 
 @app.cell
 def _(mo, stable_trisolaris_fig):
-    return mo.vstack(
-        [
-            stable_trisolaris_fig,
-            mo.md(
-                "**Stable Trisolaran Configuration:** The secret is hierarchy! The planet (blue) orbits the tight binary pair (gold and orange suns) at a safe distance, while the third sun (red) is far enough away that its gravitational perturbations are gentle. This is how real planets survive in triple-star systems like Alpha Centauri. The planet experiences predictable **Stable Eras** indefinitely."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(stable_trisolaris_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Stable Trisolaran Configuration:** The secret is hierarchy! The planet (blue) orbits the tight binary pair (gold and orange suns) at a safe distance, while the third sun (red) is far enough away that its gravitational perturbations are gentle. This is how real planets survive in triple-star systems like Alpha Centauri. The planet experiences predictable **Stable Eras** indefinitely."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1332,15 +1352,19 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(eject_animation, mo):
-    return mo.vstack(
-        [
-            eject_animation,
-            mo.md(
-                "**Ejection Scenario:** Two massive bodies (orange and gold) dominate, while a lighter body (pink) gets progressively more energy from close encounters. Eventually, the light body may gain enough energy to escape entirely, leaving a stable binary behind. This is the most common long-term fate of three-body systems."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(eject_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Ejection Scenario:** Two massive bodies (orange and gold) dominate, while a lighter body (pink) gets progressively more energy from close encounters. Eventually, the light body may gain enough energy to escape entirely, leaving a stable binary behind. This is the most common long-term fate of three-body systems."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1399,15 +1423,19 @@ def _(COLORS, create_three_body_animation, np, simulate_three_body):
 
 @app.cell
 def _(hier_animation, mo):
-    return mo.vstack(
-        [
-            hier_animation,
-            mo.md(
-                "**Hierarchical System:** A close binary pair (orange and gold) with a distant third body (green) orbiting them both. This configuration can be stable for long periods—the third body 'sees' the binary as roughly a single mass. Many real triple-star systems have this structure. But perturbations can eventually destabilize even these systems."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(hier_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Hierarchical System:** A close binary pair (orange and gold) with a distant third body (green) orbiting them both. This configuration can be stable for long periods—the third body 'sees' the binary as roughly a single mass. Many real triple-star systems have this structure. But perturbations can eventually destabilize even these systems."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell

@@ -17,6 +17,7 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
     return (
@@ -29,6 +30,7 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
         go,
         mo,
         np,
@@ -268,16 +270,21 @@ def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
 
 
 @app.cell
-def _(ellipse_fig, mo):
-    return mo.vstack(
-        [
-            mo.ui.plotly(ellipse_fig, config=get_plotly_config()),
-            mo.md(
-                "**What this shows:** A planet orbiting the Sun in an elliptical orbit (eccentricity e=0.6). The **orange dashed line** (r₁) shows the distance to the Sun, while the **green dashed line** (r₂) shows the distance to the empty focus. Notice that r₁ + r₂ remains constant throughout the orbit—this is the defining property of an ellipse. Click Play to see the orbit in motion."
-            ),
-        ],
-        align="center",
+def _(ellipse_fig, get_plotly_config, mo):
+    ellipse_plot = mo.ui.plotly(ellipse_fig, config=get_plotly_config())
+    mo.output.replace(ellipse_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                ellipse_plot,
+                mo.md(
+                    "**What this shows:** A planet orbiting the Sun in an elliptical orbit (eccentricity e=0.6). The **orange dashed line** (r₁) shows the distance to the Sun, while the **green dashed line** (r₂) shows the distance to the empty focus. Notice that r₁ + r₂ remains constant throughout the orbit—this is the defining property of an ellipse. Click Play to see the orbit in motion."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -601,16 +608,21 @@ def _(go, np):
 
 
 @app.cell
-def _(equal_areas_fig, mo):
-    return mo.vstack(
-        [
-            mo.ui.plotly(equal_areas_fig, config=get_plotly_config()),
-            mo.md(
-                "**What this shows:** Each colored wedge represents the same time interval. The planet sweeps out **equal areas** in **equal times**—Kepler's Second Law. Notice how wedges near the Sun (right side) are short and wide, while those far from the Sun (left side) are long and narrow. The planet must move faster when closer to the Sun to sweep out the same area."
-            ),
-        ],
-        align="center",
+def _(equal_areas_fig, get_plotly_config, mo):
+    equal_areas_plot = mo.ui.plotly(equal_areas_fig, config=get_plotly_config())
+    mo.output.replace(equal_areas_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                equal_areas_plot,
+                mo.md(
+                    "**What this shows:** Each colored wedge represents the same time interval. The planet sweeps out **equal areas** in **equal times**—Kepler's Second Law. Notice how wedges near the Sun (right side) are short and wide, while those far from the Sun (left side) are long and narrow. The planet must move faster when closer to the Sun to sweep out the same area."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -701,7 +713,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, mo, np):
     # Planetary data (real values)
     planets_raw = [
         {"Planet": "Mercury", "a (AU)": 0.387, "T (years)": 0.241, "Eccentricity": 0.206},
@@ -772,6 +784,7 @@ def _(go, np):
         hovermode="closest",
     )
 
+    mo.output.replace(mo.md(""))
     return (
         T_squared,
         T_theory,
@@ -891,7 +904,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Compare different power laws
     r = np.linspace(0.5, 5, 100)
 
@@ -945,7 +958,9 @@ def _(go, np):
         hovermode="x unified",
     )
 
-    return (inv_r1, inv_r2, inv_r3, mo.ui.plotly(inverse_square_fig, config=get_plotly_config()), r)
+    inverse_square_plot = mo.ui.plotly(inverse_square_fig, config=get_plotly_config())
+    mo.output.replace(inverse_square_plot)
+    return (inv_r1, inv_r2, inv_r3, inverse_square_plot, r)
 
 
 @app.cell
@@ -1230,16 +1245,21 @@ def _(go, np):
 
 
 @app.cell
-def _(cannon_fig, mo):
-    return mo.vstack(
-        [
-            mo.ui.plotly(cannon_fig, config=get_plotly_config()),
-            mo.md(
-                "**What this shows:** Newton's famous thought experiment demonstrating that **orbiting is just falling**. At low velocity (red), the cannonball falls to Earth. At higher velocities (yellow, green), it curves around Earth. At exactly the right velocity (green), Earth's surface curves away as fast as the ball falls—creating a circular orbit. Faster still (blue) creates an elliptical orbit. The Moon is simply 'falling around' Earth!"
-            ),
-        ],
-        align="center",
+def _(cannon_fig, get_plotly_config, mo):
+    cannon_plot = mo.ui.plotly(cannon_fig, config=get_plotly_config())
+    mo.output.replace(cannon_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                cannon_plot,
+                mo.md(
+                    "**What this shows:** Newton's famous thought experiment demonstrating that **orbiting is just falling**. At low velocity (red), the cannonball falls to Earth. At higher velocities (yellow, green), it curves around Earth. At exactly the right velocity (green), Earth's surface curves away as fast as the ball falls—creating a circular orbit. Faster still (blue) creates an elliptical orbit. The Moon is simply 'falling around' Earth!"
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1297,7 +1317,7 @@ def _(mo):
 
 
 @app.cell
-def _(eccentricity_slider, go, np):
+def _(eccentricity_slider, get_plotly_config, go, mo, np):
     def plot_orbit_with_eccentricity(e):
         """Plot an orbit with given eccentricity."""
         a = 1.0
@@ -1404,8 +1424,10 @@ def _(eccentricity_slider, go, np):
         return fig
 
     orbit_explorer_fig = plot_orbit_with_eccentricity(eccentricity_slider.value)
+    orbit_explorer_plot = mo.ui.plotly(orbit_explorer_fig, config=get_plotly_config())
+    mo.output.replace(orbit_explorer_plot)
     return (
-        mo.ui.plotly(orbit_explorer_fig, config=get_plotly_config()),
+        orbit_explorer_plot,
         plot_orbit_with_eccentricity,
     )
 
@@ -1703,16 +1725,21 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, tidal_fig):
-    return mo.vstack(
-        [
-            mo.ui.plotly(tidal_fig, config=get_plotly_config()),
-            mo.md(
-                "**What this shows:** The Moon's gravity pulls more strongly on the <span style='color:cyan'>**near side**</span> of Earth (cyan) than on its center, and more on the center than on the <span style='color:orange'>**far side**</span> (orange). These *differential* forces stretch Earth along the Earth-Moon line. The red star marks a coastal city rotating through two high tides per day. Arrows show the relative strength of the Moon's gravitational pull at different locations."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, mo, tidal_fig):
+    tidal_plot = mo.ui.plotly(tidal_fig, config=get_plotly_config())
+    mo.output.replace(tidal_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                tidal_plot,
+                mo.md(
+                    "**What this shows:** The Moon's gravity pulls more strongly on the <span style='color:cyan'>**near side**</span> of Earth (cyan) than on its center, and more on the center than on the <span style='color:orange'>**far side**</span> (orange). These *differential* forces stretch Earth along the Earth-Moon line. The red star marks a coastal city rotating through two high tides per day. Arrows show the relative strength of the Moon's gravitational pull at different locations."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell

@@ -16,9 +16,22 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, SCENE_3D, G, C, M_SUN, create_play_pause_buttons, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        G,
+        C,
+        M_SUN,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -91,7 +104,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Schwarzschild radius and escape velocity
     def create_schwarzschild_animation():
         n_frames = 100
@@ -260,9 +273,11 @@ def _(go, np):
         return fig
 
     schwarzschild_fig = create_schwarzschild_animation()
+    schwarzschild_plot = mo.ui.plotly(schwarzschild_fig, config=get_plotly_config())
+    mo.output.replace(schwarzschild_plot)
     return (
         create_schwarzschild_animation,
-        mo.ui.plotly(schwarzschild_fig, config=get_plotly_config()),
+        schwarzschild_plot,
     )
 
 
@@ -320,7 +335,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Light cones tilting near a black hole
     def create_light_cone_animation():
         n_frames = 80
@@ -536,7 +551,9 @@ def _(go, np):
         return fig
 
     light_cone_fig = create_light_cone_animation()
-    return (create_light_cone_animation, mo.ui.plotly(light_cone_fig, config=get_plotly_config()))
+    light_cone_plot = mo.ui.plotly(light_cone_fig, config=get_plotly_config())
+    mo.output.replace(light_cone_plot)
+    return (create_light_cone_animation, light_cone_plot)
 
 
 @app.cell
@@ -603,7 +620,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Gravitational time dilation near black hole
     def create_time_dilation_animation():
         n_frames = 120
@@ -797,9 +814,11 @@ def _(go, np):
         return fig
 
     time_dilation_fig = create_time_dilation_animation()
+    time_dilation_plot = mo.ui.plotly(time_dilation_fig, config=get_plotly_config())
+    mo.output.replace(time_dilation_plot)
     return (
         create_time_dilation_animation,
-        mo.ui.plotly(time_dilation_fig, config=get_plotly_config()),
+        time_dilation_plot,
     )
 
 
@@ -862,7 +881,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Gravitational redshift
     def create_redshift_animation():
         n_frames = 100
@@ -1076,7 +1095,9 @@ def _(go, np):
         return fig
 
     redshift_fig = create_redshift_animation()
-    return (create_redshift_animation, mo.ui.plotly(redshift_fig, config=get_plotly_config()))
+    redshift_plot = mo.ui.plotly(redshift_fig, config=get_plotly_config())
+    mo.output.replace(redshift_plot)
+    return (create_redshift_animation, redshift_plot)
 
 
 @app.cell
@@ -1139,7 +1160,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Visualization: Embedding diagram of curved space
     def create_embedding_diagram():
         # Create a 3D embedding of 2D curved space (Flamm's paraboloid)
@@ -1247,7 +1268,9 @@ def _(go, np):
         return fig
 
     embedding_fig = create_embedding_diagram()
-    return (create_embedding_diagram, mo.ui.plotly(embedding_fig, config=get_plotly_config()))
+    embedding_plot = mo.ui.plotly(embedding_fig, config=get_plotly_config())
+    mo.output.replace(embedding_plot)
+    return (create_embedding_diagram, embedding_plot)
 
 
 @app.cell
@@ -1322,7 +1345,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Interior of black hole (Kruskal-like diagram)
     def create_interior_animation():
         n_frames = 100
@@ -1570,7 +1593,9 @@ def _(go, np):
         return fig
 
     interior_fig = create_interior_animation()
-    return (create_interior_animation, mo.ui.plotly(interior_fig, config=get_plotly_config()))
+    interior_plot = mo.ui.plotly(interior_fig, config=get_plotly_config())
+    mo.output.replace(interior_plot)
+    return (create_interior_animation, interior_plot)
 
 
 @app.cell
@@ -1640,7 +1665,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Visualization: Rotating black hole (Kerr) with ergosphere
     def create_kerr_black_hole():
         # Parameters
@@ -1764,7 +1789,9 @@ def _(go, np):
         return fig
 
     kerr_fig = create_kerr_black_hole()
-    return (create_kerr_black_hole, mo.ui.plotly(kerr_fig, config=get_plotly_config()))
+    kerr_plot = mo.ui.plotly(kerr_fig, config=get_plotly_config())
+    mo.output.replace(kerr_plot)
+    return (create_kerr_black_hole, kerr_plot)
 
 
 @app.cell
@@ -1844,7 +1871,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Hawking radiation concept
     def create_hawking_animation():
         n_frames = 120
@@ -2051,7 +2078,9 @@ def _(go, np):
         return fig
 
     hawking_fig = create_hawking_animation()
-    return (create_hawking_animation, mo.ui.plotly(hawking_fig, config=get_plotly_config()))
+    hawking_plot = mo.ui.plotly(hawking_fig, config=get_plotly_config())
+    mo.output.replace(hawking_plot)
+    return (create_hawking_animation, hawking_plot)
 
 
 @app.cell

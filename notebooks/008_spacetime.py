@@ -16,9 +16,10 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, SCENE_3D, C, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, C, create_play_pause_buttons, get_plotly_config, go, mo, np
 
 
 @app.cell
@@ -103,7 +104,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_light_clock_animation():
         """Animate the light clock thought experiment showing time dilation."""
         n_frames = 60
@@ -248,7 +249,9 @@ def _(go, np):
         return fig
 
     light_clock_fig = create_light_clock_animation()
-    return (create_light_clock_animation, mo.ui.plotly(light_clock_fig, config=get_plotly_config()))
+    light_clock_plot = mo.ui.plotly(light_clock_fig, config=get_plotly_config())
+    mo.output.replace(light_clock_plot)
+    return (create_light_clock_animation, light_clock_plot)
 
 
 @app.cell
@@ -309,7 +312,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np, velocity_slider):
+def _(get_plotly_config, go, mo, np, velocity_slider):
     v = velocity_slider.value
     if v >= 1:
         v = 0.999
@@ -350,7 +353,9 @@ def _(go, np, velocity_slider):
         showlegend=True,
     )
 
-    return mo.ui.plotly(gamma_fig, config=get_plotly_config()), gamma_val, gammas, v, velocities
+    gamma_plot = mo.ui.plotly(gamma_fig, config=get_plotly_config())
+    mo.output.replace(gamma_plot)
+    return gamma_plot, gamma_val, gammas, v, velocities
 
 
 @app.cell
@@ -387,7 +392,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_length_contraction_animation():
         """Animate length contraction of a spaceship."""
         n_frames = 60
@@ -537,8 +542,10 @@ def _(go, np):
         return fig
 
     contraction_fig = create_length_contraction_animation()
+    contraction_plot = mo.ui.plotly(contraction_fig, config=get_plotly_config())
+    mo.output.replace(contraction_plot)
     return (
-        mo.ui.plotly(contraction_fig, config=get_plotly_config()),
+        contraction_plot,
         create_length_contraction_animation,
     )
 
@@ -582,7 +589,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_simultaneity_animation():
         """Animate the relativity of simultaneity with Einstein's train."""
         n_frames = 60
@@ -801,9 +808,11 @@ def _(go, np):
         return fig
 
     simultaneity_fig = create_simultaneity_animation()
+    simultaneity_plot = mo.ui.plotly(simultaneity_fig, config=get_plotly_config())
+    mo.output.replace(simultaneity_plot)
     return (
         create_simultaneity_animation,
-        mo.ui.plotly(simultaneity_fig, config=get_plotly_config()),
+        simultaneity_plot,
     )
 
 
@@ -837,7 +846,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_spacetime_diagram():
         """Create an interactive spacetime diagram."""
         # Light cone
@@ -1031,7 +1040,9 @@ def _(go, np):
         return fig
 
     spacetime_fig = create_spacetime_diagram()
-    return (create_spacetime_diagram, mo.ui.plotly(spacetime_fig, config=get_plotly_config()))
+    spacetime_plot = mo.ui.plotly(spacetime_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_plot)
+    return (create_spacetime_diagram, spacetime_plot)
 
 
 @app.cell
@@ -1126,7 +1137,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # E vs v showing rest energy and kinetic energy
     v_range = np.linspace(0, 0.99, 100)
     gamma_range = 1 / np.sqrt(1 - v_range**2)
@@ -1188,9 +1199,11 @@ def _(go, np):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
     )
 
+    energy_plot = mo.ui.plotly(energy_fig, config=get_plotly_config())
+    mo.output.replace(energy_plot)
     return (
         classical_ke,
-        mo.ui.plotly(energy_fig, config=get_plotly_config()),
+        energy_plot,
         gamma_range,
         kinetic_energy,
         rest_energy,

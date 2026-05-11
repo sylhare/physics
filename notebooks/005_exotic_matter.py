@@ -17,6 +17,7 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
     return (
@@ -26,6 +27,7 @@ def _():
         C,
         G,
         create_play_pause_buttons,
+        get_plotly_config,
         go,
         make_subplots,
         mo,
@@ -128,7 +130,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_historical_timeline():
         """Create a visual timeline of exotic matter research."""
         events = [
@@ -213,7 +215,9 @@ def _(go, np):
         return fig
 
     timeline_fig = create_historical_timeline()
-    return create_historical_timeline, mo.ui.plotly(timeline_fig, config=get_plotly_config())
+    timeline_plot = mo.ui.plotly(timeline_fig, config=get_plotly_config())
+    mo.output.replace(timeline_plot)
+    return create_historical_timeline, timeline_plot
 
 
 @app.cell
@@ -318,7 +322,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_energy_conditions_visualization():
         """Visualize the energy conditions in ρ-p space."""
 
@@ -443,9 +447,9 @@ def _(go, np):
         return fig
 
     energy_conditions_fig = create_energy_conditions_visualization()
-    return create_energy_conditions_visualization, mo.ui.plotly(
-        energy_conditions_fig, config=get_plotly_config()
-    )
+    energy_conditions_plot = mo.ui.plotly(energy_conditions_fig, config=get_plotly_config())
+    mo.output.replace(energy_conditions_plot)
+    return create_energy_conditions_visualization, energy_conditions_plot
 
 
 @app.cell
@@ -503,7 +507,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_casimir_animation():
         """Animate the Casimir effect and vacuum fluctuations."""
         n_frames = 80
@@ -707,7 +711,9 @@ def _(go, np):
         return fig
 
     casimir_fig = create_casimir_animation()
-    return create_casimir_animation, mo.ui.plotly(casimir_fig, config=get_plotly_config())
+    casimir_plot = mo.ui.plotly(casimir_fig, config=get_plotly_config())
+    mo.output.replace(casimir_plot)
+    return create_casimir_animation, casimir_plot
 
 
 @app.cell
@@ -761,7 +767,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_quantum_inequality_animation():
         """Visualize the quantum inequality constraint."""
         n_frames = 100
@@ -939,9 +945,9 @@ def _(go, np):
         return fig
 
     quantum_inequality_fig = create_quantum_inequality_animation()
-    return create_quantum_inequality_animation, mo.ui.plotly(
-        quantum_inequality_fig, config=get_plotly_config()
-    )
+    quantum_inequality_plot = mo.ui.plotly(quantum_inequality_fig, config=get_plotly_config())
+    mo.output.replace(quantum_inequality_plot)
+    return create_quantum_inequality_animation, quantum_inequality_plot
 
 
 @app.cell
@@ -1000,7 +1006,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_squeezed_vacuum_animation():
         """Visualize squeezed vacuum states and negative energy density."""
         n_frames = 80
@@ -1194,9 +1200,9 @@ def _(go, np):
         return fig
 
     squeezed_vacuum_fig = create_squeezed_vacuum_animation()
-    return create_squeezed_vacuum_animation, mo.ui.plotly(
-        squeezed_vacuum_fig, config=get_plotly_config()
-    )
+    squeezed_vacuum_plot = mo.ui.plotly(squeezed_vacuum_fig, config=get_plotly_config())
+    mo.output.replace(squeezed_vacuum_plot)
+    return create_squeezed_vacuum_animation, squeezed_vacuum_plot
 
 
 @app.cell
@@ -1253,7 +1259,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_research_directions_visualization():
         """Visualize the gap between what we have and what we need."""
 
@@ -1330,9 +1336,9 @@ def _(go, np):
         return fig
 
     research_fig = create_research_directions_visualization()
-    return create_research_directions_visualization, mo.ui.plotly(
-        research_fig, config=get_plotly_config()
-    )
+    research_plot = mo.ui.plotly(research_fig, config=get_plotly_config())
+    mo.output.replace(research_plot)
+    return create_research_directions_visualization, research_plot
 
 
 @app.cell
@@ -1399,7 +1405,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_analog_gravity_animation():
         """Visualize analog gravity in a flowing fluid."""
         n_frames = 60
@@ -1588,9 +1594,9 @@ def _(go, np):
         return fig
 
     analog_gravity_fig = create_analog_gravity_animation()
-    return create_analog_gravity_animation, mo.ui.plotly(
-        analog_gravity_fig, config=get_plotly_config()
-    )
+    analog_gravity_plot = mo.ui.plotly(analog_gravity_fig, config=get_plotly_config())
+    mo.output.replace(analog_gravity_plot)
+    return create_analog_gravity_animation, analog_gravity_plot
 
 
 @app.cell
@@ -1834,7 +1840,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_self_consistency_visualization():
         """Visualize the self-consistency challenge for exotic matter."""
         n_frames = 80
@@ -2020,9 +2026,9 @@ def _(go, np):
         return fig
 
     self_consistency_fig = create_self_consistency_visualization()
-    return create_self_consistency_visualization, mo.ui.plotly(
-        self_consistency_fig, config=get_plotly_config()
-    )
+    self_consistency_plot = mo.ui.plotly(self_consistency_fig, config=get_plotly_config())
+    mo.output.replace(self_consistency_plot)
+    return create_self_consistency_visualization, self_consistency_plot
 
 
 @app.cell

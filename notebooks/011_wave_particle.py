@@ -16,9 +16,21 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, SCENE_3D, G, C, create_play_pause_buttons, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        G,
+        C,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -87,7 +99,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_wave_interference_animation():
         """Animate two-source wave interference."""
         n_frames = 40
@@ -181,9 +193,9 @@ def _(go, np):
         return fig
 
     wave_interference_fig = create_wave_interference_animation()
-    return create_wave_interference_animation, mo.ui.plotly(
-        wave_interference_fig, config=get_plotly_config()
-    )
+    wave_interference_plot = mo.ui.plotly(wave_interference_fig, config=get_plotly_config())
+    mo.output.replace(wave_interference_plot)
+    return create_wave_interference_animation, wave_interference_plot
 
 
 @app.cell
@@ -226,7 +238,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_photoelectric_animation():
         """Animate the photoelectric effect."""
         n_frames = 60
@@ -290,7 +302,7 @@ def _(go, np):
                     if progress < 1.5:
                         # Electron ejected upward with some spread
                         e_y = -0.5 + progress * 2.5
-                        e_x = x_pos + 0.3 * np.sin(j) * progress
+                        e_x = x_pos + 0.3 * np.sin(_j) * progress
                         electron_x.append(e_x)
                         electron_y.append(e_y)
 
@@ -374,9 +386,9 @@ def _(go, np):
         return fig
 
     photoelectric_fig = create_photoelectric_animation()
-    return create_photoelectric_animation, mo.ui.plotly(
-        photoelectric_fig, config=get_plotly_config()
-    )
+    photoelectric_plot = mo.ui.plotly(photoelectric_fig, config=get_plotly_config())
+    mo.output.replace(photoelectric_plot)
+    return create_photoelectric_animation, photoelectric_plot
 
 
 @app.cell
@@ -417,7 +429,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_double_slit_animation():
         """Animate particles building up an interference pattern."""
         n_frames = 80
@@ -595,7 +607,9 @@ def _(go, np):
         return fig
 
     double_slit_fig = create_double_slit_animation()
-    return create_double_slit_animation, mo.ui.plotly(double_slit_fig, config=get_plotly_config())
+    double_slit_plot = mo.ui.plotly(double_slit_fig, config=get_plotly_config())
+    mo.output.replace(double_slit_plot)
+    return create_double_slit_animation, double_slit_plot
 
 
 @app.cell
@@ -635,7 +649,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_measurement_comparison():
         """Show interference vs no interference when measuring."""
         x = np.linspace(-8, 8, 200)
@@ -693,7 +707,9 @@ def _(go, np):
         return fig
 
     measurement_fig = create_measurement_comparison()
-    return create_measurement_comparison, mo.ui.plotly(measurement_fig, config=get_plotly_config())
+    measurement_plot = mo.ui.plotly(measurement_fig, config=get_plotly_config())
+    mo.output.replace(measurement_plot)
+    return create_measurement_comparison, measurement_plot
 
 
 @app.cell
@@ -757,7 +773,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_debroglie_animation():
         """Animate de Broglie wavelength for different masses."""
         n_frames = 60
@@ -868,7 +884,9 @@ def _(go, np):
         return fig
 
     debroglie_fig = create_debroglie_animation()
-    return create_debroglie_animation, mo.ui.plotly(debroglie_fig, config=get_plotly_config())
+    debroglie_plot = mo.ui.plotly(debroglie_fig, config=get_plotly_config())
+    mo.output.replace(debroglie_plot)
+    return create_debroglie_animation, debroglie_plot
 
 
 @app.cell
@@ -1007,16 +1025,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, uncertainty_fig):
-    return mo.vstack(
-        [
-            uncertainty_fig,
-            mo.md(
-                "**What this shows:** The unavoidable tradeoff between knowing position and momentum. A tightly localized wave packet (cyan, top) has well-defined position but its momentum is spread across many values. A broadly spread wave (orange, bottom) has more definite momentum but could be found almost anywhere. The product Δx·Δp can never be smaller than ℏ/2—this isn't a measurement limitation, it's how nature works."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, mo, uncertainty_fig):
+    _widget = mo.ui.plotly(uncertainty_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** The unavoidable tradeoff between knowing position and momentum. A tightly localized wave packet (cyan, top) has well-defined position but its momentum is spread across many values. A broadly spread wave (orange, bottom) has more definite momentum but could be found almost anywhere. The product Δx·Δp can never be smaller than ℏ/2—this isn't a measurement limitation, it's how nature works."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1112,7 +1134,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_path_integral_animation():
         """Visualize Feynman path integral concept."""
         n_frames = 50
@@ -1248,9 +1270,9 @@ def _(go, np):
         return fig
 
     path_integral_fig = create_path_integral_animation()
-    return create_path_integral_animation, mo.ui.plotly(
-        path_integral_fig, config=get_plotly_config()
-    )
+    path_integral_plot = mo.ui.plotly(path_integral_fig, config=get_plotly_config())
+    mo.output.replace(path_integral_plot)
+    return create_path_integral_animation, path_integral_plot
 
 
 @app.cell

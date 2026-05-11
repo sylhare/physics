@@ -16,9 +16,21 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, SCENE_3D, G, C, create_play_pause_buttons, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        G,
+        C,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -90,7 +102,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Magnetic field around a current-carrying wire
     def create_wire_field_animation():
         n_frames = 60
@@ -231,7 +243,9 @@ def _(go, np):
         return fig
 
     wire_field_fig = create_wire_field_animation()
-    return (create_wire_field_animation, mo.ui.plotly(wire_field_fig, config=get_plotly_config()))
+    wire_field_plot = mo.ui.plotly(wire_field_fig, config=get_plotly_config())
+    mo.output.replace(wire_field_plot)
+    return (create_wire_field_animation, wire_field_plot)
 
 
 @app.cell
@@ -289,7 +303,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Magnetic field in a solenoid
     def create_solenoid_animation():
         n_frames = 60
@@ -441,7 +455,9 @@ def _(go, np):
         return fig
 
     solenoid_fig = create_solenoid_animation()
-    return (create_solenoid_animation, mo.ui.plotly(solenoid_fig, config=get_plotly_config()))
+    solenoid_plot = mo.ui.plotly(solenoid_fig, config=get_plotly_config())
+    mo.output.replace(solenoid_plot)
+    return (create_solenoid_animation, solenoid_plot)
 
 
 @app.cell
@@ -497,7 +513,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Force on a current-carrying wire in a magnetic field
     def create_wire_force_animation():
         n_frames = 80
@@ -636,7 +652,9 @@ def _(go, np):
         return fig
 
     wire_force_fig = create_wire_force_animation()
-    return (create_wire_force_animation, mo.ui.plotly(wire_force_fig, config=get_plotly_config()))
+    wire_force_plot = mo.ui.plotly(wire_force_fig, config=get_plotly_config())
+    mo.output.replace(wire_force_plot)
+    return (create_wire_force_animation, wire_force_plot)
 
 
 @app.cell
@@ -695,7 +713,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Faraday's induction - magnet moving through coil
     def create_induction_animation():
         n_frames = 120
@@ -887,7 +905,9 @@ def _(go, np):
         return fig
 
     induction_fig = create_induction_animation()
-    return (create_induction_animation, mo.ui.plotly(induction_fig, config=get_plotly_config()))
+    induction_plot = mo.ui.plotly(induction_fig, config=get_plotly_config())
+    mo.output.replace(induction_plot)
+    return (create_induction_animation, induction_plot)
 
 
 @app.cell
@@ -944,7 +964,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: DC Motor operation
     def create_dc_motor_animation():
         n_frames = 120
@@ -1205,7 +1225,9 @@ def _(go, np):
         return fig
 
     dc_motor_fig = create_dc_motor_animation()
-    return (create_dc_motor_animation, mo.ui.plotly(dc_motor_fig, config=get_plotly_config()))
+    dc_motor_plot = mo.ui.plotly(dc_motor_fig, config=get_plotly_config())
+    mo.output.replace(dc_motor_plot)
+    return (create_dc_motor_animation, dc_motor_plot)
 
 
 @app.cell
@@ -1264,7 +1286,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: AC Induction Motor with rotating magnetic field
     def create_ac_motor_animation():
         n_frames = 120
@@ -1473,7 +1495,9 @@ def _(go, np):
         return fig
 
     ac_motor_fig = create_ac_motor_animation()
-    return (create_ac_motor_animation, mo.ui.plotly(ac_motor_fig, config=get_plotly_config()))
+    ac_motor_plot = mo.ui.plotly(ac_motor_fig, config=get_plotly_config())
+    mo.output.replace(ac_motor_plot)
+    return (create_ac_motor_animation, ac_motor_plot)
 
 
 @app.cell
@@ -1530,7 +1554,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Stepper motor operation
     def create_stepper_animation():
         n_frames = 100
@@ -1727,7 +1751,9 @@ def _(go, np):
         return fig
 
     stepper_fig = create_stepper_animation()
-    return (create_stepper_animation, mo.ui.plotly(stepper_fig, config=get_plotly_config()))
+    stepper_plot = mo.ui.plotly(stepper_fig, config=get_plotly_config())
+    mo.output.replace(stepper_plot)
+    return (create_stepper_animation, stepper_plot)
 
 
 @app.cell
@@ -1786,7 +1812,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: AC Generator
     def create_generator_animation():
         n_frames = 120
@@ -2033,7 +2059,9 @@ def _(go, np):
         return fig
 
     generator_fig = create_generator_animation()
-    return (create_generator_animation, mo.ui.plotly(generator_fig, config=get_plotly_config()))
+    generator_plot = mo.ui.plotly(generator_fig, config=get_plotly_config())
+    mo.output.replace(generator_plot)
+    return (create_generator_animation, generator_plot)
 
 
 @app.cell

@@ -17,6 +17,7 @@ def _():
         DARK_THEME,
         SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
     return (
@@ -25,6 +26,7 @@ def _():
         SCENE_3D,
         C,
         create_play_pause_buttons,
+        get_plotly_config,
         go,
         make_subplots,
         mo,
@@ -141,7 +143,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_1d_spacetime_animation():
         """Animate motion in 1+1 dimensional spacetime."""
         n_frames = 100
@@ -291,9 +293,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_1d_fig = create_1d_spacetime_animation()
+    spacetime_1d_plot = mo.ui.plotly(spacetime_1d_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_1d_plot)
     return (
         create_1d_spacetime_animation,
-        mo.ui.plotly(spacetime_1d_fig, config=get_plotly_config()),
+        spacetime_1d_plot,
     )
 
 
@@ -335,7 +339,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_2d_time_animation():
         """Visualize 1 space + 2 time dimensions."""
         n_frames = 80
@@ -468,7 +472,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     time_2d_fig = create_2d_time_animation()
-    return (create_2d_time_animation, mo.ui.plotly(time_2d_fig, config=get_plotly_config()))
+    time_2d_plot = mo.ui.plotly(time_2d_fig, config=get_plotly_config())
+    mo.output.replace(time_2d_plot)
+    return (create_2d_time_animation, time_2d_plot)
 
 
 @app.cell
@@ -547,7 +553,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_spacetime_dimensions_animation():
         """Show 2D, 3D, and 4D spacetime representations."""
         n_frames = 80
@@ -814,14 +820,16 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_dim_fig = create_spacetime_dimensions_animation()
+    spacetime_dim_plot = mo.ui.plotly(spacetime_dim_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_dim_plot)
     return (
         create_spacetime_dimensions_animation,
-        mo.ui.plotly(spacetime_dim_fig, config=get_plotly_config()),
+        spacetime_dim_plot,
     )
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_wormhole_animation():
         """Visualize a wormhole connecting two regions of 2D space."""
         n_frames = 80
@@ -1007,11 +1015,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     wormhole_fig = create_wormhole_animation()
-    return (create_wormhole_animation, mo.ui.plotly(wormhole_fig, config=get_plotly_config()))
+    wormhole_plot = mo.ui.plotly(wormhole_fig, config=get_plotly_config())
+    mo.output.replace(wormhole_plot)
+    return (create_wormhole_animation, wormhole_plot)
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_exotic_matter_spacetime_animation():
         """Show exotic matter behavior in 2D space + 1D time."""
         n_frames = 100
@@ -1263,9 +1273,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     exotic_spacetime_fig = create_exotic_matter_spacetime_animation()
+    exotic_spacetime_plot = mo.ui.plotly(exotic_spacetime_fig, config=get_plotly_config())
+    mo.output.replace(exotic_spacetime_plot)
     return (
         create_exotic_matter_spacetime_animation,
-        mo.ui.plotly(exotic_spacetime_fig, config=get_plotly_config()),
+        exotic_spacetime_plot,
     )
 
 
@@ -1302,7 +1314,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_time_directions_animation():
         """Compare 1D vs 2D time directions."""
         n_frames = 60
@@ -1467,9 +1479,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     directions_fig = create_time_directions_animation()
+    directions_plot = mo.ui.plotly(directions_fig, config=get_plotly_config())
+    mo.output.replace(directions_plot)
     return (
         create_time_directions_animation,
-        mo.ui.plotly(directions_fig, config=get_plotly_config()),
+        directions_plot,
     )
 
 
@@ -1514,7 +1528,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_dimensional_light_animation():
         """Show how light propagation differs by dimension."""
         n_frames = 60
@@ -1657,9 +1671,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     light_dim_fig = create_dimensional_light_animation()
+    light_dim_plot = mo.ui.plotly(light_dim_fig, config=get_plotly_config())
+    mo.output.replace(light_dim_plot)
     return (
         create_dimensional_light_animation,
-        mo.ui.plotly(light_dim_fig, config=get_plotly_config()),
+        light_dim_plot,
     )
 
 
@@ -1715,7 +1731,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_quantum_time_animation():
         """Visualize quantum superposition spreading in space and time."""
         n_frames = 80
@@ -1849,7 +1865,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     quantum_fig = create_quantum_time_animation()
-    return (create_quantum_time_animation, mo.ui.plotly(quantum_fig, config=get_plotly_config()))
+    quantum_plot = mo.ui.plotly(quantum_fig, config=get_plotly_config())
+    mo.output.replace(quantum_plot)
+    return (create_quantum_time_animation, quantum_plot)
 
 
 @app.cell
@@ -1891,7 +1909,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
+def _(COLORS, get_plotly_config, go, mo, np):
     def create_signature_comparison():
         """Create a static comparison of different spacetime signatures."""
 
@@ -2059,7 +2077,9 @@ def _(COLORS, go, np):
         return fig
 
     signature_fig = create_signature_comparison()
-    return (create_signature_comparison, mo.ui.plotly(signature_fig, config=get_plotly_config()))
+    signature_plot = mo.ui.plotly(signature_fig, config=get_plotly_config())
+    mo.output.replace(signature_plot)
+    return (create_signature_comparison, signature_plot)
 
 
 @app.cell
@@ -2109,7 +2129,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_entropy_arrow_animation():
         """Visualize the thermodynamic arrow of time."""
         n_frames = 100
@@ -2251,7 +2271,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     entropy_fig = create_entropy_arrow_animation()
-    return (create_entropy_arrow_animation, mo.ui.plotly(entropy_fig, config=get_plotly_config()))
+    entropy_plot = mo.ui.plotly(entropy_fig, config=get_plotly_config())
+    mo.output.replace(entropy_plot)
+    return (create_entropy_arrow_animation, entropy_plot)
 
 
 @app.cell

@@ -15,9 +15,10 @@ def _():
         COLORS,
         DARK_THEME,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, C, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, C, create_play_pause_buttons, get_plotly_config, go, mo, np
 
 
 @app.cell
@@ -89,7 +90,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Charged particle in uniform electric field (like a CRT)
     def create_electric_field_animation():
         n_frames = 80
@@ -307,9 +308,11 @@ def _(go, np):
         return fig
 
     electric_field_fig = create_electric_field_animation()
+    electric_field_plot = mo.ui.plotly(electric_field_fig, config=get_plotly_config())
+    mo.output.replace(electric_field_plot)
     return (
         create_electric_field_animation,
-        mo.ui.plotly(electric_field_fig, config=get_plotly_config()),
+        electric_field_plot,
     )
 
 
@@ -369,7 +372,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Charged particle in uniform magnetic field (circular motion)
     def create_magnetic_circular_animation():
         n_frames = 120
@@ -592,9 +595,11 @@ def _(go, np):
         return fig
 
     magnetic_circular_fig = create_magnetic_circular_animation()
+    magnetic_circular_plot = mo.ui.plotly(magnetic_circular_fig, config=get_plotly_config())
+    mo.output.replace(magnetic_circular_plot)
     return (
         create_magnetic_circular_animation,
-        mo.ui.plotly(magnetic_circular_fig, config=get_plotly_config()),
+        magnetic_circular_plot,
     )
 
 
@@ -670,7 +675,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Mass spectrometer separating isotopes
     def create_mass_spectrometer_animation():
         n_frames = 100
@@ -887,9 +892,11 @@ def _(go, np):
         return fig
 
     mass_spec_fig = create_mass_spectrometer_animation()
+    mass_spec_plot = mo.ui.plotly(mass_spec_fig, config=get_plotly_config())
+    mo.output.replace(mass_spec_plot)
     return (
         create_mass_spectrometer_animation,
-        mo.ui.plotly(mass_spec_fig, config=get_plotly_config()),
+        mass_spec_plot,
     )
 
 
@@ -961,7 +968,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Cyclotron accelerator
     def create_cyclotron_animation():
         n_frames = 100
@@ -1157,7 +1164,9 @@ def _(go, np):
         return fig
 
     cyclotron_fig = create_cyclotron_animation()
-    return (create_cyclotron_animation, mo.ui.plotly(cyclotron_fig, config=get_plotly_config()))
+    cyclotron_plot = mo.ui.plotly(cyclotron_fig, config=get_plotly_config())
+    mo.output.replace(cyclotron_plot)
+    return (create_cyclotron_animation, cyclotron_plot)
 
 
 @app.cell
@@ -1225,7 +1234,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Velocity selector (crossed E and B fields)
     def create_velocity_selector_animation():
         n_frames = 100
@@ -1447,9 +1456,11 @@ def _(go, np):
         return fig
 
     velocity_selector_fig = create_velocity_selector_animation()
+    velocity_selector_plot = mo.ui.plotly(velocity_selector_fig, config=get_plotly_config())
+    mo.output.replace(velocity_selector_plot)
     return (
         create_velocity_selector_animation,
-        mo.ui.plotly(velocity_selector_fig, config=get_plotly_config()),
+        velocity_selector_plot,
     )
 
 
@@ -1517,7 +1528,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Magnetic bottle / mirror confinement
     def create_magnetic_bottle_animation():
         n_frames = 80
@@ -1722,9 +1733,11 @@ def _(go, np):
         return fig
 
     magnetic_bottle_fig = create_magnetic_bottle_animation()
+    magnetic_bottle_plot = mo.ui.plotly(magnetic_bottle_fig, config=get_plotly_config())
+    mo.output.replace(magnetic_bottle_plot)
     return (
         create_magnetic_bottle_animation,
-        mo.ui.plotly(magnetic_bottle_fig, config=get_plotly_config()),
+        magnetic_bottle_plot,
     )
 
 
@@ -1789,7 +1802,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Hall effect
     def create_hall_effect_animation():
         n_frames = 80
@@ -1990,7 +2003,9 @@ def _(go, np):
         return fig
 
     hall_effect_fig = create_hall_effect_animation()
-    return (create_hall_effect_animation, mo.ui.plotly(hall_effect_fig, config=get_plotly_config()))
+    hall_effect_plot = mo.ui.plotly(hall_effect_fig, config=get_plotly_config())
+    mo.output.replace(hall_effect_plot)
+    return (create_hall_effect_animation, hall_effect_plot)
 
 
 @app.cell
@@ -2052,7 +2067,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Charged particles in Earth's magnetic field (aurora)
     def create_aurora_animation():
         n_frames = 120
@@ -2284,7 +2299,9 @@ def _(go, np):
         return fig
 
     aurora_fig = create_aurora_animation()
-    return (create_aurora_animation, mo.ui.plotly(aurora_fig, config=get_plotly_config()))
+    aurora_plot = mo.ui.plotly(aurora_fig, config=get_plotly_config())
+    mo.output.replace(aurora_plot)
+    return (create_aurora_animation, aurora_plot)
 
 
 @app.cell

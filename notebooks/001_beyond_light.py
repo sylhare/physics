@@ -19,6 +19,7 @@ def _():
         SCENE_3D,
         create_play_pause_buttons,
         get_physics_palette,
+        get_plotly_config,
     )
 
     return (
@@ -29,6 +30,7 @@ def _():
         DARK_THEME,
         SCENE_3D,
         get_physics_palette,
+        get_plotly_config,
         create_play_pause_buttons,
         go,
         make_subplots,
@@ -125,7 +127,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_spacetime_velocity_animation():
         """Animate the tradeoff between space and time velocity."""
         n_frames = 60
@@ -274,9 +276,9 @@ def _(go, np):
         return fig
 
     spacetime_velocity_fig = create_spacetime_velocity_animation()
-    return create_spacetime_velocity_animation, mo.ui.plotly(
-        spacetime_velocity_fig, config=get_plotly_config()
-    )
+    spacetime_velocity_plot = mo.ui.plotly(spacetime_velocity_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_velocity_plot)
+    return create_spacetime_velocity_animation, spacetime_velocity_plot
 
 
 @app.cell
@@ -316,7 +318,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_energy_barrier_animation():
         """Animate the energy barrier at c."""
         n_frames = 50
@@ -438,9 +440,9 @@ def _(go, np):
         return fig
 
     energy_barrier_fig = create_energy_barrier_animation()
-    return create_energy_barrier_animation, mo.ui.plotly(
-        energy_barrier_fig, config=get_plotly_config()
-    )
+    energy_barrier_plot = mo.ui.plotly(energy_barrier_fig, config=get_plotly_config())
+    mo.output.replace(energy_barrier_plot)
+    return create_energy_barrier_animation, energy_barrier_plot
 
 
 @app.cell
@@ -580,16 +582,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, tachyon_energy_fig):
-    return mo.vstack(
-        [
-            tachyon_energy_fig,
-            mo.md(
-                "**What this shows:** The energy-velocity relationship reveals two separate 'worlds'—normal matter (cyan) that can never reach light speed, and hypothetical tachyons (magenta) that can never slow down to it. The light barrier at v = c acts as an impenetrable wall: accelerating normal matter requires infinite energy as you approach c, while tachyons paradoxically lose energy as they speed up."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, mo, tachyon_energy_fig):
+    _widget = mo.ui.plotly(tachyon_energy_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** The energy-velocity relationship reveals two separate 'worlds'—normal matter (cyan) that can never reach light speed, and hypothetical tachyons (magenta) that can never slow down to it. The light barrier at v = c acts as an impenetrable wall: accelerating normal matter requires infinite energy as you approach c, while tachyons paradoxically lose energy as they speed up."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -742,16 +748,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, different_c_fig):
-    return mo.vstack(
-        [
-            different_c_fig,
-            mo.md(
-                "**What this shows:** How the Lorentz factor γ (time dilation) depends on the speed of light. With a smaller c (red), relativistic effects kick in at lower velocities—clocks slow dramatically even at modest speeds. With a larger c (green), the universe behaves more like Newton imagined: you could travel at half our light speed with barely any time dilation. Our universe (cyan) sits between these extremes."
-            ),
-        ],
-        align="center",
+def _(different_c_fig, get_plotly_config, mo):
+    _widget = mo.ui.plotly(different_c_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** How the Lorentz factor γ (time dilation) depends on the speed of light. With a smaller c (red), relativistic effects kick in at lower velocities—clocks slow dramatically even at modest speeds. With a larger c (green), the universe behaves more like Newton imagined: you could travel at half our light speed with barely any time dilation. Our universe (cyan) sits between these extremes."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -787,7 +797,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_light_cone_animation():
         """Animate the light cone and causal structure."""
         n_frames = 60
@@ -949,7 +959,9 @@ def _(go, np):
         return fig
 
     light_cone_fig = create_light_cone_animation()
-    return create_light_cone_animation, mo.ui.plotly(light_cone_fig, config=get_plotly_config())
+    light_cone_plot = mo.ui.plotly(light_cone_fig, config=get_plotly_config())
+    mo.output.replace(light_cone_plot)
+    return create_light_cone_animation, light_cone_plot
 
 
 @app.cell
@@ -1095,16 +1107,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, proper_time_fig):
-    return mo.vstack(
-        [
-            proper_time_fig,
-            mo.md(
-                "**What this shows:** Proper time (the time experienced by a traveler) as a function of velocity. Below c (cyan), time flows normally but slows down as you approach light speed. At exactly c, time stops completely—photons don't age. Above c (magenta dashed), proper time becomes imaginary, not negative. This means FTL travelers wouldn't experience 'backwards time' but rather something that isn't time at all."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, mo, proper_time_fig):
+    _widget = mo.ui.plotly(proper_time_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** Proper time (the time experienced by a traveler) as a function of velocity. Below c (cyan), time flows normally but slows down as you approach light speed. At exactly c, time stops completely—photons don't age. Above c (magenta dashed), proper time becomes imaginary, not negative. This means FTL travelers wouldn't experience 'backwards time' but rather something that isn't time at all."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1149,7 +1165,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_length_contraction_animation():
         """Animate length contraction approaching and beyond c."""
         n_frames = 50
@@ -1295,9 +1311,9 @@ def _(go, np):
         return fig
 
     length_contraction_fig = create_length_contraction_animation()
-    return create_length_contraction_animation, mo.ui.plotly(
-        length_contraction_fig, config=get_plotly_config()
-    )
+    length_contraction_plot = mo.ui.plotly(length_contraction_fig, config=get_plotly_config())
+    mo.output.replace(length_contraction_plot)
+    return create_length_contraction_animation, length_contraction_plot
 
 
 @app.cell
@@ -1338,7 +1354,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_warp_bubble_animation():
         """Visualize the Alcubierre warp drive concept."""
         n_frames = 60
@@ -1506,7 +1522,9 @@ def _(go, np):
         return fig
 
     warp_bubble_fig = create_warp_bubble_animation()
-    return create_warp_bubble_animation, mo.ui.plotly(warp_bubble_fig, config=get_plotly_config())
+    warp_bubble_plot = mo.ui.plotly(warp_bubble_fig, config=get_plotly_config())
+    mo.output.replace(warp_bubble_plot)
+    return create_warp_bubble_animation, warp_bubble_plot
 
 
 @app.cell
@@ -1689,16 +1707,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, newtonian_fig):
-    return mo.vstack(
-        [
-            newtonian_fig,
-            mo.md(
-                "**What this shows:** In our universe (cyan), relativistic effects become significant near c = 3×10⁸ m/s. With c' = 10c (yellow) or c' = 1000c (green), you could reach speeds far beyond our light limit before spacetime curvature matters. At c' = 1000c, even escaping the solar system would feel perfectly Newtonian—Newton's physics would be an excellent approximation for almost everything we'd ever want to do."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, mo, newtonian_fig):
+    _widget = mo.ui.plotly(newtonian_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** In our universe (cyan), relativistic effects become significant near c = 3×10⁸ m/s. With c' = 10c (yellow) or c' = 1000c (green), you could reach speeds far beyond our light limit before spacetime curvature matters. At c' = 1000c, even escaping the solar system would feel perfectly Newtonian—Newton's physics would be an excellent approximation for almost everything we'd ever want to do."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
@@ -1747,7 +1769,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_minkowski_geometry_animation():
         """Visualize the hyperbolic geometry of spacetime."""
         n_frames = 60
@@ -1926,9 +1948,9 @@ def _(go, np):
         return fig
 
     minkowski_fig = create_minkowski_geometry_animation()
-    return create_minkowski_geometry_animation, mo.ui.plotly(
-        minkowski_fig, config=get_plotly_config()
-    )
+    minkowski_plot = mo.ui.plotly(minkowski_fig, config=get_plotly_config())
+    mo.output.replace(minkowski_plot)
+    return create_minkowski_geometry_animation, minkowski_plot
 
 
 @app.cell
@@ -2173,7 +2195,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_exotic_matter_visualization():
         """Visualize the energy conditions and exotic matter."""
 
@@ -2283,9 +2305,9 @@ def _(go, np):
         return fig
 
     exotic_matter_fig = create_exotic_matter_visualization()
-    return create_exotic_matter_visualization, mo.ui.plotly(
-        exotic_matter_fig, config=get_plotly_config()
-    )
+    exotic_matter_plot = mo.ui.plotly(exotic_matter_fig, config=get_plotly_config())
+    mo.output.replace(exotic_matter_plot)
+    return create_exotic_matter_visualization, exotic_matter_plot
 
 
 @app.cell
@@ -2334,7 +2356,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_causality_paradox_animation():
         """Visualize how warp drive could create a time loop."""
         n_frames = 50
@@ -2570,9 +2592,9 @@ def _(go, np):
         return fig
 
     causality_paradox_fig = create_causality_paradox_animation()
-    return create_causality_paradox_animation, mo.ui.plotly(
-        causality_paradox_fig, config=get_plotly_config()
-    )
+    causality_paradox_plot = mo.ui.plotly(causality_paradox_fig, config=get_plotly_config())
+    mo.output.replace(causality_paradox_plot)
+    return create_causality_paradox_animation, causality_paradox_plot
 
 
 @app.cell

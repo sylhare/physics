@@ -15,9 +15,21 @@ def _():
         COLORS,
         DARK_THEME,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return C, AU, PLANETS, COLORS, DARK_THEME, create_play_pause_buttons, go, mo, np
+    return (
+        C,
+        AU,
+        PLANETS,
+        COLORS,
+        DARK_THEME,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -91,7 +103,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_romer_animation():
         """Animate Rømer's observation of Jupiter's moons."""
         n_frames = 80
@@ -226,7 +238,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     romer_fig = create_romer_animation()
-    return (create_romer_animation, mo.ui.plotly(romer_fig, config=get_plotly_config()))
+    romer_plot = mo.ui.plotly(romer_fig, config=get_plotly_config())
+    mo.output.replace(romer_plot)
+    return (create_romer_animation, romer_plot)
 
 
 @app.cell
@@ -266,7 +280,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_fizeau_animation():
         """Animate Fizeau's rotating wheel experiment."""
         n_frames = 60
@@ -422,7 +436,9 @@ def _(go, np):
         return fig
 
     fizeau_fig = create_fizeau_animation()
-    return (create_fizeau_animation, mo.ui.plotly(fizeau_fig, config=get_plotly_config()))
+    fizeau_plot = mo.ui.plotly(fizeau_fig, config=get_plotly_config())
+    mo.output.replace(fizeau_plot)
+    return (create_fizeau_animation, fizeau_plot)
 
 
 @app.cell
@@ -494,7 +510,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Show the relationship c = 1/sqrt(ε₀μ₀)
     def create_em_wave_animation():
         """Animate an electromagnetic wave showing E and B fields."""
@@ -600,7 +616,9 @@ def _(go, np):
         return fig
 
     em_wave_fig = create_em_wave_animation()
-    return (create_em_wave_animation, mo.ui.plotly(em_wave_fig, config=get_plotly_config()))
+    em_wave_plot = mo.ui.plotly(em_wave_fig, config=get_plotly_config())
+    mo.output.replace(em_wave_plot)
+    return (create_em_wave_animation, em_wave_plot)
 
 
 @app.cell
@@ -634,7 +652,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, mo, np):
     # Historical measurements comparison
     measurements = {
         "Rømer (1676)": 220000,
@@ -686,20 +704,25 @@ def _(go, np):
         showlegend=False,
     )
 
+    mo.output.replace(mo.md(""))
     return history_fig, measurements, modern_c, names, values, years
 
 
 @app.cell
-def _(history_fig, mo):
-    return mo.vstack(
-        [
-            history_fig,
-            mo.md(
-                "**What this shows:** Four centuries of increasingly precise measurements converging on the modern value. Rømer's 1676 estimate using Jupiter's moons was off by 27%, but proved light had finite speed. By Michelson's 1926 measurement, we were within 0.001% of the true value. Today, c is defined exactly—we no longer measure it, we use it to define the meter."
-            ),
-        ],
-        align="center",
+def _(get_plotly_config, history_fig, mo):
+    _widget = mo.ui.plotly(history_fig, config=get_plotly_config())
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**What this shows:** Four centuries of increasingly precise measurements converging on the modern value. Rømer's 1676 estimate using Jupiter's moons was off by 27%, but proved light had finite speed. By Michelson's 1926 measurement, we were within 0.001% of the true value. Today, c is defined exactly—we no longer measure it, we use it to define the meter."
+                ),
+            ],
+            align="center",
+        )
     )
+    return
 
 
 @app.cell
