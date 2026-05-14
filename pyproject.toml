@@ -17,6 +17,11 @@ dev = [
     "pytest-timeout>=2.3.0",
     "ruff>=0.11.0",
 ]
+browser = [
+    "pytest>=8.0.0",
+    "pytest-timeout>=2.3.0",
+    "playwright>=1.40.0",
+]
 
 [tool.marimo]
 package_manager = "uv"
