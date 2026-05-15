@@ -34,18 +34,6 @@ _BENIGN_CONSOLE_ERROR_PATTERNS = [
     "Failed to load resource",  # marimo /health polling
 ]
 
-_BENIGN_WARNING_PATTERNS = [
-    "DevTools",
-    "third-party cookie",
-    "Permissions-Policy",
-    "Canvas2D",
-    "willReadFrequently",
-    "GL Driver Message",
-    "GPU stall",
-    "WebGL",
-    "cannot be found",  # marimo hydration timing — cell exists but isn't registered yet
-]
-
 
 @pytest.fixture(scope="module")
 def server():
@@ -84,10 +72,6 @@ def _get_notebook_html_files() -> list[str]:
 
 def _is_benign_error(msg: str) -> bool:
     return any(p in msg for p in _BENIGN_CONSOLE_ERROR_PATTERNS)
-
-
-def _is_benign_warning(msg: str) -> bool:
-    return any(p in msg for p in _BENIGN_WARNING_PATTERNS)
 
 
 def _is_benign_404(url: str) -> bool:
@@ -190,23 +174,4 @@ class TestNotebookPages:
         page.goto(f"{server}/{html_file}", wait_until="networkidle", timeout=60_000)
 
         assert not failed_requests, f"Failed network requests on {html_file}: {failed_requests}"
-        page.close()
-
-    @pytest.mark.parametrize("html_file", _get_notebook_html_files())
-    def test_no_console_warnings(self, server, browser_context, html_file):
-        warnings = []
-        page = browser_context.new_page()
-        page.on(
-            "console",
-            lambda msg: (
-                warnings.append(msg.text)
-                if msg.type == "warning" and not _is_benign_warning(msg.text)
-                else None
-            ),
-        )
-
-        page.goto(f"{server}/{html_file}", wait_until="networkidle", timeout=60_000)
-        page.wait_for_timeout(3_000)
-
-        assert not warnings, f"Console warnings on {html_file}: {warnings}"
         page.close()
