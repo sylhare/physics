@@ -19,6 +19,18 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 DOCS_DIR = PROJECT_ROOT / "docs"
 
+GA_MEASUREMENT_ID = "G-YPX3TXS4S4"
+
+_GA_SNIPPET = f"""\
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', '{GA_MEASUREMENT_ID}');
+    </script>"""
+
 
 @dataclass
 class NotebookMetadata:
@@ -139,6 +151,15 @@ def _markdown_links_to_html(text: str) -> str:
     return re.sub(pattern, r'<a href="\2" target="_blank">\1</a>', text)
 
 
+def inject_ga(html_path: Path) -> None:
+    """Inject Google Analytics snippet into an existing HTML file."""
+    html = html_path.read_text()
+    if GA_MEASUREMENT_ID in html:
+        return
+    html = html.replace("</head>", f"{_GA_SNIPPET}\n</head>", 1)
+    html_path.write_text(html)
+
+
 def export_notebook(notebook_path: Path, output_dir: Path, include_code: bool = False) -> Path:
     """Export a single notebook to HTML.
 
@@ -184,6 +205,7 @@ def export_notebook(notebook_path: Path, output_dir: Path, include_code: bool = 
     if result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)
 
+    inject_ga(output_path)
     return output_path
 
 
@@ -217,6 +239,7 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feynman Physics Visualizations</title>
+{_GA_SNIPPET}
     <style>
         * {{
             margin: 0;
