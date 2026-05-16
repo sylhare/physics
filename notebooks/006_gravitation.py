@@ -9,14 +9,32 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
-    import polars as pl
+
+    from physics.constants import AU, PLANETS, G
+    from physics.integrators import gravity_acceleration, rk4_step
     from physics_explorations.visualization import (
         COLORS,
-        ANIMATION_SETTINGS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, mo, np, pl
+    return (
+        G,
+        AU,
+        PLANETS,
+        rk4_step,
+        gravity_acceleration,
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -237,9 +255,7 @@ def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
                         go.Scatter(x=[focus2[0]], y=[focus2[1]]),
                         go.Scatter(x=[x_planet[i]], y=[y_planet[i]]),
                         go.Scatter(x=[0, x_planet[i]], y=[0, y_planet[i]]),
-                        go.Scatter(
-                            x=[focus2[0], x_planet[i]], y=[focus2[1], y_planet[i]]
-                        ),
+                        go.Scatter(x=[focus2[0], x_planet[i]], y=[focus2[1], y_planet[i]]),
                     ],
                     name=str(i),
                 )
@@ -254,11 +270,20 @@ def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
 
 
 @app.cell
-def _(ellipse_fig, mo):
-    mo.vstack([
-        ellipse_fig,
-        mo.md("**What this shows:** A planet orbiting the Sun in an elliptical orbit (eccentricity e=0.6). The **orange dashed line** (r₁) shows the distance to the Sun, while the **green dashed line** (r₂) shows the distance to the empty focus. Notice that r₁ + r₂ remains constant throughout the orbit—this is the defining property of an ellipse. Click Play to see the orbit in motion.")
-    ], align="center")
+def _(ellipse_fig, get_plotly_config, mo):
+    ellipse_plot = mo.ui.plotly(ellipse_fig, config=get_plotly_config())
+    mo.output.replace(ellipse_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                ellipse_plot,
+                mo.md(
+                    "**What this shows:** A planet orbiting the Sun in an elliptical orbit (eccentricity e=0.6). The **orange dashed line** (r₁) shows the distance to the Sun, while the **green dashed line** (r₂) shows the distance to the empty focus. Notice that r₁ + r₂ remains constant throughout the orbit—this is the defining property of an ellipse. Click Play to see the orbit in motion."
+                ),
+            ],
+            align="center",
+        )
+    )
     return
 
 
@@ -401,14 +426,14 @@ def _(go, np):
 
         # Wedge colors - distinct colors
         colors = [
-            "rgba(231, 76, 60, 0.5)",    # red
-            "rgba(52, 152, 219, 0.5)",   # blue
-            "rgba(241, 196, 15, 0.5)",   # yellow
-            "rgba(46, 204, 113, 0.5)",   # green
-            "rgba(155, 89, 182, 0.5)",   # purple
-            "rgba(230, 126, 34, 0.5)",   # orange
-            "rgba(26, 188, 156, 0.5)",   # teal
-            "rgba(236, 112, 99, 0.5)",   # coral
+            "rgba(231, 76, 60, 0.5)",  # red
+            "rgba(52, 152, 219, 0.5)",  # blue
+            "rgba(241, 196, 15, 0.5)",  # yellow
+            "rgba(46, 204, 113, 0.5)",  # green
+            "rgba(155, 89, 182, 0.5)",  # purple
+            "rgba(230, 126, 34, 0.5)",  # orange
+            "rgba(26, 188, 156, 0.5)",  # teal
+            "rgba(236, 112, 99, 0.5)",  # coral
         ]
 
         def create_wedge(theta_start, theta_end, color):
@@ -449,60 +474,70 @@ def _(go, np):
             for w in range(wedge_idx):
                 start_frame = w * frames_per_wedge
                 end_frame = (w + 1) * frames_per_wedge - 1
-                frame_data.append(create_wedge(
-                    theta_values[start_frame],
-                    theta_values[end_frame],
-                    colors[w % len(colors)]
-                ))
+                frame_data.append(
+                    create_wedge(
+                        theta_values[start_frame], theta_values[end_frame], colors[w % len(colors)]
+                    )
+                )
 
             # Add current partial wedge
             if frame_in_wedge > 0:
                 start_frame = wedge_idx * frames_per_wedge
-                frame_data.append(create_wedge(
-                    theta_values[start_frame],
-                    theta_values[frame_idx],
-                    colors[wedge_idx % len(colors)]
-                ))
+                frame_data.append(
+                    create_wedge(
+                        theta_values[start_frame],
+                        theta_values[frame_idx],
+                        colors[wedge_idx % len(colors)],
+                    )
+                )
 
             # Add orbit
-            frame_data.append(go.Scatter(
-                x=x_ellipse,
-                y=y_ellipse,
-                mode="lines",
-                line={"color": "lightblue", "width": 3},
-                showlegend=False,
-                hoverinfo="skip",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=x_ellipse,
+                    y=y_ellipse,
+                    mode="lines",
+                    line={"color": "lightblue", "width": 3},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
 
             # Add sun
-            frame_data.append(go.Scatter(
-                x=[0],
-                y=[0],
-                mode="markers",
-                marker={"size": 24, "color": "gold"},
-                showlegend=False,
-                hoverinfo="skip",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="markers",
+                    marker={"size": 24, "color": "gold"},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
 
             # Add planet
-            frame_data.append(go.Scatter(
-                x=[positions[frame_idx][0]],
-                y=[positions[frame_idx][1]],
-                mode="markers",
-                marker={"size": 14, "color": "steelblue"},
-                showlegend=False,
-                hoverinfo="skip",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[positions[frame_idx][0]],
+                    y=[positions[frame_idx][1]],
+                    mode="markers",
+                    marker={"size": 14, "color": "steelblue"},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
 
             # Add radius vector
-            frame_data.append(go.Scatter(
-                x=[0, positions[frame_idx][0]],
-                y=[0, positions[frame_idx][1]],
-                mode="lines",
-                line={"color": "white", "width": 2},
-                showlegend=False,
-                hoverinfo="skip",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, positions[frame_idx][0]],
+                    y=[0, positions[frame_idx][1]],
+                    mode="lines",
+                    line={"color": "white", "width": 2},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame_idx)))
 
@@ -573,11 +608,20 @@ def _(go, np):
 
 
 @app.cell
-def _(equal_areas_fig, mo):
-    mo.vstack([
-        equal_areas_fig,
-        mo.md("**What this shows:** Each colored wedge represents the same time interval. The planet sweeps out **equal areas** in **equal times**—Kepler's Second Law. Notice how wedges near the Sun (right side) are short and wide, while those far from the Sun (left side) are long and narrow. The planet must move faster when closer to the Sun to sweep out the same area.")
-    ], align="center")
+def _(equal_areas_fig, get_plotly_config, mo):
+    equal_areas_plot = mo.ui.plotly(equal_areas_fig, config=get_plotly_config())
+    mo.output.replace(equal_areas_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                equal_areas_plot,
+                mo.md(
+                    "**What this shows:** Each colored wedge represents the same time interval. The planet sweeps out **equal areas** in **equal times**—Kepler's Second Law. Notice how wedges near the Sun (right side) are short and wide, while those far from the Sun (left side) are long and narrow. The planet must move faster when closer to the Sun to sweep out the same area."
+                ),
+            ],
+            align="center",
+        )
+    )
     return
 
 
@@ -669,30 +713,32 @@ def _(mo):
 
 
 @app.cell
-def _(go, np, pl):
+def _(go, mo, np):
     # Planetary data (real values)
-    planets_data = pl.DataFrame(
-        {
-            "Planet": ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn"],
-            "a (AU)": [0.387, 0.723, 1.000, 1.524, 5.203, 9.537],
-            "T (years)": [0.241, 0.615, 1.000, 1.881, 11.86, 29.46],
-            "Eccentricity": [0.206, 0.007, 0.017, 0.093, 0.048, 0.054],
-        }
-    )
+    planets_raw = [
+        {"Planet": "Mercury", "a (AU)": 0.387, "T (years)": 0.241, "Eccentricity": 0.206},
+        {"Planet": "Venus", "a (AU)": 0.723, "T (years)": 0.615, "Eccentricity": 0.007},
+        {"Planet": "Earth", "a (AU)": 1.000, "T (years)": 1.000, "Eccentricity": 0.017},
+        {"Planet": "Mars", "a (AU)": 1.524, "T (years)": 1.881, "Eccentricity": 0.093},
+        {"Planet": "Jupiter", "a (AU)": 5.203, "T (years)": 11.86, "Eccentricity": 0.048},
+        {"Planet": "Saturn", "a (AU)": 9.537, "T (years)": 29.46, "Eccentricity": 0.054},
+    ]
 
     # Calculate T² and a³
-    planets_analyzed = planets_data.with_columns(
-        [
-            (pl.col("T (years)") ** 2).round(2).alias("T² (years²)"),
-            (pl.col("a (AU)") ** 3).round(2).alias("a³ (AU³)"),
-            ((pl.col("T (years)") ** 2) / (pl.col("a (AU)") ** 3)).round(3).alias("T²/a³"),
-        ]
-    )
+    planets_analyzed = []
+    for p in planets_raw:
+        a = p["a (AU)"]
+        t = p["T (years)"]
+        p_new = p.copy()
+        p_new["T² (years²)"] = round(t**2, 2)
+        p_new["a³ (AU³)"] = round(a**3, 2)
+        p_new["T²/a³"] = round((t**2) / (a**3), 3)
+        planets_analyzed.append(p_new)
 
     # Extract for plotting
-    a_cubed = planets_analyzed["a³ (AU³)"].to_numpy()
-    T_squared = planets_analyzed["T² (years²)"].to_numpy()
-    names = planets_analyzed["Planet"].to_list()
+    a_cubed = np.array([p["a³ (AU³)"] for p in planets_analyzed])
+    T_squared = np.array([p["T² (years²)"] for p in planets_analyzed])
+    names = [p["Planet"] for p in planets_analyzed]
 
     # Theoretical line (T² = a³ when using AU and years)
     a_theory = np.linspace(0, 900, 100)
@@ -738,7 +784,7 @@ def _(go, np, pl):
         hovermode="closest",
     )
 
-    kepler3_fig
+    mo.output.replace(mo.md(""))
     return (
         T_squared,
         T_theory,
@@ -747,13 +793,13 @@ def _(go, np, pl):
         kepler3_fig,
         names,
         planets_analyzed,
-        planets_data,
+        planets_raw,
     )
 
 
 @app.cell
 def _(mo, planets_analyzed):
-    mo.vstack(
+    return mo.vstack(
         [
             mo.md(
                 r"""
@@ -766,7 +812,6 @@ def _(mo, planets_analyzed):
             mo.ui.table(planets_analyzed, selection=None),
         ]
     )
-    return
 
 
 @app.cell
@@ -859,7 +904,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Compare different power laws
     r = np.linspace(0.5, 5, 100)
 
@@ -913,8 +958,9 @@ def _(go, np):
         hovermode="x unified",
     )
 
-    inverse_square_fig
-    return (inv_r1, inv_r2, inv_r3, inverse_square_fig, r)
+    inverse_square_plot = mo.ui.plotly(inverse_square_fig, config=get_plotly_config())
+    mo.output.replace(inverse_square_plot)
+    return (inv_r1, inv_r2, inv_r3, inverse_square_plot, r)
 
 
 @app.cell
@@ -1040,26 +1086,39 @@ def _(go, np):
             x_traj = [x]
             y_traj = [y]
 
-            for step in range(500):
-                r = np.sqrt(x**2 + y**2)
-                if r < R:
+            t_curr = 0
+            for step in range(1000):  # More steps for RK4
+                r_mag = np.sqrt(x**2 + y**2)
+                if r_mag < R:
                     break
-                if r > 4:
+                if r_mag > 4:
                     break
                 if step > 50 and abs(y - cannon_height) < 0.1 and x > 0.1:
                     break
                 if len(x_traj) >= max_points:
                     break
 
-                a_mag = g * R**2 / r**2
-                ax = -a_mag * x / r
-                ay = -a_mag * y / r
-                vx += ax * dt
-                vy += ay * dt
-                x += vx * dt
-                y += vy * dt
-                x_traj.append(x)
-                y_traj.append(y)
+                # State vector [x, y, vx, vy]
+                state = np.array([x, y, vx, vy])
+
+                # Derivative function for RK4: returns [vx, vy, ax, ay]
+                def derivative_func(s):
+                    # s = [x, y, vx, vy]
+                    pos = s[:2]
+                    vel = s[2:]
+                    r_sq = np.sum(pos**2)
+                    acc = -g * R**2 * pos / (r_sq**1.5 + 1e-10)
+                    return np.concatenate([vel, acc])
+
+                # RK4 Step
+                new_state = rk4_step(state, derivative_func, dt)
+                x, y, vx, vy = new_state
+                t_curr += dt
+
+                # Only append every few steps to keep animation smooth but calculation accurate
+                if step % 2 == 0:
+                    x_traj.append(x)
+                    y_traj.append(y)
 
             all_trajectories.append((np.array(x_traj), np.array(y_traj)))
 
@@ -1069,21 +1128,37 @@ def _(go, np):
         for traj_idx in range(len(all_trajectories) + 1):
             frame_data = [
                 # Earth
-                go.Scatter(x=x_earth, y=y_earth, mode="lines", fill="toself",
-                           fillcolor="rgba(100, 180, 255, 0.4)", line={"color": "steelblue", "width": 2},
-                           hoverinfo="skip"),
+                go.Scatter(
+                    x=x_earth,
+                    y=y_earth,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100, 180, 255, 0.4)",
+                    line={"color": "steelblue", "width": 2},
+                    name="Earth",
+                ),
                 # Cannon
-                go.Scatter(x=[x_cannon], y=[y_cannon], mode="markers",
-                           marker={"size": 12, "color": "black", "symbol": "triangle-right"},
-                           hoverinfo="skip"),
+                go.Scatter(
+                    x=[x_cannon],
+                    y=[y_cannon],
+                    mode="markers",
+                    marker={"size": 12, "color": "black", "symbol": "triangle-right"},
+                    name="Cannon",
+                ),
             ]
 
             # Add trajectories up to current index
             for idx in range(traj_idx):
                 px, py = all_trajectories[idx]
-                frame_data.append(go.Scatter(x=px, y=py, mode="lines",
-                                              line={"color": colors[idx], "width": 3},
-                                              hoverinfo="skip"))
+                frame_data.append(
+                    go.Scatter(
+                        x=px,
+                        y=py,
+                        mode="lines",
+                        line={"color": colors[idx], "width": 3},
+                        name=f"Launch {velocities[idx]}v_c",
+                    )
+                )
 
             frames.append(go.Frame(data=frame_data, name=str(traj_idx)))
 
@@ -1095,38 +1170,69 @@ def _(go, np):
                     text="<b>Newton's Cannon:</b> From Falling to Orbiting<br><sub>Click Play to fire at increasing velocities</sub>",
                     font=dict(size=16),
                 ),
-                xaxis={"scaleanchor": "y", "range": [-2.5, 2.5], "showgrid": False, "zeroline": False, "showticklabels": False},
-                yaxis={"range": [-2.5, 2.5], "showgrid": False, "zeroline": False, "showticklabels": False},
-                showlegend=False,
+                xaxis={
+                    "scaleanchor": "y",
+                    "range": [-2.5, 2.5],
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
+                yaxis={
+                    "range": [-2.5, 2.5],
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.08,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "▶ Fire Cannon",
-                                "method": "animate",
-                                "args": [None, {"frame": {"duration": 800, "redraw": True},
-                                               "fromcurrent": True, "transition": {"duration": 300}}],
-                            },
-                            {
-                                "label": "↺ Reset",
-                                "method": "animate",
-                                "args": [["0"], {"frame": {"duration": 0, "redraw": True}, "mode": "immediate"}],
-                            },
-                        ],
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=60),
+                margin=dict(t=80, b=60),
                 annotations=[
-                    dict(x=1.9, y=1.7, text="<b>Velocity:</b>", showarrow=False, font=dict(size=10)),
-                    dict(x=1.9, y=1.4, text="<span style='color:#e74c3c'>■</span> Slow", showarrow=False, font=dict(size=9)),
-                    dict(x=1.9, y=1.2, text="<span style='color:#f1c40f'>■</span> Medium", showarrow=False, font=dict(size=9)),
-                    dict(x=1.9, y=1.0, text="<span style='color:#2ecc71'>■</span> Orbital", showarrow=False, font=dict(size=9)),
-                    dict(x=1.9, y=0.8, text="<span style='color:#3498db'>■</span> Fast", showarrow=False, font=dict(size=9)),
+                    dict(
+                        x=1.9, y=1.7, text="<b>Velocity:</b>", showarrow=False, font=dict(size=10)
+                    ),
+                    dict(
+                        x=1.9,
+                        y=1.4,
+                        text="<span style='color:#e74c3c'>■</span> Slow",
+                        showarrow=False,
+                        font=dict(size=9),
+                    ),
+                    dict(
+                        x=1.9,
+                        y=1.2,
+                        text="<span style='color:#f1c40f'>■</span> Medium",
+                        showarrow=False,
+                        font=dict(size=9),
+                    ),
+                    dict(
+                        x=1.9,
+                        y=1.0,
+                        text="<span style='color:#2ecc71'>■</span> Orbital",
+                        showarrow=False,
+                        font=dict(size=9),
+                    ),
+                    dict(
+                        x=1.9,
+                        y=0.8,
+                        text="<span style='color:#3498db'>■</span> Fast",
+                        showarrow=False,
+                        font=dict(size=9),
+                    ),
                 ],
             ),
             frames=frames,
@@ -1139,11 +1245,20 @@ def _(go, np):
 
 
 @app.cell
-def _(cannon_fig, mo):
-    mo.vstack([
-        cannon_fig,
-        mo.md("**What this shows:** Newton's famous thought experiment demonstrating that **orbiting is just falling**. At low velocity (red), the cannonball falls to Earth. At higher velocities (yellow, green), it curves around Earth. At exactly the right velocity (green), Earth's surface curves away as fast as the ball falls—creating a circular orbit. Faster still (blue) creates an elliptical orbit. The Moon is simply 'falling around' Earth!")
-    ], align="center")
+def _(cannon_fig, get_plotly_config, mo):
+    cannon_plot = mo.ui.plotly(cannon_fig, config=get_plotly_config())
+    mo.output.replace(cannon_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                cannon_plot,
+                mo.md(
+                    "**What this shows:** Newton's famous thought experiment demonstrating that **orbiting is just falling**. At low velocity (red), the cannonball falls to Earth. At higher velocities (yellow, green), it curves around Earth. At exactly the right velocity (green), Earth's surface curves away as fast as the ball falls—creating a circular orbit. Faster still (blue) creates an elliptical orbit. The Moon is simply 'falling around' Earth!"
+                ),
+            ],
+            align="center",
+        )
+    )
     return
 
 
@@ -1202,7 +1317,7 @@ def _(mo):
 
 
 @app.cell
-def _(eccentricity_slider, go, np):
+def _(eccentricity_slider, get_plotly_config, go, mo, np):
     def plot_orbit_with_eccentricity(e):
         """Plot an orbit with given eccentricity."""
         a = 1.0
@@ -1222,7 +1337,8 @@ def _(eccentricity_slider, go, np):
         # Orbit
         fig.add_trace(
             go.Scatter(
-                x=x, y=y,
+                x=x,
+                y=y,
                 mode="lines",
                 line={"color": "lightblue", "width": 3},
                 name="Orbit",
@@ -1233,7 +1349,8 @@ def _(eccentricity_slider, go, np):
         # Sun
         fig.add_trace(
             go.Scatter(
-                x=[0], y=[0],
+                x=[0],
+                y=[0],
                 mode="markers",
                 marker={"size": 24, "color": "gold"},
                 name="Sun (focus)",
@@ -1243,7 +1360,8 @@ def _(eccentricity_slider, go, np):
         # Second focus
         fig.add_trace(
             go.Scatter(
-                x=[-2 * c], y=[0],
+                x=[-2 * c],
+                y=[0],
                 mode="markers",
                 marker={"size": 10, "color": "gray", "symbol": "x"},
                 name="Empty focus",
@@ -1253,7 +1371,8 @@ def _(eccentricity_slider, go, np):
         # Perihelion
         fig.add_trace(
             go.Scatter(
-                x=[r_perihelion], y=[0],
+                x=[r_perihelion],
+                y=[0],
                 mode="markers",
                 marker={"size": 12, "color": "#e74c3c"},
                 name=f"Perihelion: {r_perihelion:.2f} AU",
@@ -1263,7 +1382,8 @@ def _(eccentricity_slider, go, np):
         # Aphelion
         fig.add_trace(
             go.Scatter(
-                x=[-r_aphelion], y=[0],
+                x=[-r_aphelion],
+                y=[0],
                 mode="markers",
                 marker={"size": 12, "color": "#3498db"},
                 name=f"Aphelion: {r_aphelion:.2f} AU",
@@ -1273,14 +1393,15 @@ def _(eccentricity_slider, go, np):
         # Semi-major axis
         fig.add_trace(
             go.Scatter(
-                x=[-r_aphelion, r_perihelion], y=[0, 0],
+                x=[-r_aphelion, r_perihelion],
+                y=[0, 0],
                 mode="lines",
                 line={"color": "green", "dash": "dash", "width": 2},
                 name=f"Semi-major axis: {a:.2f} AU",
             )
         )
 
-        ratio = r_aphelion / r_perihelion if r_perihelion > 0.01 else float('inf')
+        ratio = r_aphelion / r_perihelion if r_perihelion > 0.01 else float("inf")
 
         fig.update_layout(
             title=dict(
@@ -1290,14 +1411,25 @@ def _(eccentricity_slider, go, np):
             xaxis={"scaleanchor": "y", "range": [-2.5, 2], "title": "x (AU)"},
             yaxis={"range": [-1.5, 1.5], "title": "y (AU)"},
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, font=dict(size=10)),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="center",
+                x=0.5,
+                font=dict(size=10),
+            ),
         )
 
         return fig
 
     orbit_explorer_fig = plot_orbit_with_eccentricity(eccentricity_slider.value)
-    orbit_explorer_fig
-    return (orbit_explorer_fig, plot_orbit_with_eccentricity)
+    orbit_explorer_plot = mo.ui.plotly(orbit_explorer_fig, config=get_plotly_config())
+    mo.output.replace(orbit_explorer_plot)
+    return (
+        orbit_explorer_plot,
+        plot_orbit_with_eccentricity,
+    )
 
 
 @app.cell
@@ -1343,7 +1475,7 @@ def _(go, np):
         n_frames = 60
 
         # Near-side bulge (right half, toward Moon) - Cyan
-        theta_near = np.linspace(-np.pi/2, np.pi/2, 50)
+        theta_near = np.linspace(-np.pi / 2, np.pi / 2, 50)
         r_near = R + bulge * np.cos(2 * theta_near)
         x_near = r_near * np.cos(theta_near)
         y_near = r_near * np.sin(theta_near)
@@ -1352,7 +1484,7 @@ def _(go, np):
         y_near = np.concatenate([[y_near[0]], y_near, [y_near[-1]]])
 
         # Far-side bulge (left half, away from Moon) - Orange
-        theta_far = np.linspace(np.pi/2, 3*np.pi/2, 50)
+        theta_far = np.linspace(np.pi / 2, 3 * np.pi / 2, 50)
         r_far = R + bulge * np.cos(2 * theta_far)
         x_far = r_far * np.cos(theta_far)
         y_far = r_far * np.sin(theta_far)
@@ -1386,50 +1518,110 @@ def _(go, np):
             marker_y = marker_r * np.sin(marker_angle)
 
             # Continent markers (rotate with Earth)
-            continent_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
+            continent_angles = [0, np.pi / 2, np.pi, 3 * np.pi / 2]
             cont_x = [0.6 * np.cos(a + rotation_angle) for a in continent_angles]
             cont_y = [0.6 * np.sin(a + rotation_angle) for a in continent_angles]
 
             frame_data = [
                 # Near-side ocean bulge (cyan, toward Moon)
-                go.Scatter(x=x_near, y=y_near, mode="lines", fill="toself",
-                           fillcolor="rgba(0, 200, 255, 0.4)", line={"color": "cyan", "width": 2},
-                           name="Near-side bulge", showlegend=(i == 0)),
+                go.Scatter(
+                    x=x_near,
+                    y=y_near,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(0, 200, 255, 0.4)",
+                    line={"color": "cyan", "width": 2},
+                    name="Near-side bulge",
+                    showlegend=(i == 0),
+                ),
                 # Far-side ocean bulge (orange, away from Moon)
-                go.Scatter(x=x_far, y=y_far, mode="lines", fill="toself",
-                           fillcolor="rgba(255, 140, 0, 0.4)", line={"color": "orange", "width": 2},
-                           name="Far-side bulge", showlegend=(i == 0)),
+                go.Scatter(
+                    x=x_far,
+                    y=y_far,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(255, 140, 0, 0.4)",
+                    line={"color": "orange", "width": 2},
+                    name="Far-side bulge",
+                    showlegend=(i == 0),
+                ),
                 # Earth interior (rotating)
-                go.Scatter(x=x_earth, y=y_earth, mode="lines", fill="toself",
-                           fillcolor="rgba(139, 119, 101, 0.6)", line={"color": "sienna", "width": 1},
-                           showlegend=False),
+                go.Scatter(
+                    x=x_earth,
+                    y=y_earth,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(139, 119, 101, 0.6)",
+                    line={"color": "sienna", "width": 1},
+                    showlegend=False,
+                ),
                 # Continent markers
-                go.Scatter(x=cont_x, y=cont_y, mode="markers",
-                           marker={"size": 12, "color": "forestgreen", "symbol": "circle"},
-                           showlegend=False),
+                go.Scatter(
+                    x=cont_x,
+                    y=cont_y,
+                    mode="markers",
+                    marker={"size": 12, "color": "forestgreen", "symbol": "circle"},
+                    showlegend=False,
+                ),
                 # Coastal city marker
-                go.Scatter(x=[marker_x], y=[marker_y], mode="markers",
-                           marker={"size": 10, "color": "red", "symbol": "star"},
-                           name="Coastal city", showlegend=(i == 0)),
+                go.Scatter(
+                    x=[marker_x],
+                    y=[marker_y],
+                    mode="markers",
+                    marker={"size": 10, "color": "red", "symbol": "star"},
+                    name="Coastal city",
+                    showlegend=(i == 0),
+                ),
                 # Moon
-                go.Scatter(x=moon_x, y=moon_y, mode="lines", fill="toself",
-                           fillcolor="rgba(200, 200, 200, 0.8)", line={"color": "gray", "width": 1},
-                           showlegend=False),
+                go.Scatter(
+                    x=moon_x,
+                    y=moon_y,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(200, 200, 200, 0.8)",
+                    line={"color": "gray", "width": 1},
+                    showlegend=False,
+                ),
                 # Near-side arrow (strong pull toward Moon) - cyan
-                go.Scatter(x=[1.3, 2.3], y=[0, 0], mode="lines+markers",
-                           line={"color": "cyan", "width": 3},
-                           marker={"symbol": "arrow", "size": 15, "angleref": "previous", "color": "cyan"},
-                           name="Strong pull on near water", showlegend=(i == 0)),
+                go.Scatter(
+                    x=[1.3, 2.3],
+                    y=[0, 0],
+                    mode="lines+markers",
+                    line={"color": "cyan", "width": 3},
+                    marker={"symbol": "arrow", "size": 15, "angleref": "previous", "color": "cyan"},
+                    name="Strong pull on near water",
+                    showlegend=(i == 0),
+                ),
                 # Center arrow (reference pull on Earth) - white dashed
-                go.Scatter(x=[0, 0.9], y=[0.5, 0.5], mode="lines+markers",
-                           line={"color": "white", "width": 2, "dash": "dash"},
-                           marker={"symbol": "arrow", "size": 12, "angleref": "previous", "color": "white"},
-                           name="Pull on Earth center", showlegend=(i == 0)),
+                go.Scatter(
+                    x=[0, 0.9],
+                    y=[0.5, 0.5],
+                    mode="lines+markers",
+                    line={"color": "white", "width": 2, "dash": "dash"},
+                    marker={
+                        "symbol": "arrow",
+                        "size": 12,
+                        "angleref": "previous",
+                        "color": "white",
+                    },
+                    name="Pull on Earth center",
+                    showlegend=(i == 0),
+                ),
                 # Far-side arrow (weaker pull - shorter) - orange
-                go.Scatter(x=[-1.3, -0.85], y=[0, 0], mode="lines+markers",
-                           line={"color": "orange", "width": 2},
-                           marker={"symbol": "arrow", "size": 10, "angleref": "previous", "color": "orange"},
-                           name="Weaker pull on far water", showlegend=(i == 0)),
+                go.Scatter(
+                    x=[-1.3, -0.85],
+                    y=[0, 0],
+                    mode="lines+markers",
+                    line={"color": "orange", "width": 2},
+                    marker={
+                        "symbol": "arrow",
+                        "size": 10,
+                        "angleref": "previous",
+                        "color": "orange",
+                    },
+                    name="Weaker pull on far water",
+                    showlegend=(i == 0),
+                ),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -1442,8 +1634,19 @@ def _(go, np):
                     text="<b>Tidal Forces:</b> Differential Gravity Creates Two Bulges",
                     font=dict(size=16),
                 ),
-                xaxis={"scaleanchor": "y", "range": [-3, 6], "showgrid": False, "zeroline": False, "showticklabels": False},
-                yaxis={"range": [-2.5, 2.5], "showgrid": False, "zeroline": False, "showticklabels": False},
+                xaxis={
+                    "scaleanchor": "y",
+                    "range": [-3, 6],
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
+                yaxis={
+                    "range": [-2.5, 2.5],
+                    "showgrid": False,
+                    "zeroline": False,
+                    "showticklabels": False,
+                },
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -1464,22 +1667,52 @@ def _(go, np):
                             {
                                 "label": "▶ Play",
                                 "method": "animate",
-                                "args": [None, {"frame": {"duration": 80, "redraw": True},
-                                               "fromcurrent": True, "transition": {"duration": 0}}],
+                                "args": [
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
                             },
                             {
                                 "label": "⏸ Pause",
                                 "method": "animate",
-                                "args": [[None], {"frame": {"duration": 0, "redraw": False}, "mode": "immediate"}],
+                                "args": [
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
                             },
                         ],
                     }
                 ],
                 margin=dict(b=80),
                 annotations=[
-                    dict(x=-1.3, y=-1.8, text="<span style='color:orange'><b>Far-side bulge</b></span><br>Weaker pull → water 'left behind'", showarrow=False, font=dict(size=10)),
-                    dict(x=1.5, y=-1.8, text="<span style='color:cyan'><b>Near-side bulge</b></span><br>Stronger pull → water toward Moon", showarrow=False, font=dict(size=10)),
-                    dict(x=moon_distance, y=-0.8, text="Moon", showarrow=False, font=dict(size=11, color="gray")),
+                    dict(
+                        x=-1.3,
+                        y=-1.8,
+                        text="<span style='color:orange'><b>Far-side bulge</b></span><br>Weaker pull → water 'left behind'",
+                        showarrow=False,
+                        font=dict(size=10),
+                    ),
+                    dict(
+                        x=1.5,
+                        y=-1.8,
+                        text="<span style='color:cyan'><b>Near-side bulge</b></span><br>Stronger pull → water toward Moon",
+                        showarrow=False,
+                        font=dict(size=10),
+                    ),
+                    dict(
+                        x=moon_distance,
+                        y=-0.8,
+                        text="Moon",
+                        showarrow=False,
+                        font=dict(size=11, color="gray"),
+                    ),
                 ],
             ),
             frames=frames,
@@ -1492,11 +1725,20 @@ def _(go, np):
 
 
 @app.cell
-def _(mo, tidal_fig):
-    mo.vstack([
-        tidal_fig,
-        mo.md("**What this shows:** The Moon's gravity pulls more strongly on the <span style='color:cyan'>**near side**</span> of Earth (cyan) than on its center, and more on the center than on the <span style='color:orange'>**far side**</span> (orange). These *differential* forces stretch Earth along the Earth-Moon line. The red star marks a coastal city rotating through two high tides per day. Arrows show the relative strength of the Moon's gravitational pull at different locations.")
-    ], align="center")
+def _(get_plotly_config, mo, tidal_fig):
+    tidal_plot = mo.ui.plotly(tidal_fig, config=get_plotly_config())
+    mo.output.replace(tidal_plot)
+    mo.output.replace(
+        mo.vstack(
+            [
+                tidal_plot,
+                mo.md(
+                    "**What this shows:** The Moon's gravity pulls more strongly on the <span style='color:cyan'>**near side**</span> of Earth (cyan) than on its center, and more on the center than on the <span style='color:orange'>**far side**</span> (orange). These *differential* forces stretch Earth along the Earth-Moon line. The red star marks a coastal city rotating through two high tides per day. Arrows show the relative strength of the Moon's gravitational pull at different locations."
+                ),
+            ],
+            align="center",
+        )
+    )
     return
 
 

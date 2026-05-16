@@ -10,12 +10,28 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
+
+    from physics.constants import C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, create_play_pause_buttons, go, make_subplots, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        C,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        make_subplots,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -127,7 +143,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_1d_spacetime_animation():
         """Animate motion in 1+1 dimensional spacetime."""
         n_frames = 100
@@ -156,35 +172,40 @@ def _(COLORS, create_play_pause_buttons, go, np):
             frame_data = [
                 # Light cone from origin
                 go.Scatter(
-                    x=x_cone_right, y=t_cone,
+                    x=x_cone_right,
+                    y=t_cone,
                     mode="lines",
                     line=dict(color=COLORS["photon"], width=1, dash="dash"),
                     name="Light cone",
                     showlegend=(i == 0),
                 ),
                 go.Scatter(
-                    x=x_cone_left, y=t_cone,
+                    x=x_cone_left,
+                    y=t_cone,
                     mode="lines",
                     line=dict(color=COLORS["photon"], width=1, dash="dash"),
                     showlegend=False,
                 ),
                 # Future light cone from particle
                 go.Scatter(
-                    x=x_future_right, y=t_future,
+                    x=x_future_right,
+                    y=t_future,
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=1, dash="dot"),
                     name="Future light cone",
                     showlegend=(i == 0),
                 ),
                 go.Scatter(
-                    x=x_future_left, y=t_future,
+                    x=x_future_left,
+                    y=t_future,
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=1, dash="dot"),
                     showlegend=False,
                 ),
                 # Worldline
                 go.Scatter(
-                    x=x_history, y=t_history,
+                    x=x_history,
+                    y=t_history,
                     mode="lines",
                     line=dict(color=COLORS["primary"], width=3),
                     name="Worldline",
@@ -192,7 +213,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Current position
                 go.Scatter(
-                    x=[x_particle], y=[t],
+                    x=[x_particle],
+                    y=[t],
                     mode="markers",
                     marker=dict(size=15, color=COLORS["secondary"]),
                     name="Linelander",
@@ -200,7 +222,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Time arrow
                 go.Scatter(
-                    x=[-4.5, -4.5], y=[0, 9],
+                    x=[-4.5, -4.5],
+                    y=[0, 9],
                     mode="lines+text",
                     line=dict(color=COLORS["text"], width=2),
                     text=["", "TIME →"],
@@ -210,7 +233,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Annotation
                 go.Scatter(
-                    x=[x_particle + 0.3], y=[t + 0.5],
+                    x=[x_particle + 0.3],
+                    y=[t + 0.5],
                     mode="text",
                     text=[f"t = {t:.1f}"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -269,8 +293,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_1d_fig = create_1d_spacetime_animation()
-    spacetime_1d_fig
-    return (create_1d_spacetime_animation, spacetime_1d_fig)
+    spacetime_1d_plot = mo.ui.plotly(spacetime_1d_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_1d_plot)
+    return (
+        create_1d_spacetime_animation,
+        spacetime_1d_plot,
+    )
 
 
 @app.cell
@@ -311,7 +339,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_2d_time_animation():
         """Visualize 1 space + 2 time dimensions."""
         n_frames = 80
@@ -337,22 +365,31 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
             frame_data = [
                 # Time plane grid (horizontal lines)
-                *[go.Scatter(
-                    x=[0, 6], y=[t, t],
-                    mode="lines",
-                    line=dict(color=COLORS["grid"], width=1),
-                    showlegend=False,
-                ) for t in t_grid],
+                *[
+                    go.Scatter(
+                        x=[0, 6],
+                        y=[t, t],
+                        mode="lines",
+                        line=dict(color=COLORS["grid"], width=1),
+                        showlegend=False,
+                    )
+                    for t in t_grid
+                ],
                 # Time plane grid (vertical lines)
-                *[go.Scatter(
-                    x=[t, t], y=[0, 6],
-                    mode="lines",
-                    line=dict(color=COLORS["grid"], width=1),
-                    showlegend=False,
-                ) for t in t_grid],
+                *[
+                    go.Scatter(
+                        x=[t, t],
+                        y=[0, 6],
+                        mode="lines",
+                        line=dict(color=COLORS["grid"], width=1),
+                        showlegend=False,
+                    )
+                    for t in t_grid
+                ],
                 # Path through time plane
                 go.Scatter(
-                    x=t1_history, y=t2_history,
+                    x=t1_history,
+                    y=t2_history,
                     mode="lines",
                     line=dict(color=COLORS["spacetime"], width=3),
                     name="Path through 2D time",
@@ -360,7 +397,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Current position
                 go.Scatter(
-                    x=[t1], y=[t2],
+                    x=[t1],
+                    y=[t2],
                     mode="markers+text",
                     marker=dict(size=15, color=COLORS["secondary"]),
                     text=[f"x={x:.1f}"],
@@ -371,8 +409,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Arrow showing "forward" in 2D time
                 go.Scatter(
-                    x=[t1, t1 + 0.3 * np.cos(progress * 2 * np.pi + np.pi/2)],
-                    y=[t2, t2 + 0.3 * np.sin(progress * 2 * np.pi + np.pi/2)],
+                    x=[t1, t1 + 0.3 * np.cos(progress * 2 * np.pi + np.pi / 2)],
+                    y=[t2, t2 + 0.3 * np.sin(progress * 2 * np.pi + np.pi / 2)],
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=3),
                     name="Time direction",
@@ -380,7 +418,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Origin marker
                 go.Scatter(
-                    x=[3], y=[3],
+                    x=[3],
+                    y=[3],
                     mode="markers",
                     marker=dict(size=8, color=COLORS["text_secondary"], symbol="x"),
                     name="Origin",
@@ -433,8 +472,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     time_2d_fig = create_2d_time_animation()
-    time_2d_fig
-    return (create_2d_time_animation, time_2d_fig)
+    time_2d_plot = mo.ui.plotly(time_2d_fig, config=get_plotly_config())
+    mo.output.replace(time_2d_plot)
+    return (create_2d_time_animation, time_2d_plot)
 
 
 @app.cell
@@ -513,7 +553,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_spacetime_dimensions_animation():
         """Show 2D, 3D, and 4D spacetime representations."""
         n_frames = 80
@@ -531,11 +571,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
             # === 2+1D (3D spacetime): x, y, and t ===
             # Show as 3D with time as vertical axis
-            theta_2d = np.linspace(0, 2 * np.pi, 30)
             # Particle spiraling upward in time
             spiral_t = np.linspace(0, 3, 50)
             spiral_x = 0.4 * np.cos(spiral_t * 3 + t)
-            spiral_y = 0.4 * np.sin(spiral_t * 3 + t)
 
             # === 3+1D (4D spacetime): projected ===
             # Show a tesseract-like projection (hypercube)
@@ -545,13 +583,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
             # Current position marker
             marker_x = 0.3 * np.cos(t)
-            marker_y = 0.3 * np.sin(t)
 
             frame_data = [
                 # ========== 1+1D SPACETIME (left) ==========
                 # Label
                 go.Scatter(
-                    x=[-3.5], y=[4.5],
+                    x=[-3.5],
+                    y=[4.5],
                     mode="text",
                     text=["<b>1+1D Spacetime</b><br>(1 space + 1 time)"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -559,7 +597,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Axes
                 go.Scatter(
-                    x=[-5, -2], y=[0, 0],
+                    x=[-5, -2],
+                    y=[0, 0],
                     mode="lines+text",
                     line=dict(color=COLORS["text_secondary"], width=2),
                     text=["", "x"],
@@ -568,7 +607,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[-5, -5], y=[0, 4],
+                    x=[-5, -5],
+                    y=[0, 4],
                     mode="lines+text",
                     line=dict(color=COLORS["text_secondary"], width=2),
                     text=["", "t"],
@@ -579,21 +619,23 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 # Light cone
                 go.Scatter(
                     x=[-5 + lc_t * 0.5, -5 - lc_t * 0.5 + 3][::-1],
-                    y=[lc_t.tolist() + lc_t.tolist()[::-1]][0][:len(lc_t)],
+                    y=[lc_t.tolist() + lc_t.tolist()[::-1]][0][: len(lc_t)],
                     mode="lines",
                     line=dict(color=COLORS["photon"], width=1, dash="dash"),
                     name="Light cone" if i == 0 else None,
                     showlegend=(i == 0),
                 ),
                 go.Scatter(
-                    x=-5 - lc_t * 0.5 + 3, y=lc_t,
+                    x=-5 - lc_t * 0.5 + 3,
+                    y=lc_t,
                     mode="lines",
                     line=dict(color=COLORS["photon"], width=1, dash="dash"),
                     showlegend=False,
                 ),
                 # Worldline
                 go.Scatter(
-                    x=x_1d - 3.5, y=t_vals,
+                    x=x_1d - 3.5,
+                    y=t_vals,
                     mode="lines",
                     line=dict(color=COLORS["primary"], width=3),
                     name="Worldline" if i == 0 else None,
@@ -607,11 +649,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     marker=dict(size=10, color=COLORS["secondary"]),
                     showlegend=False,
                 ),
-
                 # ========== 2+1D SPACETIME (center) ==========
                 # Label
                 go.Scatter(
-                    x=[0], y=[4.5],
+                    x=[0],
+                    y=[4.5],
                     mode="text",
                     text=["<b>2+1D Spacetime</b><br>(2 space + 1 time)"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -619,7 +661,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Spatial plane at t=0
                 go.Scatter(
-                    x=[-1, 1, 1, -1, -1], y=[-0.5, -0.5, 0.5, 0.5, -0.5],
+                    x=[-1, 1, 1, -1, -1],
+                    y=[-0.5, -0.5, 0.5, 0.5, -0.5],
                     mode="lines",
                     line=dict(color=COLORS["grid"], width=1),
                     fill="toself",
@@ -629,7 +672,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Time axis (vertical)
                 go.Scatter(
-                    x=[0, 0], y=[0, 4],
+                    x=[0, 0],
+                    y=[0, 4],
                     mode="lines+text",
                     line=dict(color=COLORS["quaternary"], width=2),
                     text=["", "t ↑"],
@@ -639,7 +683,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Spiral worldline (projected)
                 go.Scatter(
-                    x=spiral_x, y=spiral_t,
+                    x=spiral_x,
+                    y=spiral_t,
                     mode="lines",
                     line=dict(color=COLORS["spacetime"], width=2),
                     name="Spiral worldline" if i == 0 else None,
@@ -647,16 +692,17 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Current point
                 go.Scatter(
-                    x=[marker_x], y=[t / (2 * np.pi) * 3],
+                    x=[marker_x],
+                    y=[t / (2 * np.pi) * 3],
                     mode="markers",
                     marker=dict(size=10, color=COLORS["particle"]),
                     showlegend=False,
                 ),
-
                 # ========== 3+1D SPACETIME (right) ==========
                 # Label
                 go.Scatter(
-                    x=[3.5], y=[4.5],
+                    x=[3.5],
+                    y=[4.5],
                     mode="text",
                     text=["<b>3+1D Spacetime</b><br>(3 space + 1 time)"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -664,8 +710,20 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Hypercube projection (tesseract) - outer cube
                 go.Scatter(
-                    x=[3.5 - cube_scale, 3.5 + cube_scale, 3.5 + cube_scale, 3.5 - cube_scale, 3.5 - cube_scale],
-                    y=[1 - cube_scale, 1 - cube_scale, 1 + cube_scale, 1 + cube_scale, 1 - cube_scale],
+                    x=[
+                        3.5 - cube_scale,
+                        3.5 + cube_scale,
+                        3.5 + cube_scale,
+                        3.5 - cube_scale,
+                        3.5 - cube_scale,
+                    ],
+                    y=[
+                        1 - cube_scale,
+                        1 - cube_scale,
+                        1 + cube_scale,
+                        1 + cube_scale,
+                        1 - cube_scale,
+                    ],
                     mode="lines",
                     line=dict(color=COLORS["primary"], width=2),
                     name="3D space (now)" if i == 0 else None,
@@ -673,21 +731,36 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Inner cube (future)
                 go.Scatter(
-                    x=[3.5 - inner_scale, 3.5 + inner_scale, 3.5 + inner_scale, 3.5 - inner_scale, 3.5 - inner_scale],
-                    y=[2.5 - inner_scale, 2.5 - inner_scale, 2.5 + inner_scale, 2.5 + inner_scale, 2.5 - inner_scale],
+                    x=[
+                        3.5 - inner_scale,
+                        3.5 + inner_scale,
+                        3.5 + inner_scale,
+                        3.5 - inner_scale,
+                        3.5 - inner_scale,
+                    ],
+                    y=[
+                        2.5 - inner_scale,
+                        2.5 - inner_scale,
+                        2.5 + inner_scale,
+                        2.5 + inner_scale,
+                        2.5 - inner_scale,
+                    ],
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     name="3D space (future)" if i == 0 else None,
                     showlegend=(i == 0),
                 ),
                 # Connecting lines (time evolution)
-                *[go.Scatter(
-                    x=[3.5 + dx * cube_scale, 3.5 + dx * inner_scale],
-                    y=[1 + dy * cube_scale, 2.5 + dy * inner_scale],
-                    mode="lines",
-                    line=dict(color=COLORS["text_secondary"], width=1, dash="dot"),
-                    showlegend=False,
-                ) for dx, dy in [(-1, -1), (1, -1), (1, 1), (-1, 1)]],
+                *[
+                    go.Scatter(
+                        x=[3.5 + dx * cube_scale, 3.5 + dx * inner_scale],
+                        y=[1 + dy * cube_scale, 2.5 + dy * inner_scale],
+                        mode="lines",
+                        line=dict(color=COLORS["text_secondary"], width=1, dash="dot"),
+                        showlegend=False,
+                    )
+                    for dx, dy in [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+                ],
                 # Rotating point showing 4D motion
                 go.Scatter(
                     x=[3.5 + 0.3 * np.cos(t * 2)],
@@ -709,7 +782,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     font=dict(size=16, color=COLORS["text"]),
                 ),
                 xaxis=dict(range=[-6, 6], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-1, 5.5], showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x"),
+                yaxis=dict(
+                    range=[-1, 5.5],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 plot_bgcolor=COLORS["background"],
                 paper_bgcolor=COLORS["paper"],
                 font=dict(color=COLORS["text"]),
@@ -741,12 +820,16 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     spacetime_dim_fig = create_spacetime_dimensions_animation()
-    spacetime_dim_fig
-    return (create_spacetime_dimensions_animation, spacetime_dim_fig)
+    spacetime_dim_plot = mo.ui.plotly(spacetime_dim_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_dim_plot)
+    return (
+        create_spacetime_dimensions_animation,
+        spacetime_dim_plot,
+    )
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_wormhole_animation():
         """Visualize a wormhole connecting two regions of 2D space."""
         n_frames = 80
@@ -762,10 +845,10 @@ def _(COLORS, create_play_pause_buttons, go, np):
             x_surface = np.linspace(-3, 3, 60)
 
             # Upper sheet (our universe)
-            y_upper = 2 + 0.3 * np.exp(-x_surface**2 / 2)
+            y_upper = 2 + 0.3 * np.exp(-(x_surface**2) / 2)
 
             # Lower sheet (other region / other universe)
-            y_lower = -2 - 0.3 * np.exp(-x_surface**2 / 2)
+            y_lower = -2 - 0.3 * np.exp(-(x_surface**2) / 2)
 
             # Wormhole throat connecting them
             throat_y = np.linspace(y_lower[30], y_upper[30], 20)
@@ -777,7 +860,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 # On upper surface, moving toward throat
                 p = progress / 0.3
                 particle_x = 2.5 - p * 2.5
-                particle_y = 2 + 0.3 * np.exp(-particle_x**2 / 2)
+                particle_y = 2 + 0.3 * np.exp(-(particle_x**2) / 2)
             elif progress < 0.7:
                 # In throat
                 p = (progress - 0.3) / 0.4
@@ -787,15 +870,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 # On lower surface, moving away
                 p = (progress - 0.7) / 0.3
                 particle_x = p * 2.5
-                particle_y = -2 - 0.3 * np.exp(-particle_x**2 / 2)
-
-            # Light rays showing connection
-            ray_progress = (t / (2 * np.pi)) % 1
+                particle_y = -2 - 0.3 * np.exp(-(particle_x**2) / 2)
 
             frame_data = [
                 # Upper surface (our universe)
                 go.Scatter(
-                    x=x_surface, y=y_upper,
+                    x=x_surface,
+                    y=y_upper,
                     mode="lines",
                     line=dict(color=COLORS["primary"], width=3),
                     fill="tozeroy",
@@ -805,7 +886,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Lower surface
                 go.Scatter(
-                    x=x_surface, y=y_lower,
+                    x=x_surface,
+                    y=y_lower,
                     mode="lines",
                     line=dict(color=COLORS["spacetime"], width=3),
                     fill="tozeroy",
@@ -815,7 +897,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Wormhole throat
                 go.Scatter(
-                    x=throat_x, y=throat_y,
+                    x=throat_x,
+                    y=throat_y,
                     mode="lines",
                     line=dict(color=COLORS["secondary"], width=4),
                     name="Wormhole throat",
@@ -823,7 +906,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Exotic matter at throat (negative energy)
                 go.Scatter(
-                    x=[0], y=[0],
+                    x=[0],
+                    y=[0],
                     mode="markers",
                     marker=dict(
                         size=25,
@@ -836,7 +920,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Particle
                 go.Scatter(
-                    x=[particle_x], y=[particle_y],
+                    x=[particle_x],
+                    y=[particle_y],
                     mode="markers",
                     marker=dict(size=12, color=COLORS["quaternary"]),
                     name="Traveler",
@@ -844,21 +929,24 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Labels
                 go.Scatter(
-                    x=[2.5], y=[2.8],
+                    x=[2.5],
+                    y=[2.8],
                     mode="text",
                     text=["Region A"],
                     textfont=dict(color=COLORS["primary"], size=12),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[2.5], y=[-2.8],
+                    x=[2.5],
+                    y=[-2.8],
                     mode="text",
                     text=["Region B"],
                     textfont=dict(color=COLORS["spacetime"], size=12),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[0.8], y=[0],
+                    x=[0.8],
+                    y=[0],
                     mode="text",
                     text=["ρ < 0"],
                     textfont=dict(color=COLORS["secondary"], size=11),
@@ -866,7 +954,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Distance annotations
                 go.Scatter(
-                    x=[-2.5, 2.5], y=[3.2, 3.2],
+                    x=[-2.5, 2.5],
+                    y=[3.2, 3.2],
                     mode="lines+text",
                     line=dict(color=COLORS["text_secondary"], width=1, dash="dot"),
                     text=["", "Normal path: far"],
@@ -875,7 +964,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[0], y=[0.8],
+                    x=[0],
+                    y=[0.8],
                     mode="text",
                     text=["Shortcut!"],
                     textfont=dict(color=COLORS["quaternary"], size=10),
@@ -893,7 +983,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     font=dict(size=16, color=COLORS["text"]),
                 ),
                 xaxis=dict(range=[-4, 4], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-4, 4], showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x"),
+                yaxis=dict(
+                    range=[-4, 4],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 plot_bgcolor=COLORS["background"],
                 paper_bgcolor=COLORS["paper"],
                 font=dict(color=COLORS["text"]),
@@ -919,12 +1015,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     wormhole_fig = create_wormhole_animation()
-    wormhole_fig
-    return (create_wormhole_animation, wormhole_fig)
+    wormhole_plot = mo.ui.plotly(wormhole_fig, config=get_plotly_config())
+    mo.output.replace(wormhole_plot)
+    return (create_wormhole_animation, wormhole_plot)
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_exotic_matter_spacetime_animation():
         """Show exotic matter behavior in 2D space + 1D time."""
         n_frames = 100
@@ -959,67 +1056,76 @@ def _(COLORS, create_play_pause_buttons, go, np):
             em_test_x = em_x + em_r * np.cos(test_angles - t * 0.3)
             em_test_y = em_y + em_r * np.sin(test_angles - t * 0.3)
 
-            # Spacetime curvature visualization (deformed grid)
-            grid_traces = []
-            for gx in x_grid:
-                line_y = y_grid.copy()
-                line_x = np.full_like(line_y, gx)
-                # Deform based on matter locations
-                for j in range(len(line_y)):
-                    # Normal matter pulls grid inward
-                    d_nm = np.sqrt((gx - nm_x)**2 + (line_y[j] - nm_y)**2)
-                    if d_nm > 0.3:
-                        pull = 0.3 / d_nm**1.5
-                        line_x[j] += pull * (nm_x - gx) / d_nm
-                        line_y[j] += pull * (nm_y - line_y[j]) / d_nm
+            # Vectorized Spacetime curvature visualization
+            x_mesh, y_mesh = np.meshgrid(x_grid, y_grid)
 
-                    # Exotic matter pushes grid outward
-                    d_em = np.sqrt((gx - em_x)**2 + (line_y[j] - em_y)**2)
-                    if d_em > 0.3:
-                        push = 0.3 / d_em**1.5
-                        line_x[j] -= push * (em_x - gx) / d_em  # Opposite direction!
-                        line_y[j] -= push * (em_y - line_y[j]) / d_em
+            # Deform meshes based on matter
+            _nm_x, _nm_y = nm_x, nm_y
+            _em_x, _em_y = em_x, em_y
 
-                grid_traces.append(go.Scatter(
-                    x=line_x, y=line_y,
+            def deform(x, y, _nm_x=_nm_x, _nm_y=_nm_y, _em_x=_em_x, _em_y=_em_y):
+                # Normal matter
+                d_nm = np.sqrt((x - _nm_x) ** 2 + (y - _nm_y) ** 2)
+                pull = np.where(d_nm > 0.3, 0.3 / (d_nm**1.5 + 1e-10), 0)
+                dx_nm = pull * (_nm_x - x) / (d_nm + 1e-10)
+                dy_nm = pull * (_nm_y - y) / (d_nm + 1e-10)
+
+                # Exotic matter
+                d_em = np.sqrt((x - _em_x) ** 2 + (y - _em_y) ** 2)
+                push = np.where(d_em > 0.3, 0.3 / (d_em**1.5 + 1e-10), 0)
+                dx_em = -push * (_em_x - x) / (d_em + 1e-10)
+                dy_em = -push * (_em_y - y) / (d_em + 1e-10)
+
+                return x + dx_nm + dx_em, y + dy_nm + dy_em
+
+            x_def, y_def = deform(x_mesh, y_mesh)
+
+            # Create vertical line segments separated by None
+            vx = []
+            vy = []
+            for j in range(len(x_grid)):
+                vx.extend(x_def[:, j])
+                vx.append(None)
+                vy.extend(y_def[:, j])
+                vy.append(None)
+
+            # Create horizontal line segments separated by None
+            hx = []
+            hy = []
+            for i in range(len(y_grid)):
+                hx.extend(x_def[i, :])
+                hx.append(None)
+                hy.extend(y_def[i, :])
+                hy.append(None)
+
+            grid_traces = [
+                go.Scatter(
+                    x=vx,
+                    y=vy,
                     mode="lines",
                     line=dict(color=COLORS["grid"], width=1),
                     showlegend=False,
-                ))
-
-            # Horizontal grid lines
-            for gy in y_grid:
-                line_x = x_grid.copy()
-                line_y = np.full_like(line_x, gy)
-                for j in range(len(line_x)):
-                    d_nm = np.sqrt((line_x[j] - nm_x)**2 + (gy - nm_y)**2)
-                    if d_nm > 0.3:
-                        pull = 0.3 / d_nm**1.5
-                        line_x[j] += pull * (nm_x - line_x[j]) / d_nm
-                        line_y[j] += pull * (nm_y - gy) / d_nm
-
-                    d_em = np.sqrt((line_x[j] - em_x)**2 + (gy - em_y)**2)
-                    if d_em > 0.3:
-                        push = 0.3 / d_em**1.5
-                        line_x[j] -= push * (em_x - line_x[j]) / d_em
-                        line_y[j] -= push * (em_y - gy) / d_em
-
-                grid_traces.append(go.Scatter(
-                    x=line_x, y=line_y,
+                ),
+                go.Scatter(
+                    x=hx,
+                    y=hy,
                     mode="lines",
                     line=dict(color=COLORS["grid"], width=1),
                     showlegend=False,
-                ))
+                ),
+            ]
 
             frame_data = [
                 # Deformed spacetime grid
                 *grid_traces,
                 # Normal matter (positive energy)
                 go.Scatter(
-                    x=[nm_x], y=[nm_y],
+                    x=[nm_x],
+                    y=[nm_y],
                     mode="markers+text",
-                    marker=dict(size=30, color=COLORS["gravity"],
-                               line=dict(color="white", width=2)),
+                    marker=dict(
+                        size=30, color=COLORS["gravity"], line=dict(color="white", width=2)
+                    ),
                     text=["ρ > 0"],
                     textposition="bottom center",
                     textfont=dict(color=COLORS["gravity"], size=11),
@@ -1028,11 +1134,15 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Exotic matter (negative energy)
                 go.Scatter(
-                    x=[em_x], y=[em_y],
+                    x=[em_x],
+                    y=[em_y],
                     mode="markers+text",
-                    marker=dict(size=30, color=COLORS["secondary"],
-                               line=dict(color="white", width=2),
-                               symbol="diamond"),
+                    marker=dict(
+                        size=30,
+                        color=COLORS["secondary"],
+                        line=dict(color="white", width=2),
+                        symbol="diamond",
+                    ),
                     text=["ρ < 0"],
                     textposition="bottom center",
                     textfont=dict(color=COLORS["secondary"], size=11),
@@ -1041,7 +1151,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Test particles around normal matter
                 go.Scatter(
-                    x=nm_test_x, y=nm_test_y,
+                    x=nm_test_x,
+                    y=nm_test_y,
                     mode="markers",
                     marker=dict(size=8, color=COLORS["quaternary"]),
                     name="Attracted particles",
@@ -1049,7 +1160,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Test particles around exotic matter
                 go.Scatter(
-                    x=em_test_x, y=em_test_y,
+                    x=em_test_x,
+                    y=em_test_y,
                     mode="markers",
                     marker=dict(size=8, color=COLORS["wave"]),
                     name="Repelled particles",
@@ -1057,40 +1169,46 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Arrows showing attraction
                 go.Scatter(
-                    x=[nm_x - 0.8, nm_x - 0.4], y=[0.8, 0.4],
+                    x=[nm_x - 0.8, nm_x - 0.4],
+                    y=[0.8, 0.4],
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=2),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[nm_x + 0.8, nm_x + 0.4], y=[-0.8, -0.4],
+                    x=[nm_x + 0.8, nm_x + 0.4],
+                    y=[-0.8, -0.4],
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=2),
                     showlegend=False,
                 ),
                 # Arrows showing repulsion
                 go.Scatter(
-                    x=[em_x + 0.4, em_x + 0.8], y=[0.4, 0.8],
+                    x=[em_x + 0.4, em_x + 0.8],
+                    y=[0.4, 0.8],
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[em_x - 0.4, em_x - 0.8], y=[-0.4, -0.8],
+                    x=[em_x - 0.4, em_x - 0.8],
+                    y=[-0.4, -0.8],
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     showlegend=False,
                 ),
                 # Labels
                 go.Scatter(
-                    x=[-1.5], y=[2.5],
+                    x=[-1.5],
+                    y=[2.5],
                     mode="text",
                     text=["<b>ATTRACTS</b><br>Curves space inward"],
                     textfont=dict(color=COLORS["gravity"], size=10),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[1.5], y=[2.5],
+                    x=[1.5],
+                    y=[2.5],
                     mode="text",
                     text=["<b>REPELS</b><br>Curves space outward"],
                     textfont=dict(color=COLORS["secondary"], size=10),
@@ -1098,7 +1216,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Time indicator
                 go.Scatter(
-                    x=[3.2], y=[-2.8],
+                    x=[3.2],
+                    y=[-2.8],
                     mode="text",
                     text=[f"t = {t:.1f}"],
                     textfont=dict(color=COLORS["text_secondary"], size=11),
@@ -1116,7 +1235,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     font=dict(size=16, color=COLORS["text"]),
                 ),
                 xaxis=dict(range=[-3.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3.5, 3.5], showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x"),
+                yaxis=dict(
+                    range=[-3.5, 3.5],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 plot_bgcolor=COLORS["background"],
                 paper_bgcolor=COLORS["paper"],
                 font=dict(color=COLORS["text"]),
@@ -1148,8 +1273,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     exotic_spacetime_fig = create_exotic_matter_spacetime_animation()
-    exotic_spacetime_fig
-    return (create_exotic_matter_spacetime_animation, exotic_spacetime_fig)
+    exotic_spacetime_plot = mo.ui.plotly(exotic_spacetime_fig, config=get_plotly_config())
+    mo.output.replace(exotic_spacetime_plot)
+    return (
+        create_exotic_matter_spacetime_animation,
+        exotic_spacetime_plot,
+    )
 
 
 @app.cell
@@ -1185,7 +1314,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_time_directions_animation():
         """Compare 1D vs 2D time directions."""
         n_frames = 60
@@ -1213,7 +1342,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 # ===== LEFT PLOT: 1D Time =====
                 # Worldline
                 go.Scatter(
-                    x=x_1d_hist - 5, y=t_vals,
+                    x=x_1d_hist - 5,
+                    y=t_vals,
                     mode="lines",
                     line=dict(color=COLORS["primary"], width=3),
                     name="1D time worldline",
@@ -1221,7 +1351,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Current position
                 go.Scatter(
-                    x=[x_1d - 5], y=[t_1d],
+                    x=[x_1d - 5],
+                    y=[t_1d],
                     mode="markers",
                     marker=dict(size=12, color=COLORS["secondary"]),
                     name="Observer (1D time)",
@@ -1229,24 +1360,26 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Forward arrow
                 go.Scatter(
-                    x=[x_1d - 5, x_1d - 5], y=[t_1d, t_1d + 0.5],
+                    x=[x_1d - 5, x_1d - 5],
+                    y=[t_1d, t_1d + 0.5],
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=3),
                     showlegend=False,
                 ),
                 # Label
                 go.Scatter(
-                    x=[-5], y=[7],
+                    x=[-5],
+                    y=[7],
                     mode="text",
                     text=["<b>1D Time</b><br>Only forward/backward"],
                     textfont=dict(color=COLORS["text"], size=11),
                     showlegend=False,
                 ),
-
                 # ===== RIGHT PLOT: 2D Time =====
                 # Path
                 go.Scatter(
-                    x=t1_2d_hist + 2, y=t2_2d_hist,
+                    x=t1_2d_hist + 2,
+                    y=t2_2d_hist,
                     mode="lines",
                     line=dict(color=COLORS["spacetime"], width=3),
                     name="2D time path",
@@ -1254,7 +1387,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Current position
                 go.Scatter(
-                    x=[t1_2d + 2], y=[t2_2d],
+                    x=[t1_2d + 2],
+                    y=[t2_2d],
                     mode="markers",
                     marker=dict(size=12, color=COLORS["particle"]),
                     name="Observer (2D time)",
@@ -1262,29 +1396,32 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Direction arrows (showing 2D freedom)
                 go.Scatter(
-                    x=[t1_2d + 2, t1_2d + 2.4], y=[t2_2d, t2_2d],
+                    x=[t1_2d + 2, t1_2d + 2.4],
+                    y=[t2_2d, t2_2d],
                     mode="lines",
                     line=dict(color=COLORS["quaternary"], width=2),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[t1_2d + 2, t1_2d + 2], y=[t2_2d, t2_2d + 0.4],
+                    x=[t1_2d + 2, t1_2d + 2],
+                    y=[t2_2d, t2_2d + 0.4],
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     showlegend=False,
                 ),
                 # Label
                 go.Scatter(
-                    x=[5], y=[7],
+                    x=[5],
+                    y=[7],
                     mode="text",
                     text=["<b>2D Time</b><br>Can move in t₁ or t₂"],
                     textfont=dict(color=COLORS["text"], size=11),
                     showlegend=False,
                 ),
-
                 # Dividing line
                 go.Scatter(
-                    x=[0, 0], y=[-0.5, 8],
+                    x=[0, 0],
+                    y=[-0.5, 8],
                     mode="lines",
                     line=dict(color=COLORS["text_secondary"], width=1, dash="dash"),
                     showlegend=False,
@@ -1342,8 +1479,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     directions_fig = create_time_directions_animation()
-    directions_fig
-    return (create_time_directions_animation, directions_fig)
+    directions_plot = mo.ui.plotly(directions_fig, config=get_plotly_config())
+    mo.output.replace(directions_plot)
+    return (
+        create_time_directions_animation,
+        directions_plot,
+    )
 
 
 @app.cell
@@ -1387,7 +1528,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_dimensional_light_animation():
         """Show how light propagation differs by dimension."""
         n_frames = 60
@@ -1413,7 +1554,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
             frame_data = [
                 # ===== 1D LIGHT =====
                 go.Scatter(
-                    x=np.array(x_1d) - 6, y=[0, 0],
+                    x=np.array(x_1d) - 6,
+                    y=[0, 0],
                     mode="markers+lines",
                     marker=dict(size=10, color=COLORS["photon"]),
                     line=dict(color=COLORS["photon"], width=2),
@@ -1421,50 +1563,55 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     showlegend=(i == 0),
                 ),
                 go.Scatter(
-                    x=[-6], y=[1.5],
+                    x=[-6],
+                    y=[1.5],
                     mode="text",
                     text=["<b>1D Space</b><br>Light = 2 points"],
                     textfont=dict(color=COLORS["text"], size=10),
                     showlegend=False,
                 ),
-
                 # ===== 2D LIGHT =====
                 go.Scatter(
-                    x=x_2d, y=y_2d - 4,
+                    x=x_2d,
+                    y=y_2d - 4,
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     name="2D light (circle)",
                     showlegend=(i == 0),
                 ),
                 go.Scatter(
-                    x=[0], y=[-2.5],
+                    x=[0],
+                    y=[-2.5],
                     mode="text",
                     text=["<b>2D Space</b><br>Light = circle"],
                     textfont=dict(color=COLORS["text"], size=10),
                     showlegend=False,
                 ),
-
                 # ===== 3D LIGHT =====
                 # Multiple circles representing sphere cross-sections
-                *[go.Scatter(
-                    x=t * np.sin(phi) * np.cos(theta) + 6,
-                    y=t * np.sin(phi) * np.sin(theta),
-                    mode="lines",
-                    line=dict(color=COLORS["quantum"], width=1),
-                    name="3D light (sphere)" if j == 0 and i == 0 else None,
-                    showlegend=(j == 0 and i == 0),
-                ) for j, phi in enumerate(phi_vals)],
+                *[
+                    go.Scatter(
+                        x=t * np.sin(phi) * np.cos(theta) + 6,
+                        y=t * np.sin(phi) * np.sin(theta),
+                        mode="lines",
+                        line=dict(color=COLORS["quantum"], width=1),
+                        name="3D light (sphere)" if j == 0 and i == 0 else None,
+                        showlegend=(j == 0 and i == 0),
+                    )
+                    for j, phi in enumerate(phi_vals)
+                ],
                 go.Scatter(
-                    x=[6], y=[1.5],
+                    x=[6],
+                    y=[1.5],
                     mode="text",
                     text=["<b>3D Space</b><br>Light = sphere"],
                     textfont=dict(color=COLORS["text"], size=10),
                     showlegend=False,
                 ),
-
                 # Time indicator
                 go.Scatter(
-                    x=[-8], y=[-5],
+                    x=[-8],
+                    y=[-5],
                     mode="text",
                     text=[f"t = {t:.2f}"],
                     textfont=dict(color=COLORS["quaternary"], size=14),
@@ -1524,8 +1671,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     light_dim_fig = create_dimensional_light_animation()
-    light_dim_fig
-    return (create_dimensional_light_animation, light_dim_fig)
+    light_dim_plot = mo.ui.plotly(light_dim_fig, config=get_plotly_config())
+    mo.output.replace(light_dim_plot)
+    return (
+        create_dimensional_light_animation,
+        light_dim_plot,
+    )
 
 
 @app.cell
@@ -1580,7 +1731,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_quantum_time_animation():
         """Visualize quantum superposition spreading in space and time."""
         n_frames = 80
@@ -1592,12 +1743,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
             # Quantum wavepacket spreading
             x = np.linspace(-5, 5, 200)
             sigma = 0.5 + t * 0.3  # Spreading width
-            psi = np.exp(-x**2 / (2 * sigma**2)) * np.cos(3 * x - t * 2)
+            psi = np.exp(-(x**2) / (2 * sigma**2)) * np.cos(3 * x - t * 2)
             prob = psi**2
 
             # Probability at different "times" (superposition)
-            psi_past = np.exp(-(x + 1)**2 / (2 * 0.5**2)) * 0.3
-            psi_future = np.exp(-(x - 1)**2 / (2 * 0.8**2)) * 0.3
+            psi_past = np.exp(-((x + 1) ** 2) / (2 * 0.5**2)) * 0.3
 
             # Classical particle position
             x_classical = 2 * np.sin(t * 0.5)
@@ -1605,7 +1755,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
             frame_data = [
                 # Probability density
                 go.Scatter(
-                    x=x, y=prob + 2,
+                    x=x,
+                    y=prob + 2,
                     mode="lines",
                     fill="tozeroy",
                     fillcolor="rgba(0, 212, 255, 0.3)",
@@ -1615,7 +1766,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Wave function (real part)
                 go.Scatter(
-                    x=x, y=psi,
+                    x=x,
+                    y=psi,
                     mode="lines",
                     line=dict(color=COLORS["wave"], width=2),
                     name="ψ (wave function)",
@@ -1623,7 +1775,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # "Ghost" of past state
                 go.Scatter(
-                    x=x, y=psi_past - 1.5,
+                    x=x,
+                    y=psi_past - 1.5,
                     mode="lines",
                     line=dict(color=COLORS["text_secondary"], width=1, dash="dot"),
                     name="Past state (fading)",
@@ -1631,7 +1784,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Classical particle for comparison
                 go.Scatter(
-                    x=[x_classical], y=[-2.5],
+                    x=[x_classical],
+                    y=[-2.5],
                     mode="markers",
                     marker=dict(size=15, color=COLORS["secondary"]),
                     name="Classical particle",
@@ -1639,14 +1793,16 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Labels
                 go.Scatter(
-                    x=[-4.5], y=[2.5],
+                    x=[-4.5],
+                    y=[2.5],
                     mode="text",
                     text=["<b>Quantum</b>: Spread in space AND time?"],
                     textfont=dict(color=COLORS["text"], size=11),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[-4.5], y=[-2.5],
+                    x=[-4.5],
+                    y=[-2.5],
                     mode="text",
                     text=["<b>Classical</b>: Definite position"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -1654,7 +1810,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Time indicator
                 go.Scatter(
-                    x=[4], y=[3.5],
+                    x=[4],
+                    y=[3.5],
                     mode="text",
                     text=[f"t = {t:.2f}"],
                     textfont=dict(color=COLORS["quaternary"], size=12),
@@ -1708,8 +1865,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     quantum_fig = create_quantum_time_animation()
-    quantum_fig
-    return (create_quantum_time_animation, quantum_fig)
+    quantum_plot = mo.ui.plotly(quantum_fig, config=get_plotly_config())
+    mo.output.replace(quantum_plot)
+    return (create_quantum_time_animation, quantum_plot)
 
 
 @app.cell
@@ -1751,7 +1909,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
+def _(COLORS, get_plotly_config, go, mo, np):
     def create_signature_comparison():
         """Create a static comparison of different spacetime signatures."""
 
@@ -1787,56 +1945,92 @@ def _(COLORS, go, np):
         y_11 = np.zeros_like(t) - 2
 
         # Add traces
-        fig.add_trace(go.Scatter(
-            x=x_31, y=y_31, mode="lines",
-            line=dict(color=COLORS["wave"], width=3),
-            name="(3,1) Stable orbit"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[-3], y=[2], mode="markers",
-            marker=dict(size=15, color=COLORS["gravity"]),
-            showlegend=False
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x_31,
+                y=y_31,
+                mode="lines",
+                line=dict(color=COLORS["wave"], width=3),
+                name="(3,1) Stable orbit",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[-3],
+                y=[2],
+                mode="markers",
+                marker=dict(size=15, color=COLORS["gravity"]),
+                showlegend=False,
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=x_21, y=y_21, mode="lines",
-            line=dict(color=COLORS["secondary"], width=2),
-            name="(2,1) Spiral in"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[0], y=[2], mode="markers",
-            marker=dict(size=12, color=COLORS["gravity"]),
-            showlegend=False
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x_21,
+                y=y_21,
+                mode="lines",
+                line=dict(color=COLORS["secondary"], width=2),
+                name="(2,1) Spiral in",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[0],
+                y=[2],
+                mode="markers",
+                marker=dict(size=12, color=COLORS["gravity"]),
+                showlegend=False,
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=x_41, y=y_41, mode="lines",
-            line=dict(color=COLORS["spacetime"], width=2),
-            name="(4,1) Spiral out"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[3], y=[2], mode="markers",
-            marker=dict(size=12, color=COLORS["gravity"]),
-            showlegend=False
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x_41,
+                y=y_41,
+                mode="lines",
+                line=dict(color=COLORS["spacetime"], width=2),
+                name="(4,1) Spiral out",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[3],
+                y=[2],
+                mode="markers",
+                marker=dict(size=12, color=COLORS["gravity"]),
+                showlegend=False,
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=[x_30], y=[y_30], mode="markers",
-            marker=dict(size=20, color=COLORS["text_secondary"]),
-            name="(3,0) Frozen"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[x_30],
+                y=[y_30],
+                mode="markers",
+                marker=dict(size=20, color=COLORS["text_secondary"]),
+                name="(3,0) Frozen",
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=x_22, y=y_22, mode="lines",
-            line=dict(color=COLORS["particle"], width=2),
-            name="(2,2) Chaotic"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x_22,
+                y=y_22,
+                mode="lines",
+                line=dict(color=COLORS["particle"], width=2),
+                name="(2,2) Chaotic",
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=x_11, y=y_11, mode="lines",
-            line=dict(color=COLORS["primary"], width=3),
-            name="(1,1) Linear"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=x_11,
+                y=y_11,
+                mode="lines",
+                line=dict(color=COLORS["primary"], width=3),
+                name="(1,1) Linear",
+            )
+        )
 
         # Labels
         labels = [
@@ -1849,12 +2043,16 @@ def _(COLORS, go, np):
         ]
 
         for x, y, text in labels:
-            fig.add_trace(go.Scatter(
-                x=[x], y=[y], mode="text",
-                text=[text],
-                textfont=dict(color=COLORS["text"], size=11),
-                showlegend=False
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[x],
+                    y=[y],
+                    mode="text",
+                    text=[text],
+                    textfont=dict(color=COLORS["text"], size=11),
+                    showlegend=False,
+                )
+            )
 
         fig.update_layout(
             title=dict(
@@ -1879,8 +2077,9 @@ def _(COLORS, go, np):
         return fig
 
     signature_fig = create_signature_comparison()
-    signature_fig
-    return (create_signature_comparison, signature_fig)
+    signature_plot = mo.ui.plotly(signature_fig, config=get_plotly_config())
+    mo.output.replace(signature_plot)
+    return (create_signature_comparison, signature_plot)
 
 
 @app.cell
@@ -1930,7 +2129,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, create_play_pause_buttons, go, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def create_entropy_arrow_animation():
         """Visualize the thermodynamic arrow of time."""
         n_frames = 100
@@ -1964,14 +2163,16 @@ def _(COLORS, create_play_pause_buttons, go, np):
             frame_data = [
                 # Box
                 go.Scatter(
-                    x=[-2, 2, 2, -2, -2], y=[-2, -2, 2, 2, -2],
+                    x=[-2, 2, 2, -2, -2],
+                    y=[-2, -2, 2, 2, -2],
                     mode="lines",
                     line=dict(color=COLORS["text_secondary"], width=2),
                     showlegend=False,
                 ),
                 # Particles
                 go.Scatter(
-                    x=x, y=y,
+                    x=x,
+                    y=y,
                     mode="markers",
                     marker=dict(
                         size=8,
@@ -1983,7 +2184,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Entropy indicator
                 go.Scatter(
-                    x=[3.5], y=[entropy - 2],
+                    x=[3.5],
+                    y=[entropy - 2],
                     mode="markers",
                     marker=dict(size=12, color=COLORS["secondary"]),
                     name="Entropy",
@@ -1991,13 +2193,15 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Entropy axis
                 go.Scatter(
-                    x=[3.5, 3.5], y=[-2, 2],
+                    x=[3.5, 3.5],
+                    y=[-2, 2],
                     mode="lines",
                     line=dict(color=COLORS["text_secondary"], width=2),
                     showlegend=False,
                 ),
                 go.Scatter(
-                    x=[3.5], y=[2.3],
+                    x=[3.5],
+                    y=[2.3],
                     mode="text",
                     text=["S (entropy)"],
                     textfont=dict(color=COLORS["text"], size=10),
@@ -2005,7 +2209,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Time arrow
                 go.Scatter(
-                    x=[-2.5, -2.5], y=[-2, 2],
+                    x=[-2.5, -2.5],
+                    y=[-2, 2],
                     mode="lines+text",
                     line=dict(color=COLORS["quaternary"], width=2),
                     text=["", "TIME ↑"],
@@ -2015,7 +2220,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 ),
                 # Status
                 go.Scatter(
-                    x=[0], y=[-2.8],
+                    x=[0],
+                    y=[-2.8],
                     mode="text",
                     text=[f"t = {t:.1f}  |  Low entropy → High entropy"],
                     textfont=dict(color=COLORS["text"], size=11),
@@ -2032,7 +2238,13 @@ def _(COLORS, create_play_pause_buttons, go, np):
                     text="<b>The Arrow of Time:</b> Entropy Always Increases<br><sub>Ordered state → Disordered state (never spontaneously reverses)</sub>",
                     font=dict(size=16, color=COLORS["text"]),
                 ),
-                xaxis=dict(range=[-3, 4.5], scaleanchor="y", showgrid=False, zeroline=False, showticklabels=False),
+                xaxis=dict(
+                    range=[-3, 4.5],
+                    scaleanchor="y",
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                ),
                 yaxis=dict(range=[-3.5, 3], showgrid=False, zeroline=False, showticklabels=False),
                 plot_bgcolor=COLORS["background"],
                 paper_bgcolor=COLORS["paper"],
@@ -2059,8 +2271,9 @@ def _(COLORS, create_play_pause_buttons, go, np):
         return fig
 
     entropy_fig = create_entropy_arrow_animation()
-    entropy_fig
-    return (create_entropy_arrow_animation, entropy_fig)
+    entropy_plot = mo.ui.plotly(entropy_fig, config=get_plotly_config())
+    mo.output.replace(entropy_plot)
+    return (create_entropy_arrow_animation, entropy_plot)
 
 
 @app.cell

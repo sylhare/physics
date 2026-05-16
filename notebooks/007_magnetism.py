@@ -9,12 +9,28 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+
+    from physics.constants import C, G
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        G,
+        C,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -86,7 +102,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Magnetic field around a current-carrying wire
     def create_wire_field_animation():
         n_frames = 60
@@ -97,23 +113,31 @@ def _(go, np):
             frame_data = []
 
             # The wire (vertical line at center)
-            frame_data.append(go.Scatter3d(
-                x=[0, 0], y=[0, 0], z=[-2, 2],
-                mode="lines",
-                line=dict(color="gold", width=10),
-                name="Current-carrying wire",
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[0, 0],
+                    y=[0, 0],
+                    z=[-2, 2],
+                    mode="lines",
+                    line=dict(color="gold", width=10),
+                    name="Current-carrying wire",
+                )
+            )
 
             # Current direction indicator (moving charge)
             charge_z = -2 + (frame / n_frames) * 4
             if charge_z > 2:
                 charge_z = charge_z - 4
-            frame_data.append(go.Scatter3d(
-                x=[0], y=[0], z=[charge_z],
-                mode="markers",
-                marker=dict(size=8, color="yellow", symbol="diamond"),
-                name="Moving charge (current)",
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[0],
+                    y=[0],
+                    z=[charge_z],
+                    mode="markers",
+                    marker=dict(size=8, color="yellow", symbol="diamond"),
+                    name="Moving charge (current)",
+                )
+            )
 
             # Magnetic field lines (concentric circles)
             for r in [0.5, 1.0, 1.5]:
@@ -124,13 +148,17 @@ def _(go, np):
                 y_circle = r * np.sin(theta_shifted)
                 z_circle = np.zeros_like(theta)
 
-                frame_data.append(go.Scatter3d(
-                    x=x_circle, y=y_circle, z=z_circle,
-                    mode="lines",
-                    line=dict(color=f"rgba(0, 150, 255, {0.8 - r * 0.2})", width=4),
-                    name=f"B field (r={r})" if r == 0.5 else None,
-                    showlegend=(r == 0.5),
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=x_circle,
+                        y=y_circle,
+                        z=z_circle,
+                        mode="lines",
+                        line=dict(color=f"rgba(0, 150, 255, {0.8 - r * 0.2})", width=4),
+                        name=f"B field (r={r})" if r == 0.5 else None,
+                        showlegend=(r == 0.5),
+                    )
+                )
 
             # Field direction arrows
             n_arrows = 8
@@ -144,14 +172,20 @@ def _(go, np):
                 dx = -0.2 * np.sin(angle)
                 dy = 0.2 * np.cos(angle)
 
-                frame_data.append(go.Cone(
-                    x=[x_arr], y=[y_arr], z=[0],
-                    u=[dx], v=[dy], w=[0],
-                    colorscale=[[0, "cyan"], [1, "cyan"]],
-                    showscale=False,
-                    sizemode="absolute",
-                    sizeref=0.15,
-                ))
+                frame_data.append(
+                    go.Cone(
+                        x=[x_arr],
+                        y=[y_arr],
+                        z=[0],
+                        u=[dx],
+                        v=[dy],
+                        w=[0],
+                        colorscale=[[0, "cyan"], [1, "cyan"]],
+                        showscale=False,
+                        sizemode="absolute",
+                        sizeref=0.15,
+                    )
+                )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -178,14 +212,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -195,8 +243,9 @@ def _(go, np):
         return fig
 
     wire_field_fig = create_wire_field_animation()
-    wire_field_fig
-    return (create_wire_field_animation, wire_field_fig)
+    wire_field_plot = mo.ui.plotly(wire_field_fig, config=get_plotly_config())
+    mo.output.replace(wire_field_plot)
+    return (create_wire_field_animation, wire_field_plot)
 
 
 @app.cell
@@ -254,7 +303,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Magnetic field in a solenoid
     def create_solenoid_animation():
         n_frames = 60
@@ -271,12 +320,16 @@ def _(go, np):
             y_coil = np.sin(theta_coil)
             z_coil = np.linspace(-3, 3, 200)
 
-            frame_data.append(go.Scatter3d(
-                x=x_coil, y=y_coil, z=z_coil,
-                mode="lines",
-                line=dict(color="orange", width=5),
-                name="Solenoid coil",
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=x_coil,
+                    y=y_coil,
+                    z=z_coil,
+                    mode="lines",
+                    line=dict(color="orange", width=5),
+                    name="Solenoid coil",
+                )
+            )
 
             # Internal field lines (parallel, uniform)
             for offset in [-0.3, 0, 0.3]:
@@ -285,38 +338,48 @@ def _(go, np):
                 phase = t + offset * 5
                 marker_pos = -2.5 + ((phase / (2 * np.pi)) * 5) % 5
 
-                frame_data.append(go.Scatter3d(
-                    x=[offset] * len(z_field),
-                    y=[0] * len(z_field),
-                    z=z_field,
-                    mode="lines",
-                    line=dict(color="cyan", width=3),
-                    showlegend=(offset == 0),
-                    name="B field (inside)" if offset == 0 else None,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=[offset] * len(z_field),
+                        y=[0] * len(z_field),
+                        z=z_field,
+                        mode="lines",
+                        line=dict(color="cyan", width=3),
+                        showlegend=(offset == 0),
+                        name="B field (inside)" if offset == 0 else None,
+                    )
+                )
 
                 # Moving marker to show field direction
-                frame_data.append(go.Scatter3d(
-                    x=[offset], y=[0], z=[marker_pos],
-                    mode="markers",
-                    marker=dict(size=6, color="white", symbol="diamond"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=[offset],
+                        y=[0],
+                        z=[marker_pos],
+                        mode="markers",
+                        marker=dict(size=6, color="white", symbol="diamond"),
+                        showlegend=False,
+                    )
+                )
 
             # External field lines (returning loops)
             for side in [-1, 1]:
                 for r_offset in [1.5, 2.0]:
                     # Curved return path
                     z_ext = np.linspace(-2.5, 2.5, 30)
-                    x_ext = side * (1 + r_offset * np.exp(-z_ext**2 / 4))
+                    x_ext = side * (1 + r_offset * np.exp(-(z_ext**2) / 4))
                     y_ext = np.zeros_like(z_ext)
 
-                    frame_data.append(go.Scatter3d(
-                        x=x_ext, y=y_ext, z=z_ext,
-                        mode="lines",
-                        line=dict(color="rgba(0, 200, 255, 0.4)", width=2),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter3d(
+                            x=x_ext,
+                            y=y_ext,
+                            z=z_ext,
+                            mode="lines",
+                            line=dict(color="rgba(0, 200, 255, 0.4)", width=2),
+                            showlegend=False,
+                        )
+                    )
 
             # Current direction indicators
             for i in range(4):
@@ -325,12 +388,16 @@ def _(go, np):
                 x_pos = np.cos(angle)
                 y_pos = np.sin(angle)
 
-                frame_data.append(go.Scatter3d(
-                    x=[x_pos], y=[y_pos], z=[z_pos],
-                    mode="markers",
-                    marker=dict(size=5, color="yellow"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=[x_pos],
+                        y=[y_pos],
+                        z=[z_pos],
+                        mode="markers",
+                        marker=dict(size=5, color="yellow"),
+                        showlegend=False,
+                    )
+                )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -357,14 +424,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -374,8 +455,9 @@ def _(go, np):
         return fig
 
     solenoid_fig = create_solenoid_animation()
-    solenoid_fig
-    return (create_solenoid_animation, solenoid_fig)
+    solenoid_plot = mo.ui.plotly(solenoid_fig, config=get_plotly_config())
+    mo.output.replace(solenoid_plot)
+    return (create_solenoid_animation, solenoid_plot)
 
 
 @app.cell
@@ -431,7 +513,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Force on a current-carrying wire in a magnetic field
     def create_wire_force_animation():
         n_frames = 80
@@ -444,62 +526,79 @@ def _(go, np):
             # Magnetic field (into the page, represented by X symbols)
             for x in np.linspace(-2, 2, 5):
                 for y in np.linspace(-1.5, 1.5, 4):
-                    frame_data.append(go.Scatter(
-                        x=[x], y=[y],
-                        mode="markers+text",
-                        marker=dict(size=20, color="rgba(100, 100, 255, 0.3)", symbol="x"),
-                        text=["B"],
-                        textposition="top center",
-                        textfont=dict(size=10, color="rgba(100, 100, 255, 0.5)"),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[x],
+                            y=[y],
+                            mode="markers+text",
+                            marker=dict(size=20, color="rgba(100, 100, 255, 0.3)", symbol="x"),
+                            text=["B"],
+                            textposition="top center",
+                            textfont=dict(size=10, color="rgba(100, 100, 255, 0.5)"),
+                            showlegend=False,
+                        )
+                    )
 
             # Wire (moving due to force)
             wire_x = -1.5 + t * 3  # Wire moves to the right
 
             # Wire representation
-            frame_data.append(go.Scatter(
-                x=[wire_x, wire_x], y=[-1.5, 1.5],
-                mode="lines",
-                line=dict(color="orange", width=8),
-                name="Wire (current up)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[wire_x, wire_x],
+                    y=[-1.5, 1.5],
+                    mode="lines",
+                    line=dict(color="orange", width=8),
+                    name="Wire (current up)",
+                )
+            )
 
             # Current direction arrow
-            frame_data.append(go.Scatter(
-                x=[wire_x], y=[0],
-                mode="markers",
-                marker=dict(size=15, color="yellow", symbol="triangle-up"),
-                name="Current direction (I)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[wire_x],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=15, color="yellow", symbol="triangle-up"),
+                    name="Current direction (I)",
+                )
+            )
 
             # Force arrow
             arrow_length = 0.5
-            frame_data.append(go.Scatter(
-                x=[wire_x, wire_x + arrow_length],
-                y=[0.8, 0.8],
-                mode="lines+markers",
-                line=dict(color="red", width=4),
-                marker=dict(size=[0, 12], color="red", symbol=["circle", "triangle-right"]),
-                name="Force (F = IL × B)",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[wire_x, wire_x + arrow_length],
+                    y=[0.8, 0.8],
+                    mode="lines+markers",
+                    line=dict(color="red", width=4),
+                    marker=dict(size=[0, 12], color="red", symbol=["circle", "triangle-right"]),
+                    name="Force (F = IL × B)",
+                )
+            )
 
             # Annotations
-            frame_data.append(go.Scatter(
-                x=[2.5], y=[1.5],
-                mode="text",
-                text=["B field: into page (⊗)"],
-                textfont=dict(size=12, color="blue"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[2.5],
+                    y=[1.5],
+                    mode="text",
+                    text=["B field: into page (⊗)"],
+                    textfont=dict(size=12, color="blue"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[2.5], y=[1.0],
-                mode="text",
-                text=[f"Wire position: {wire_x:.1f}"],
-                textfont=dict(size=12, color="orange"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[2.5],
+                    y=[1.0],
+                    mode="text",
+                    text=[f"Wire position: {wire_x:.1f}"],
+                    textfont=dict(size=12, color="orange"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -522,14 +621,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 50, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 50, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -539,8 +652,9 @@ def _(go, np):
         return fig
 
     wire_force_fig = create_wire_force_animation()
-    wire_force_fig
-    return (create_wire_force_animation, wire_force_fig)
+    wire_force_plot = mo.ui.plotly(wire_force_fig, config=get_plotly_config())
+    mo.output.replace(wire_force_plot)
+    return (create_wire_force_animation, wire_force_plot)
 
 
 @app.cell
@@ -599,7 +713,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Faraday's induction - magnet moving through coil
     def create_induction_animation():
         n_frames = 120
@@ -618,41 +732,53 @@ def _(go, np):
             coil_z = 0.8 * np.sin(coil_theta)
 
             for x_offset in [-0.3, -0.1, 0.1, 0.3]:
-                frame_data.append(go.Scatter3d(
-                    x=[x_offset] * len(coil_theta),
-                    y=coil_y,
-                    z=coil_z,
-                    mode="lines",
-                    line=dict(color="orange", width=6),
-                    showlegend=(x_offset == -0.3),
-                    name="Coil" if x_offset == -0.3 else None,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=[x_offset] * len(coil_theta),
+                        y=coil_y,
+                        z=coil_z,
+                        mode="lines",
+                        line=dict(color="orange", width=6),
+                        showlegend=(x_offset == -0.3),
+                        name="Coil" if x_offset == -0.3 else None,
+                    )
+                )
 
             # Bar magnet
-            frame_data.append(go.Scatter3d(
-                x=[magnet_x - 0.8, magnet_x + 0.8],
-                y=[0, 0],
-                z=[0, 0],
-                mode="lines",
-                line=dict(color="red", width=20),
-                name="Magnet",
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[magnet_x - 0.8, magnet_x + 0.8],
+                    y=[0, 0],
+                    z=[0, 0],
+                    mode="lines",
+                    line=dict(color="red", width=20),
+                    name="Magnet",
+                )
+            )
 
             # N and S poles
-            frame_data.append(go.Scatter3d(
-                x=[magnet_x - 0.6], y=[0], z=[0.3],
-                mode="text",
-                text=["S"],
-                textfont=dict(size=14, color="blue"),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter3d(
-                x=[magnet_x + 0.6], y=[0], z=[0.3],
-                mode="text",
-                text=["N"],
-                textfont=dict(size=14, color="red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[magnet_x - 0.6],
+                    y=[0],
+                    z=[0.3],
+                    mode="text",
+                    text=["S"],
+                    textfont=dict(size=14, color="blue"),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter3d(
+                    x=[magnet_x + 0.6],
+                    y=[0],
+                    z=[0.3],
+                    mode="text",
+                    text=["N"],
+                    textfont=dict(size=14, color="red"),
+                    showlegend=False,
+                )
+            )
 
             # Magnetic field lines from magnet
             for y_off in [-0.3, 0, 0.3]:
@@ -661,12 +787,16 @@ def _(go, np):
                 field_y = y_off * (1 + spread)
                 field_z = np.zeros_like(field_x)
 
-                frame_data.append(go.Scatter3d(
-                    x=field_x, y=field_y, z=field_z,
-                    mode="lines",
-                    line=dict(color="rgba(255, 100, 100, 0.5)", width=2),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=field_x,
+                        y=field_y,
+                        z=field_z,
+                        mode="lines",
+                        line=dict(color="rgba(255, 100, 100, 0.5)", width=2),
+                        showlegend=False,
+                    )
+                )
 
             # Induced current visualization (brightness based on rate of change)
             velocity = 2 * np.cos(t)  # d(position)/dt
@@ -676,36 +806,48 @@ def _(go, np):
             # Clamp alpha to avoid floating point issues with very small numbers
             alpha = max(0.0, min(induced_emf / 2, 1.0))
             current_color = f"rgba(255, 255, 0, {alpha:.3f})"
-            frame_data.append(go.Scatter3d(
-                x=[0.5], y=[0], z=[1.2],
-                mode="text",
-                text=[f"Induced EMF: {induced_emf:.2f} (arb. units)"],
-                textfont=dict(size=12, color="yellow"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[0.5],
+                    y=[0],
+                    z=[1.2],
+                    mode="text",
+                    text=[f"Induced EMF: {induced_emf:.2f} (arb. units)"],
+                    textfont=dict(size=12, color="yellow"),
+                    showlegend=False,
+                )
+            )
 
             # Current direction indicator (appears when EMF is significant)
             if induced_emf > 0.3:
                 direction = "↻" if velocity > 0 else "↺"
-                frame_data.append(go.Scatter3d(
-                    x=[0], y=[1.2], z=[0],
-                    mode="text",
-                    text=[f"Current: {direction}"],
-                    textfont=dict(size=14, color="cyan"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter3d(
+                        x=[0],
+                        y=[1.2],
+                        z=[0],
+                        mode="text",
+                        text=[f"Current: {direction}"],
+                        textfont=dict(size=14, color="cyan"),
+                        showlegend=False,
+                    )
+                )
 
             # Ammeter reading
-            frame_data.append(go.Scatter3d(
-                x=[0], y=[-1.5], z=[0],
-                mode="markers+text",
-                marker=dict(size=10, color=current_color),
-                text=[f"v = {velocity:.2f}"],
-                textposition="bottom center",
-                textfont=dict(size=11, color="white"),
-                name="Induced current",
-                showlegend=(frame == 0),
-            ))
+            frame_data.append(
+                go.Scatter3d(
+                    x=[0],
+                    y=[-1.5],
+                    z=[0],
+                    mode="markers+text",
+                    marker=dict(size=10, color=current_color),
+                    text=[f"v = {velocity:.2f}"],
+                    textposition="bottom center",
+                    textfont=dict(size=11, color="white"),
+                    name="Induced current",
+                    showlegend=(frame == 0),
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -732,14 +874,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 40, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 40, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -749,8 +905,9 @@ def _(go, np):
         return fig
 
     induction_fig = create_induction_animation()
-    induction_fig
-    return (create_induction_animation, induction_fig)
+    induction_plot = mo.ui.plotly(induction_fig, config=get_plotly_config())
+    mo.output.replace(induction_plot)
+    return (create_induction_animation, induction_plot)
 
 
 @app.cell
@@ -807,7 +964,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: DC Motor operation
     def create_dc_motor_animation():
         n_frames = 120
@@ -819,63 +976,77 @@ def _(go, np):
 
             # Permanent magnets (N and S poles)
             # North pole (left)
-            frame_data.append(go.Scatter(
-                x=[-2.5, -1.5, -1.5, -2.5, -2.5],
-                y=[-1, -1, 1, 1, -1],
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(255, 100, 100, 0.7)",
-                line=dict(color="red", width=2),
-                name="N pole",
-            ))
-            frame_data.append(go.Scatter(
-                x=[-2], y=[0],
-                mode="text",
-                text=["N"],
-                textfont=dict(size=20, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-2.5, -1.5, -1.5, -2.5, -2.5],
+                    y=[-1, -1, 1, 1, -1],
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(255, 100, 100, 0.7)",
+                    line=dict(color="red", width=2),
+                    name="N pole",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[-2],
+                    y=[0],
+                    mode="text",
+                    text=["N"],
+                    textfont=dict(size=20, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # South pole (right)
-            frame_data.append(go.Scatter(
-                x=[1.5, 2.5, 2.5, 1.5, 1.5],
-                y=[-1, -1, 1, 1, -1],
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(100, 100, 255, 0.7)",
-                line=dict(color="blue", width=2),
-                name="S pole",
-            ))
-            frame_data.append(go.Scatter(
-                x=[2], y=[0],
-                mode="text",
-                text=["S"],
-                textfont=dict(size=20, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[1.5, 2.5, 2.5, 1.5, 1.5],
+                    y=[-1, -1, 1, 1, -1],
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100, 100, 255, 0.7)",
+                    line=dict(color="blue", width=2),
+                    name="S pole",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[2],
+                    y=[0],
+                    mode="text",
+                    text=["S"],
+                    textfont=dict(size=20, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Magnetic field lines (horizontal, N to S)
             for y_offset in [-0.5, 0, 0.5]:
-                frame_data.append(go.Scatter(
-                    x=[-1.5, 1.5],
-                    y=[y_offset, y_offset],
-                    mode="lines",
-                    line=dict(color="rgba(200, 200, 255, 0.5)", width=1, dash="dot"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[-1.5, 1.5],
+                        y=[y_offset, y_offset],
+                        mode="lines",
+                        line=dict(color="rgba(200, 200, 255, 0.5)", width=1, dash="dot"),
+                        showlegend=False,
+                    )
+                )
 
             # Rotating armature coil
             coil_length = 1.0
             coil_width = 0.6
 
             # Coil corners in local coordinates
-            corners_local = np.array([
-                [-coil_length, -coil_width],
-                [coil_length, -coil_width],
-                [coil_length, coil_width],
-                [-coil_length, coil_width],
-                [-coil_length, -coil_width],
-            ])
+            corners_local = np.array(
+                [
+                    [-coil_length, -coil_width],
+                    [coil_length, -coil_width],
+                    [coil_length, coil_width],
+                    [-coil_length, coil_width],
+                    [-coil_length, -coil_width],
+                ]
+            )
 
             # Rotate
             cos_a, sin_a = np.cos(angle), np.sin(angle)
@@ -887,49 +1058,43 @@ def _(go, np):
             commutator_state = int((angle / np.pi) % 2)
             coil_color = "orange" if commutator_state == 0 else "yellow"
 
-            frame_data.append(go.Scatter(
-                x=corners_rotated[:, 0],
-                y=corners_rotated[:, 1],
-                mode="lines",
-                line=dict(color=coil_color, width=6),
-                name="Armature coil",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=corners_rotated[:, 0],
+                    y=corners_rotated[:, 1],
+                    mode="lines",
+                    line=dict(color=coil_color, width=6),
+                    name="Armature coil",
+                )
+            )
 
             # Current direction arrows on coil sides
             # Left side of coil
             left_center = rotation @ np.array([-coil_length, 0])
-            # Right side of coil
-            right_center = rotation @ np.array([coil_length, 0])
-
             # Force arrows (perpendicular to both current and B field)
             # B field is horizontal (left to right)
             # Current direction alternates with commutator
-            if commutator_state == 0:
-                # Current flows one way
-                force_left = np.array([0, 0.4])  # Force up on left
-                force_right = np.array([0, -0.4])  # Force down on right
-            else:
-                # Current reversed
-                force_left = np.array([0, -0.4])
-                force_right = np.array([0, 0.4])
 
             # Rotate force arrows with coil (they're relative to coil orientation)
             # Actually forces are in lab frame (up/down), not coil frame
 
-            # Show force on left side (into page or out)
-            left_y = left_center[1]
             if abs(np.cos(angle)) > 0.1:  # Only show when coil side is in field
                 force_dir = 0.5 if (commutator_state == 0) else -0.5
                 # Force is perpendicular to field and current
-                frame_data.append(go.Scatter(
-                    x=[left_center[0], left_center[0]],
-                    y=[left_center[1], left_center[1] + force_dir * abs(np.cos(angle))],
-                    mode="lines+markers",
-                    line=dict(color="lime", width=3),
-                    marker=dict(size=[0, 8], symbol=["circle", "triangle-up" if force_dir > 0 else "triangle-down"]),
-                    name="Force" if frame == 0 else None,
-                    showlegend=(frame == 0),
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[left_center[0], left_center[0]],
+                        y=[left_center[1], left_center[1] + force_dir * abs(np.cos(angle))],
+                        mode="lines+markers",
+                        line=dict(color="lime", width=3),
+                        marker=dict(
+                            size=[0, 8],
+                            symbol=["circle", "triangle-up" if force_dir > 0 else "triangle-down"],
+                        ),
+                        name="Force" if frame == 0 else None,
+                        showlegend=(frame == 0),
+                    )
+                )
 
             # Commutator (split ring at bottom)
             comm_angle = angle
@@ -938,55 +1103,69 @@ def _(go, np):
             theta1 = np.linspace(comm_angle, comm_angle + np.pi, 20)
             theta2 = np.linspace(comm_angle + np.pi, comm_angle + 2 * np.pi, 20)
 
-            frame_data.append(go.Scatter(
-                x=comm_r * np.cos(theta1),
-                y=comm_r * np.sin(theta1) - 1.5,
-                mode="lines",
-                line=dict(color="gold", width=8),
-                name="Commutator",
-            ))
-            frame_data.append(go.Scatter(
-                x=comm_r * np.cos(theta2),
-                y=comm_r * np.sin(theta2) - 1.5,
-                mode="lines",
-                line=dict(color="goldenrod", width=8),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=comm_r * np.cos(theta1),
+                    y=comm_r * np.sin(theta1) - 1.5,
+                    mode="lines",
+                    line=dict(color="gold", width=8),
+                    name="Commutator",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=comm_r * np.cos(theta2),
+                    y=comm_r * np.sin(theta2) - 1.5,
+                    mode="lines",
+                    line=dict(color="goldenrod", width=8),
+                    showlegend=False,
+                )
+            )
 
             # Brushes (stationary contacts)
-            frame_data.append(go.Scatter(
-                x=[-0.5, -0.35], y=[-1.5, -1.5],
-                mode="lines",
-                line=dict(color="gray", width=10),
-                name="Brushes",
-            ))
-            frame_data.append(go.Scatter(
-                x=[0.35, 0.5], y=[-1.5, -1.5],
-                mode="lines",
-                line=dict(color="gray", width=10),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-0.5, -0.35],
+                    y=[-1.5, -1.5],
+                    mode="lines",
+                    line=dict(color="gray", width=10),
+                    name="Brushes",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[0.35, 0.5],
+                    y=[-1.5, -1.5],
+                    mode="lines",
+                    line=dict(color="gray", width=10),
+                    showlegend=False,
+                )
+            )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[0], y=[2],
-                mode="text",
-                text=[f"Rotation: {np.degrees(angle) % 360:.0f}°"],
-                textfont=dict(size=14, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[2],
+                    mode="text",
+                    text=[f"Rotation: {np.degrees(angle) % 360:.0f}°"],
+                    textfont=dict(size=14, color="white"),
+                    showlegend=False,
+                )
+            )
 
-            # Torque indicator
-            torque = np.sin(angle) * (1 if commutator_state == 0 else -1)
             # With commutator, torque is always positive (same direction)
             effective_torque = abs(np.sin(angle))
-            frame_data.append(go.Scatter(
-                x=[0], y=[-2.3],
-                mode="text",
-                text=[f"Torque: {effective_torque:.2f} (always same direction!)"],
-                textfont=dict(size=12, color="lime"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[-2.3],
+                    mode="text",
+                    text=[f"Torque: {effective_torque:.2f} (always same direction!)"],
+                    textfont=dict(size=12, color="lime"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -998,8 +1177,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3, 2.5], showgrid=False, zeroline=False, showticklabels=False,
-                          scaleanchor="x"),
+                yaxis=dict(
+                    range=[-3, 2.5],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(x=0.8, y=1),
                 plot_bgcolor="rgba(20, 20, 40, 1)",
@@ -1010,14 +1194,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 40, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 40, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1027,8 +1225,9 @@ def _(go, np):
         return fig
 
     dc_motor_fig = create_dc_motor_animation()
-    dc_motor_fig
-    return (create_dc_motor_animation, dc_motor_fig)
+    dc_motor_plot = mo.ui.plotly(dc_motor_fig, config=get_plotly_config())
+    mo.output.replace(dc_motor_plot)
+    return (create_dc_motor_animation, dc_motor_plot)
 
 
 @app.cell
@@ -1087,7 +1286,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: AC Induction Motor with rotating magnetic field
     def create_ac_motor_animation():
         n_frames = 120
@@ -1102,27 +1301,33 @@ def _(go, np):
             stator_r_outer = 2.0
             stator_r_inner = 1.6
 
-            frame_data.append(go.Scatter(
-                x=stator_r_outer * np.cos(stator_theta),
-                y=stator_r_outer * np.sin(stator_theta),
-                mode="lines",
-                line=dict(color="gray", width=3),
-                name="Stator",
-            ))
-            frame_data.append(go.Scatter(
-                x=stator_r_inner * np.cos(stator_theta),
-                y=stator_r_inner * np.sin(stator_theta),
-                mode="lines",
-                line=dict(color="gray", width=3),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=stator_r_outer * np.cos(stator_theta),
+                    y=stator_r_outer * np.sin(stator_theta),
+                    mode="lines",
+                    line=dict(color="gray", width=3),
+                    name="Stator",
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=stator_r_inner * np.cos(stator_theta),
+                    y=stator_r_inner * np.sin(stator_theta),
+                    mode="lines",
+                    line=dict(color="gray", width=3),
+                    showlegend=False,
+                )
+            )
 
             # Three-phase stator coils (at 0°, 120°, 240°)
             phases = [0, 2 * np.pi / 3, 4 * np.pi / 3]
             phase_colors = ["red", "green", "blue"]
             phase_names = ["Phase A", "Phase B", "Phase C"]
 
-            for i, (phase, color, name) in enumerate(zip(phases, phase_colors, phase_names)):
+            for _i, (phase, color, name) in enumerate(
+                zip(phases, phase_colors, phase_names, strict=False)
+            ):
                 # Current in each phase (sinusoidal, offset by 120°)
                 current = np.sin(t - phase)
                 intensity = abs(current)
@@ -1136,38 +1341,41 @@ def _(go, np):
                 opp_x = 1.8 * np.cos(coil_angle + np.pi)
                 opp_y = 1.8 * np.sin(coil_angle + np.pi)
 
-                frame_data.append(go.Scatter(
-                    x=[coil_x, opp_x],
-                    y=[coil_y, opp_y],
-                    mode="markers",
-                    marker=dict(size=15 + 10 * intensity,
-                               color=color,
-                               opacity=0.3 + 0.7 * intensity),
-                    name=name,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[coil_x, opp_x],
+                        y=[coil_y, opp_y],
+                        mode="markers",
+                        marker=dict(
+                            size=15 + 10 * intensity, color=color, opacity=0.3 + 0.7 * intensity
+                        ),
+                        name=name,
+                    )
+                )
 
             # Rotating magnetic field (the sum of all three phases)
             # The resultant field rotates at the AC frequency
             B_x = 0
             B_y = 0
-            for i, phase in enumerate(phases):
+            for _i, phase in enumerate(phases):
                 current = np.sin(t - phase)
                 # Each coil contributes to field along its axis
                 B_x += current * np.cos(phase)
                 B_y += current * np.sin(phase)
 
-            B_magnitude = np.sqrt(B_x**2 + B_y**2)
             B_angle = np.arctan2(B_y, B_x)
 
             # Show rotating B field vector
-            frame_data.append(go.Scatter(
-                x=[0, 1.2 * np.cos(B_angle)],
-                y=[0, 1.2 * np.sin(B_angle)],
-                mode="lines+markers",
-                line=dict(color="yellow", width=5),
-                marker=dict(size=[5, 12], color="yellow", symbol=["circle", "triangle-up"]),
-                name="Rotating B field",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 1.2 * np.cos(B_angle)],
+                    y=[0, 1.2 * np.sin(B_angle)],
+                    mode="lines+markers",
+                    line=dict(color="yellow", width=5),
+                    marker=dict(size=[5, 12], color="yellow", symbol=["circle", "triangle-up"]),
+                    name="Rotating B field",
+                )
+            )
 
             # Rotor (squirrel cage - conducting bars)
             # Rotor lags slightly behind the field (slip)
@@ -1189,49 +1397,62 @@ def _(go, np):
                 bar_alpha = min(1.0, 0.3 + 0.7 * abs(induced_current))
                 bar_color = f"rgba(255, 165, 0, {bar_alpha:.3f})"
 
-                frame_data.append(go.Scatter(
-                    x=[bar_x * 0.3, bar_x],
-                    y=[bar_y * 0.3, bar_y],
-                    mode="lines",
-                    line=dict(color=bar_color, width=6),
-                    showlegend=(i == 0),
-                    name="Rotor bars" if i == 0 else None,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[bar_x * 0.3, bar_x],
+                        y=[bar_y * 0.3, bar_y],
+                        mode="lines",
+                        line=dict(color=bar_color, width=6),
+                        showlegend=(i == 0),
+                        name="Rotor bars" if i == 0 else None,
+                    )
+                )
 
             # Rotor end rings
             rotor_inner = np.linspace(0, 2 * np.pi, 50)
-            frame_data.append(go.Scatter(
-                x=0.3 * np.cos(rotor_inner),
-                y=0.3 * np.sin(rotor_inner),
-                mode="lines",
-                line=dict(color="orange", width=4),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=rotor_r * np.cos(rotor_inner),
-                y=rotor_r * np.sin(rotor_inner),
-                mode="lines",
-                line=dict(color="orange", width=4),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=0.3 * np.cos(rotor_inner),
+                    y=0.3 * np.sin(rotor_inner),
+                    mode="lines",
+                    line=dict(color="orange", width=4),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=rotor_r * np.cos(rotor_inner),
+                    y=rotor_r * np.sin(rotor_inner),
+                    mode="lines",
+                    line=dict(color="orange", width=4),
+                    showlegend=False,
+                )
+            )
 
             # Rotor position indicator
-            frame_data.append(go.Scatter(
-                x=[0, 0.8 * np.cos(rotor_angle)],
-                y=[0, 0.8 * np.sin(rotor_angle)],
-                mode="lines",
-                line=dict(color="white", width=3, dash="dash"),
-                name="Rotor position",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, 0.8 * np.cos(rotor_angle)],
+                    y=[0, 0.8 * np.sin(rotor_angle)],
+                    mode="lines",
+                    line=dict(color="white", width=3, dash="dash"),
+                    name="Rotor position",
+                )
+            )
 
             # Info text
-            frame_data.append(go.Scatter(
-                x=[0], y=[2.8],
-                mode="text",
-                text=[f"Field angle: {np.degrees(B_angle) % 360:.0f}° | Rotor: {np.degrees(rotor_angle) % 360:.0f}° | Slip: {slip*100:.0f}%"],
-                textfont=dict(size=12, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[2.8],
+                    mode="text",
+                    text=[
+                        f"Field angle: {np.degrees(B_angle) % 360:.0f}° | Rotor: {np.degrees(rotor_angle) % 360:.0f}° | Slip: {slip * 100:.0f}%"
+                    ],
+                    textfont=dict(size=12, color="white"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -1243,37 +1464,40 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3, 3], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-2.5, 3.2], showgrid=False, zeroline=False, showticklabels=False,
-                          scaleanchor="x"),
+                yaxis=dict(
+                    range=[-2.5, 3.2],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
-                legend=dict(x=0.75, y=0.25),
-                plot_bgcolor="rgba(20, 20, 40, 1)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 40, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
         return fig
 
     ac_motor_fig = create_ac_motor_animation()
-    ac_motor_fig
-    return (create_ac_motor_animation, ac_motor_fig)
+    ac_motor_plot = mo.ui.plotly(ac_motor_fig, config=get_plotly_config())
+    mo.output.replace(ac_motor_plot)
+    return (create_ac_motor_animation, ac_motor_plot)
 
 
 @app.cell
@@ -1330,7 +1554,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: Stepper motor operation
     def create_stepper_animation():
         n_frames = 100
@@ -1367,7 +1591,9 @@ def _(go, np):
             else:
                 active_coils = [(current_step // 2) % n_coils, ((current_step // 2) + 1) % n_coils]
 
-            for i, (angle, name, color) in enumerate(zip(coil_angles, coil_names, coil_colors)):
+            for i, (angle, name, color) in enumerate(
+                zip(coil_angles, coil_names, coil_colors, strict=False)
+            ):
                 is_active = i in active_coils
                 intensity = 1.0 if is_active else 0.3
 
@@ -1377,92 +1603,112 @@ def _(go, np):
                 opp_x = stator_r * np.cos(angle + np.pi)
                 opp_y = stator_r * np.sin(angle + np.pi)
 
-                frame_data.append(go.Scatter(
-                    x=[coil_x], y=[coil_y],
-                    mode="markers",
-                    marker=dict(size=25, color=color, opacity=intensity,
-                               symbol="square"),
-                    name=name + (" (ON)" if is_active else ""),
-                ))
-                frame_data.append(go.Scatter(
-                    x=[opp_x], y=[opp_y],
-                    mode="markers",
-                    marker=dict(size=25, color=color, opacity=intensity,
-                               symbol="square"),
-                    showlegend=False,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[coil_x],
+                        y=[coil_y],
+                        mode="markers",
+                        marker=dict(size=25, color=color, opacity=intensity, symbol="square"),
+                        name=name + (" (ON)" if is_active else ""),
+                    )
+                )
+                frame_data.append(
+                    go.Scatter(
+                        x=[opp_x],
+                        y=[opp_y],
+                        mode="markers",
+                        marker=dict(size=25, color=color, opacity=intensity, symbol="square"),
+                        showlegend=False,
+                    )
+                )
 
                 # Magnetic field from active coils
                 if is_active:
-                    frame_data.append(go.Scatter(
-                        x=[coil_x * 0.7, opp_x * 0.7],
-                        y=[coil_y * 0.7, opp_y * 0.7],
-                        mode="lines",
-                        line=dict(color=color, width=2, dash="dot"),
-                        showlegend=False,
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[coil_x * 0.7, opp_x * 0.7],
+                            y=[coil_y * 0.7, opp_y * 0.7],
+                            mode="lines",
+                            line=dict(color=color, width=2, dash="dot"),
+                            showlegend=False,
+                        )
+                    )
 
             # Rotor (permanent magnet with N/S poles)
             rotor_r = 1.2
 
             # Rotor body
             rotor_theta = np.linspace(0, 2 * np.pi, 50)
-            frame_data.append(go.Scatter(
-                x=0.8 * np.cos(rotor_theta),
-                y=0.8 * np.sin(rotor_theta),
-                mode="lines",
-                fill="toself",
-                fillcolor="rgba(100, 100, 100, 0.5)",
-                line=dict(color="white", width=2),
-                name="Rotor",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=0.8 * np.cos(rotor_theta),
+                    y=0.8 * np.sin(rotor_theta),
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100, 100, 100, 0.5)",
+                    line=dict(color="white", width=2),
+                    name="Rotor",
+                )
+            )
 
             # N pole (red)
             n_angle = rotor_angle
-            frame_data.append(go.Scatter(
-                x=[0, rotor_r * np.cos(n_angle)],
-                y=[0, rotor_r * np.sin(n_angle)],
-                mode="lines+markers+text",
-                line=dict(color="red", width=8),
-                marker=dict(size=[0, 15], color="red"),
-                text=["", "N"],
-                textposition="top center",
-                textfont=dict(size=14, color="red"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, rotor_r * np.cos(n_angle)],
+                    y=[0, rotor_r * np.sin(n_angle)],
+                    mode="lines+markers+text",
+                    line=dict(color="red", width=8),
+                    marker=dict(size=[0, 15], color="red"),
+                    text=["", "N"],
+                    textposition="top center",
+                    textfont=dict(size=14, color="red"),
+                    showlegend=False,
+                )
+            )
 
             # S pole (blue)
             s_angle = rotor_angle + np.pi
-            frame_data.append(go.Scatter(
-                x=[0, rotor_r * np.cos(s_angle)],
-                y=[0, rotor_r * np.sin(s_angle)],
-                mode="lines+markers+text",
-                line=dict(color="blue", width=8),
-                marker=dict(size=[0, 15], color="blue"),
-                text=["", "S"],
-                textposition="bottom center",
-                textfont=dict(size=14, color="blue"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0, rotor_r * np.cos(s_angle)],
+                    y=[0, rotor_r * np.sin(s_angle)],
+                    mode="lines+markers+text",
+                    line=dict(color="blue", width=8),
+                    marker=dict(size=[0, 15], color="blue"),
+                    text=["", "S"],
+                    textposition="bottom center",
+                    textfont=dict(size=14, color="blue"),
+                    showlegend=False,
+                )
+            )
 
             # Step counter
-            frame_data.append(go.Scatter(
-                x=[0], y=[2.8],
-                mode="text",
-                text=[f"Step: {current_step + 1}/{steps_per_rev} | Angle: {np.degrees(rotor_angle):.1f}°"],
-                textfont=dict(size=14, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[2.8],
+                    mode="text",
+                    text=[
+                        f"Step: {current_step + 1}/{steps_per_rev} | Angle: {np.degrees(rotor_angle):.1f}°"
+                    ],
+                    textfont=dict(size=14, color="white"),
+                    showlegend=False,
+                )
+            )
 
             # Active coils indicator
             active_names = [coil_names[i] for i in active_coils]
-            frame_data.append(go.Scatter(
-                x=[0], y=[-2.8],
-                mode="text",
-                text=[f"Active: {', '.join(active_names)}"],
-                textfont=dict(size=12, color="yellow"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[-2.8],
+                    mode="text",
+                    text=[f"Active: {', '.join(active_names)}"],
+                    textfont=dict(size=12, color="yellow"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -1474,37 +1720,40 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3, 3], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3.2, 3.2], showgrid=False, zeroline=False, showticklabels=False,
-                          scaleanchor="x"),
+                yaxis=dict(
+                    range=[-2.5, 3.2],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
-                legend=dict(x=0.8, y=1),
-                plot_bgcolor="rgba(20, 20, 40, 1)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
-                        ],
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
         return fig
 
     stepper_fig = create_stepper_animation()
-    stepper_fig
-    return (create_stepper_animation, stepper_fig)
+    stepper_plot = mo.ui.plotly(stepper_fig, config=get_plotly_config())
+    mo.output.replace(stepper_plot)
+    return (create_stepper_animation, stepper_plot)
 
 
 @app.cell
@@ -1563,7 +1812,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # Animation: AC Generator
     def create_generator_animation():
         n_frames = 120
@@ -1582,15 +1831,21 @@ def _(go, np):
 
             # Magnetic field (horizontal arrows)
             for y_pos in [-0.8, 0, 0.8]:
-                frame_data.append(go.Scatter(
-                    x=[-3, -2], y=[y_pos, y_pos],
-                    mode="lines+markers",
-                    line=dict(color="rgba(100, 100, 255, 0.5)", width=2),
-                    marker=dict(size=[0, 8], symbol=["circle", "triangle-right"],
-                               color="rgba(100, 100, 255, 0.5)"),
-                    showlegend=(y_pos == 0),
-                    name="B field" if y_pos == 0 else None,
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[-3, -2],
+                        y=[y_pos, y_pos],
+                        mode="lines+markers",
+                        line=dict(color="rgba(100, 100, 255, 0.5)", width=2),
+                        marker=dict(
+                            size=[0, 8],
+                            symbol=["circle", "triangle-right"],
+                            color="rgba(100, 100, 255, 0.5)",
+                        ),
+                        showlegend=(y_pos == 0),
+                        name="B field" if y_pos == 0 else None,
+                    )
+                )
 
             # Rotating coil
             coil_width = 1.5
@@ -1603,100 +1858,148 @@ def _(go, np):
             apparent_width = coil_width * abs(np.cos(angle))
 
             # Coil representation
-            coil_x = [-apparent_width/2, apparent_width/2, apparent_width/2, -apparent_width/2, -apparent_width/2]
-            coil_y = [-coil_height/2, -coil_height/2, coil_height/2, coil_height/2, -coil_height/2]
+            coil_x = [
+                -apparent_width / 2,
+                apparent_width / 2,
+                apparent_width / 2,
+                -apparent_width / 2,
+                -apparent_width / 2,
+            ]
+            coil_y = [
+                -coil_height / 2,
+                -coil_height / 2,
+                coil_height / 2,
+                coil_height / 2,
+                -coil_height / 2,
+            ]
 
-            frame_data.append(go.Scatter(
-                x=coil_x, y=coil_y,
-                mode="lines",
-                line=dict(color="orange", width=4),
-                fill="toself",
-                fillcolor="rgba(255, 165, 0, 0.2)",
-                name="Rotating coil",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=coil_x,
+                    y=coil_y,
+                    mode="lines",
+                    line=dict(color="orange", width=4),
+                    fill="toself",
+                    fillcolor="rgba(255, 165, 0, 0.2)",
+                    name="Rotating coil",
+                )
+            )
 
             # Rotation axis (into page)
-            frame_data.append(go.Scatter(
-                x=[0], y=[0],
-                mode="markers",
-                marker=dict(size=10, color="white", symbol="circle"),
-                name="Axis",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="markers",
+                    marker=dict(size=10, color="white", symbol="circle"),
+                    name="Axis",
+                )
+            )
 
             # Slip rings and brushes
-            frame_data.append(go.Scatter(
-                x=[-0.3, 0.3], y=[-1.8, -1.8],
-                mode="markers",
-                marker=dict(size=15, color="gold", symbol="square"),
-                name="Slip rings",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-0.3, 0.3],
+                    y=[-1.8, -1.8],
+                    mode="markers",
+                    marker=dict(size=15, color="gold", symbol="square"),
+                    name="Slip rings",
+                )
+            )
 
             # Output wires
-            frame_data.append(go.Scatter(
-                x=[-0.3, -0.3, -1], y=[-1.8, -2.5, -2.5],
-                mode="lines",
-                line=dict(color="red", width=3),
-                showlegend=False,
-            ))
-            frame_data.append(go.Scatter(
-                x=[0.3, 0.3, 1], y=[-1.8, -2.5, -2.5],
-                mode="lines",
-                line=dict(color="blue", width=3),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[-0.3, -0.3, -1],
+                    y=[-1.8, -2.5, -2.5],
+                    mode="lines",
+                    line=dict(color="red", width=3),
+                    showlegend=False,
+                )
+            )
+            frame_data.append(
+                go.Scatter(
+                    x=[0.3, 0.3, 1],
+                    y=[-1.8, -2.5, -2.5],
+                    mode="lines",
+                    line=dict(color="blue", width=3),
+                    showlegend=False,
+                )
+            )
 
             # Voltage graph (right side)
             time_axis = np.linspace(0, 4 * np.pi, len(voltage_history))
-            frame_data.append(go.Scatter(
-                x=2 + time_axis[-60:] / (4 * np.pi) * 2 if len(voltage_history) > 60 else 2 + time_axis / (4 * np.pi) * 2,
-                y=[v * 0.8 for v in voltage_history[-60:]] if len(voltage_history) > 60 else [v * 0.8 for v in voltage_history],
-                mode="lines",
-                line=dict(color="lime", width=2),
-                name="Output voltage",
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=2 + time_axis[-60:] / (4 * np.pi) * 2
+                    if len(voltage_history) > 60
+                    else 2 + time_axis / (4 * np.pi) * 2,
+                    y=[v * 0.8 for v in voltage_history[-60:]]
+                    if len(voltage_history) > 60
+                    else [v * 0.8 for v in voltage_history],
+                    mode="lines",
+                    line=dict(color="lime", width=2),
+                    name="Output voltage",
+                )
+            )
 
             # Current voltage indicator
-            frame_data.append(go.Scatter(
-                x=[4.2], y=[emf * 0.8],
-                mode="markers",
-                marker=dict(size=10, color="lime"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[4.2],
+                    y=[emf * 0.8],
+                    mode="markers",
+                    marker=dict(size=10, color="lime"),
+                    showlegend=False,
+                )
+            )
 
             # Voltage axis
-            frame_data.append(go.Scatter(
-                x=[2, 4.2], y=[0, 0],
-                mode="lines",
-                line=dict(color="white", width=1, dash="dash"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[2, 4.2],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="white", width=1, dash="dash"),
+                    showlegend=False,
+                )
+            )
 
             # Labels
-            frame_data.append(go.Scatter(
-                x=[0], y=[2],
-                mode="text",
-                text=[f"Angle: {np.degrees(angle) % 360:.0f}°"],
-                textfont=dict(size=14, color="white"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[2],
+                    mode="text",
+                    text=[f"Angle: {np.degrees(angle) % 360:.0f}°"],
+                    textfont=dict(size=14, color="white"),
+                    showlegend=False,
+                )
+            )
 
-            frame_data.append(go.Scatter(
-                x=[3], y=[1.5],
-                mode="text",
-                text=[f"EMF = {emf:.2f} V"],
-                textfont=dict(size=12, color="lime"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[3],
+                    y=[1.5],
+                    mode="text",
+                    text=[f"EMF = {emf:.2f} V"],
+                    textfont=dict(size=12, color="lime"),
+                    showlegend=False,
+                )
+            )
 
             # Flux indicator
             flux = np.cos(angle)  # Flux is max when coil is face-on
-            frame_data.append(go.Scatter(
-                x=[0], y=[-3],
-                mode="text",
-                text=[f"Flux through coil: Φ = {flux:.2f} (max when face-on)"],
-                textfont=dict(size=11, color="cyan"),
-                showlegend=False,
-            ))
+            frame_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[-3],
+                    mode="text",
+                    text=[f"Flux through coil: Φ = {flux:.2f} (max when face-on)"],
+                    textfont=dict(size=11, color="cyan"),
+                    showlegend=False,
+                )
+            )
 
             frames.append(go.Frame(data=frame_data, name=str(frame)))
 
@@ -1708,8 +2011,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3.5, 5], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-3.5, 2.5], showgrid=False, zeroline=False, showticklabels=False,
-                          scaleanchor="x"),
+                yaxis=dict(
+                    range=[-3.5, 2.5],
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                    scaleanchor="x",
+                ),
                 showlegend=True,
                 legend=dict(x=0.7, y=1),
                 plot_bgcolor="rgba(20, 20, 40, 1)",
@@ -1720,14 +2028,28 @@ def _(go, np):
                         y=0,
                         x=0.1,
                         buttons=[
-                            dict(label="Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 40, "redraw": True},
-                                             "fromcurrent": True}]),
-                            dict(label="Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                               "mode": "immediate"}]),
+                            dict(
+                                label="Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 40, "redraw": True},
+                                        "fromcurrent": True,
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -1737,8 +2059,9 @@ def _(go, np):
         return fig
 
     generator_fig = create_generator_animation()
-    generator_fig
-    return (create_generator_animation, generator_fig)
+    generator_plot = mo.ui.plotly(generator_fig, config=get_plotly_config())
+    mo.output.replace(generator_plot)
+    return (create_generator_animation, generator_plot)
 
 
 @app.cell

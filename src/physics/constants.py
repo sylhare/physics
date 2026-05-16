@@ -5,6 +5,15 @@ from dataclasses import dataclass
 # Gravitational constant (m³ kg⁻¹ s⁻²)
 G = 6.67430e-11
 
+# Speed of light in vacuum (m/s)
+C = 299792458
+
+# Planck constant (J⋅s)
+H = 6.62607015e-34
+
+# Reduced Planck constant (hbar)
+HBAR = H / (2 * 3.141592653589793)
+
 # Solar mass (kg)
 M_SUN = 1.989e30
 

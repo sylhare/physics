@@ -19,6 +19,18 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 DOCS_DIR = PROJECT_ROOT / "docs"
 
+GA_MEASUREMENT_ID = "G-YPX3TXS4S4"
+
+_GA_SNIPPET = f"""\
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', '{GA_MEASUREMENT_ID}');
+    </script>"""
+
 
 @dataclass
 class NotebookMetadata:
@@ -35,25 +47,30 @@ class NotebookMetadata:
 
 # Notebooks that are part of the Feynman Lectures series
 FEYNMAN_NOTEBOOKS = {
-    "gravitation", "speed_of_light", "spacetime", "wave_particle",
-    "magnetism", "charged_motion", "black_holes"
+    "006_gravitation",
+    "009_speed_of_light",
+    "008_spacetime",
+    "011_wave_particle",
+    "007_magnetism",
+    "003_charged_motion",
+    "002_black_holes",
 }
 
 # Explicit tags for each notebook (avoids false matches from keyword inference)
 NOTEBOOK_TAGS = {
     # Feynman Lectures series
-    "gravitation": ["Gravity", "Orbital Mechanics", "Feynman Lectures"],
-    "speed_of_light": ["Optics", "Relativity", "Feynman Lectures"],
-    "spacetime": ["Relativity", "Spacetime", "Feynman Lectures"],
-    "wave_particle": ["Quantum Mechanics", "Wave-Particle Duality", "Feynman Lectures"],
-    "magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
-    "charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
-    "black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
+    "006_gravitation": ["Gravity", "Orbital Mechanics", "Feynman Lectures"],
+    "009_speed_of_light": ["Optics", "Relativity", "Feynman Lectures"],
+    "008_spacetime": ["Relativity", "Spacetime", "Feynman Lectures"],
+    "011_wave_particle": ["Quantum Mechanics", "Wave-Particle Duality", "Feynman Lectures"],
+    "007_magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
+    "003_charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
+    "002_black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
     # Explorations
-    "beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
-    "dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
-    "exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
-    "three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
+    "001_beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
+    "004_dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
+    "005_exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
+    "010_three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
 }
 
 
@@ -92,10 +109,7 @@ def extract_metadata(notebook_path: Path) -> NotebookMetadata:
         title = stem.replace("_", " ").title()
 
     # Extract description from first substantial paragraph after title
-    desc_match = re.search(
-        r'mo\.md\(\s*r?"""[^"]*?#[^\n]+\n+([^#\n][^\n]+)',
-        content
-    )
+    desc_match = re.search(r'mo\.md\(\s*r?"""[^"]*?#[^\n]+\n+([^#\n][^\n]+)', content)
     if desc_match:
         description = desc_match.group(1).strip()
     else:
@@ -133,15 +147,20 @@ def _infer_tags(content: str, stem: str) -> list[str]:
 def _markdown_links_to_html(text: str) -> str:
     """Convert markdown links [text](url) to HTML <a> tags."""
     # Pattern matches [link text](url)
-    pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+    pattern = r"\[([^\]]+)\]\(([^)]+)\)"
     return re.sub(pattern, r'<a href="\2" target="_blank">\1</a>', text)
 
 
-def export_notebook(
-    notebook_path: Path,
-    output_dir: Path,
-    include_code: bool = False
-) -> Path:
+def inject_ga(html_path: Path) -> None:
+    """Inject Google Analytics snippet into an existing HTML file."""
+    html = html_path.read_text()
+    if GA_MEASUREMENT_ID in html:
+        return
+    html = html.replace("</head>", f"{_GA_SNIPPET}\n</head>", 1)
+    html_path.write_text(html)
+
+
+def export_notebook(notebook_path: Path, output_dir: Path, include_code: bool = False) -> Path:
     """Export a single notebook to HTML.
 
     Args:
@@ -159,12 +178,20 @@ def export_notebook(
     output_path = output_dir / f"{notebook_path.stem}.html"
 
     cmd = [
-        "uv", "run", "marimo", "export", "html",
+        "python3",
+        "-m",
+        "marimo",
+        "export",
+        "html",
         str(notebook_path),
-        "-o", str(output_path),
+        "-o",
+        str(output_path),
     ]
     if not include_code:
         cmd.append("--no-include-code")
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(PROJECT_ROOT / "src") + os.pathsep + env.get("PYTHONPATH", "")
 
     result = subprocess.run(
         cmd,
@@ -172,13 +199,13 @@ def export_notebook(
         text=True,
         cwd=PROJECT_ROOT,
         timeout=180,
+        env=env,
     )
 
     if result.returncode != 0:
-        raise subprocess.CalledProcessError(
-            result.returncode, cmd, result.stdout, result.stderr
-        )
+        raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)
 
+    inject_ga(output_path)
     return output_path
 
 
@@ -212,6 +239,7 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feynman Physics Visualizations</title>
+{_GA_SNIPPET}
     <style>
         * {{
             margin: 0;
@@ -220,7 +248,8 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
         }}
 
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #e4e4e7;
             min-height: 100vh;
@@ -420,7 +449,8 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
             <h1>Feynman Physics Visualizations</h1>
             <p class="subtitle">
                 Interactive notebooks exploring physics concepts from the
-                <a href="https://www.feynmanlectures.caltech.edu/" target="_blank">Feynman Lectures on Physics</a>
+                <a href="https://www.feynmanlectures.caltech.edu/"
+                    target="_blank">Feynman Lectures on Physics</a>
             </p>
         </header>
 
@@ -456,9 +486,7 @@ def generate_index_html(notebooks: list[NotebookMetadata], output_dir: Path) -> 
 
 def _generate_card(nb: NotebookMetadata) -> str:
     """Generate HTML for a single notebook card."""
-    tags_html = "\n                    ".join(
-        f'<span class="tag">{tag}</span>' for tag in nb.tags
-    )
+    tags_html = "\n                    ".join(f'<span class="tag">{tag}</span>' for tag in nb.tags)
 
     # Convert markdown links to HTML in description
     description_html = _markdown_links_to_html(nb.description)

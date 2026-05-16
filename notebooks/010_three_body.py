@@ -9,13 +9,29 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+
+    from physics.constants import AU, G
+    from physics.integrators import gravity_acceleration, rk4_step
     from physics_explorations.visualization import (
         COLORS,
-        ANIMATION_SETTINGS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
     )
 
-    return ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, mo, np
+    return (
+        G,
+        AU,
+        rk4_step,
+        gravity_acceleration,
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        create_play_pause_buttons,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -134,50 +150,43 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
-    def simulate_three_body(
-        positions, velocities, masses, dt=0.001, n_steps=10000, G=1.0
-    ):
-        """Simulate three-body gravitational dynamics.
-
-        Args:
-            positions: Initial positions [(x1,y1), (x2,y2), (x3,y3)]
-            velocities: Initial velocities [(vx1,vy1), (vx2,vy2), (vx3,vy3)]
-            masses: Masses [m1, m2, m3]
-            dt: Time step
-            n_steps: Number of simulation steps
-            G: Gravitational constant
-
-        Returns:
-            trajectories: List of (x_array, y_array) for each body
-        """
+def _(COLORS, G, go, gravity_acceleration, np, rk4_step):
+    def simulate_three_body(positions, velocities, masses, dt=0.001, n_steps=10000, G=G):
+        """Simulate three-body gravitational dynamics using RK4."""
         pos = np.array(positions, dtype=float)
         vel = np.array(velocities, dtype=float)
         m = np.array(masses, dtype=float)
 
-        trajectories = [[pos[i].copy()] for i in range(3)]
+        # Initial state [N*D + N*D]
+        state = np.concatenate([pos.flatten(), vel.flatten()])
+        n_bodies = len(m)
+        dim = pos.shape[1]
 
-        for _ in range(n_steps):
-            # Calculate accelerations
-            acc = np.zeros_like(pos)
-            for i in range(3):
-                for j in range(3):
-                    if i != j:
-                        r_vec = pos[j] - pos[i]
-                        r_mag = np.sqrt(np.sum(r_vec**2))
-                        if r_mag > 0.01:  # Softening to avoid singularities
-                            acc[i] += G * m[j] * r_vec / (r_mag**3 + 0.001)
+        trajectories = [[pos[i].copy()] for i in range(n_bodies)]
 
-            # Velocity Verlet integration
-            vel += acc * dt
-            pos += vel * dt
+        def derivative_func(s):
+            # Extract pos and vel from state
+            p = s[: n_bodies * dim].reshape(n_bodies, dim)
+            v = s[n_bodies * dim :].reshape(n_bodies, dim)
 
-            # Store positions
-            for i in range(3):
-                trajectories[i].append(pos[i].copy())
+            # Accelerations using centralized vectorized function
+            a = gravity_acceleration(p, m, G=G, softening=0.01)
+
+            # Return [vel.flatten(), acc.flatten()]
+            return np.concatenate([v.flatten(), a.flatten()])
+
+        for step in range(n_steps):
+            # RK4 Step
+            state = rk4_step(state, derivative_func, dt)
+
+            # Store positions every few steps if needed or every step for chaotic detail
+            if step % 2 == 0:
+                p_curr = state[: n_bodies * dim].reshape(n_bodies, dim)
+                for i in range(n_bodies):
+                    trajectories[i].append(p_curr[i].copy())
 
         # Convert to arrays
-        for i in range(3):
+        for i in range(n_bodies):
             trajectories[i] = np.array(trajectories[i])
 
         return trajectories
@@ -264,9 +273,9 @@ def _(COLORS, go, np):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -276,43 +285,18 @@ def _(COLORS, go, np):
                     x=0.5,
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 30, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                        "mode": "loop",
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -353,6 +337,7 @@ def _(COLORS, go, np):
     )
 
     return (
+        create_play_pause_buttons,
         create_three_body_animation,
         fig8_animation,
         fig8_colors,
@@ -369,14 +354,17 @@ def _(COLORS, go, np):
 
 @app.cell
 def _(fig8_animation, mo):
-    mo.vstack(
-        [
-            fig8_animation,
-            mo.md(
-                "**The Figure-8 Orbit:** This remarkable solution, discovered in 1993 by Christopher Moore, shows three equal masses chasing each other along a figure-8 path. All three bodies follow the *exact same curve* in space, just offset in time. This is one of very few known stable periodic solutions to the three-body problem."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(fig8_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Figure-8 Orbit:** This remarkable solution, discovered in 1993 by Christopher Moore, shows three equal masses chasing each other along a figure-8 path. All three bodies follow the *exact same curve* in space, just offset in time. This is one of very few known stable periodic solutions to the three-body problem."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -455,14 +443,17 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(chaos_animation, mo):
-    mo.vstack(
-        [
-            chaos_animation,
-            mo.md(
-                "**Chaotic Motion:** Three bodies with unequal masses (shown by size) interact gravitationally. Notice how the system alternates between close encounters and wider separations. The orange 'sun' dominates gravitationally, but the other bodies can temporarily escape its influence before being pulled back."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(chaos_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Chaotic Motion:** Three bodies with unequal masses (shown by size) interact gravitationally. Notice how the system alternates between close encounters and wider separations. The orange 'sun' dominates gravitationally, but the other bodies can temporarily escape its influence before being pulled back."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -494,7 +485,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np, simulate_three_body):
+def _(COLORS, create_play_pause_buttons, go, np, simulate_three_body):
     def create_butterfly_effect_animation():
         """Show two nearly-identical systems diverging."""
         # Base initial conditions
@@ -530,16 +521,6 @@ def _(COLORS, go, np, simulate_three_body):
         n_frames = 100
         total_points = len(traj_base[0])
         indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
-
-        # Calculate divergence over time
-        divergence = []
-        for idx in indices:
-            total_div = 0
-            for body in range(3):
-                dx = traj_base[body][idx, 0] - traj_perturbed[body][idx, 0]
-                dy = traj_base[body][idx, 1] - traj_perturbed[body][idx, 1]
-                total_div += np.sqrt(dx**2 + dy**2)
-            divergence.append(total_div / 3)
 
         frames = []
         for frame_idx, data_idx in enumerate(indices):
@@ -614,12 +595,8 @@ def _(COLORS, go, np, simulate_three_body):
             frames.append(go.Frame(data=frame_data, name=str(frame_idx)))
 
         # Axis range
-        all_x = np.concatenate(
-            [t[:, 0] for t in traj_base] + [t[:, 0] for t in traj_perturbed]
-        )
-        all_y = np.concatenate(
-            [t[:, 1] for t in traj_base] + [t[:, 1] for t in traj_perturbed]
-        )
+        all_x = np.concatenate([t[:, 0] for t in traj_base] + [t[:, 0] for t in traj_perturbed])
+        all_y = np.concatenate([t[:, 1] for t in traj_base] + [t[:, 1] for t in traj_perturbed])
         margin = 0.3
         x_range = [all_x.min() - margin, all_x.max() + margin]
         y_range = [all_y.min() - margin, all_y.max() + margin]
@@ -644,9 +621,9 @@ def _(COLORS, go, np, simulate_three_body):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -657,42 +634,18 @@ def _(COLORS, go, np, simulate_three_body):
                     font=dict(size=10),
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
                 annotations=[
                     dict(
                         x=0.5,
@@ -716,14 +669,17 @@ def _(COLORS, go, np, simulate_three_body):
 
 @app.cell
 def _(butterfly_fig, mo):
-    mo.vstack(
-        [
-            butterfly_fig,
-            mo.md(
-                "**The Butterfly Effect:** Two identical three-body systems—except one body starts just 0.0001 units away. At first they move together (solid circles and dotted diamonds overlap). But tiny differences amplify exponentially. By the end, the systems have completely different configurations. This is why long-term prediction is fundamentally impossible."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(butterfly_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Butterfly Effect:** Two identical three-body systems—except one body starts just 0.0001 units away. At first they move together (solid circles and dotted diamonds overlap). But tiny differences amplify exponentially. By the end, the systems have completely different configurations. This is why long-term prediction is fundamentally impossible."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -753,27 +709,30 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, go, np):
+def _(COLORS, create_play_pause_buttons, go, np):
     def simulate_trisolaris(dt=0.0005, n_steps=30000):
         """Simulate a planet in a triple-star system."""
         # Three suns - hierarchical system (binary pair + distant third)
         # Using normalized units
-        sun_positions = np.array([
-            [-0.5, 0.0],   # Sun 1 (binary pair)
-            [0.5, 0.0],    # Sun 2 (binary pair)
-            [2.5, 0.0],    # Sun 3 (distant)
-        ])
-        sun_velocities = np.array([
-            [0.0, -0.4],
-            [0.0, 0.4],
-            [0.0, -0.15],
-        ])
+        sun_positions = np.array(
+            [
+                [-0.5, 0.0],  # Sun 1 (binary pair)
+                [0.5, 0.0],  # Sun 2 (binary pair)
+                [2.5, 0.0],  # Sun 3 (distant)
+            ]
+        )
+        sun_velocities = np.array(
+            [
+                [0.0, -0.4],
+                [0.0, 0.4],
+                [0.0, -0.15],
+            ]
+        )
         sun_masses = np.array([1.0, 1.0, 0.8])
 
         # Planet - starts orbiting the binary pair
         planet_pos = np.array([0.0, 1.2])
         planet_vel = np.array([0.6, 0.0])
-        planet_mass = 0.0001  # Negligible mass
 
         # Storage
         sun_trajectories = [[pos.copy()] for pos in sun_positions]
@@ -818,7 +777,7 @@ def _(COLORS, go, np):
 
         return sun_trajectories, planet_trajectory
 
-    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=200):
+    def create_trisolaris_animation(sun_trajs, planet_traj, n_frames=100):
         """Create animation of Trisolaran system."""
         total_points = len(planet_traj)
         indices = np.linspace(0, total_points - 1, n_frames, dtype=int)
@@ -868,7 +827,7 @@ def _(COLORS, go, np):
                 )
 
             # Planet trail
-            trail_start = max(0, data_idx - 200)
+            trail_start = max(0, data_idx - 100)
             frame_data.append(
                 go.Scatter(
                     x=planet_traj[trail_start : data_idx + 1, 0],
@@ -881,17 +840,52 @@ def _(COLORS, go, np):
                 )
             )
 
+            # Planet IR temperature (Irradiance)
+            irradiance = 0
+            for sun_idx in range(3):
+                dist = np.sqrt(np.sum((planet_traj[data_idx] - sun_trajs[sun_idx][data_idx]) ** 2))
+                irradiance += 0.5 / (dist**2 + 0.1)  # Simplified units
+
+            temp_status = "STABLE"
+            temp_color = COLORS["quantum"]
+            if irradiance > 1.5:
+                temp_status = "SCORCHING"
+                temp_color = "red"
+            elif irradiance < 0.2:
+                temp_status = "FREEZING"
+                temp_color = "cyan"
+
+            # Stability Zones (Hill spheres - approximate)
+            for sun_idx in range(3):
+                sun_pos = sun_trajs[sun_idx][data_idx]
+                r_hill = 0.5  # Visualization constant
+                theta_h = np.linspace(0, 2 * np.pi, 30)
+                frame_data.append(
+                    go.Scatter(
+                        x=sun_pos[0] + r_hill * np.cos(theta_h),
+                        y=sun_pos[1] + r_hill * np.sin(theta_h),
+                        mode="lines",
+                        line=dict(color=sun_colors[sun_idx], width=1, dash="dot"),
+                        opacity=0.2,
+                        showlegend=False,
+                        hoverinfo="skip",
+                    )
+                )
+
             # Planet
             frame_data.append(
                 go.Scatter(
                     x=[planet_traj[data_idx, 0]],
                     y=[planet_traj[data_idx, 1]],
-                    mode="markers",
+                    mode="markers+text",
                     marker={
                         "size": planet_size,
-                        "color": planet_color,
+                        "color": temp_color,
                         "symbol": "circle",
                     },
+                    text=[f" {temp_status}"],
+                    textposition="top right",
+                    textfont=dict(color=temp_color, size=10),
                     name="Trisolaris" if frame_idx == 0 else None,
                     showlegend=(frame_idx == 0),
                     hoverinfo="skip",
@@ -927,9 +921,9 @@ def _(COLORS, go, np):
                     "zeroline": False,
                     "showticklabels": False,
                 },
-                plot_bgcolor=COLORS["background"],
+                template="plotly_dark",
                 paper_bgcolor=COLORS["paper"],
-                font=dict(color=COLORS["text"]),
+                plot_bgcolor=COLORS["background"],
                 showlegend=True,
                 legend=dict(
                     orientation="h",
@@ -939,42 +933,18 @@ def _(COLORS, go, np):
                     x=0.5,
                 ),
                 updatemenus=[
-                    {
-                        "type": "buttons",
-                        "showactive": False,
-                        "y": -0.12,
-                        "x": 0.5,
-                        "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 25, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
-                        "bgcolor": COLORS["paper"],
-                        "font": {"color": COLORS["text"]},
-                    }
+                    dict(
+                        type="buttons",
+                        showactive=False,
+                        y=-0.08,
+                        x=0.5,
+                        xanchor="center",
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
+                    )
                 ],
-                margin=dict(b=80),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -995,14 +965,17 @@ def _(COLORS, go, np):
 
 @app.cell
 def _(mo, trisolaris_fig):
-    mo.vstack(
-        [
-            trisolaris_fig,
-            mo.md(
-                "**The Trisolaran System (Chaotic):** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(trisolaris_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**The Trisolaran System (Chaotic):** Three suns (gold, orange, red) orbit each other while a small blue planet tries to survive. The two closer suns form a binary pair, while the third orbits farther out. The planet's fate depends on the complex gravitational dance—sometimes stable, sometimes chaotic. This is the reality the Trisolarans face."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -1039,22 +1012,26 @@ def _(COLORS, go, np):
         """
         # Tight binary pair
         binary_sep = 0.8
-        sun_positions = np.array([
-            [-binary_sep/2, 0.0],   # Sun 1 (binary)
-            [binary_sep/2, 0.0],    # Sun 2 (binary)
-            [8.0, 0.0],             # Sun 3 (distant - 10x binary separation)
-        ])
+        sun_positions = np.array(
+            [
+                [-binary_sep / 2, 0.0],  # Sun 1 (binary)
+                [binary_sep / 2, 0.0],  # Sun 2 (binary)
+                [8.0, 0.0],  # Sun 3 (distant - 10x binary separation)
+            ]
+        )
 
         # Binary orbital velocity (circular orbit around center of mass)
         v_binary = np.sqrt(1.0 / binary_sep) * 0.7
         # Third star velocity (slow orbit around system)
         v_third = np.sqrt(2.0 / 8.0) * 0.5
 
-        sun_velocities = np.array([
-            [0.0, -v_binary],
-            [0.0, v_binary],
-            [0.0, v_third],
-        ])
+        sun_velocities = np.array(
+            [
+                [0.0, -v_binary],
+                [0.0, v_binary],
+                [0.0, v_third],
+            ]
+        )
         sun_masses = np.array([1.0, 1.0, 0.6])
 
         # Planet in stable circumbinary orbit
@@ -1288,14 +1265,17 @@ def _(COLORS, go, np):
 
 @app.cell
 def _(mo, stable_trisolaris_fig):
-    mo.vstack(
-        [
-            stable_trisolaris_fig,
-            mo.md(
-                "**Stable Trisolaran Configuration:** The secret is hierarchy! The planet (blue) orbits the tight binary pair (gold and orange suns) at a safe distance, while the third sun (red) is far enough away that its gravitational perturbations are gentle. This is how real planets survive in triple-star systems like Alpha Centauri. The planet experiences predictable **Stable Eras** indefinitely."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(stable_trisolaris_fig)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Stable Trisolaran Configuration:** The secret is hierarchy! The planet (blue) orbits the tight binary pair (gold and orange suns) at a safe distance, while the third sun (red) is far enough away that its gravitational perturbations are gentle. This is how real planets survive in triple-star systems like Alpha Centauri. The planet experiences predictable **Stable Eras** indefinitely."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -1372,14 +1352,17 @@ def _(COLORS, create_three_body_animation, simulate_three_body):
 
 @app.cell
 def _(eject_animation, mo):
-    mo.vstack(
-        [
-            eject_animation,
-            mo.md(
-                "**Ejection Scenario:** Two massive bodies (orange and gold) dominate, while a lighter body (pink) gets progressively more energy from close encounters. Eventually, the light body may gain enough energy to escape entirely, leaving a stable binary behind. This is the most common long-term fate of three-body systems."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(eject_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Ejection Scenario:** Two massive bodies (orange and gold) dominate, while a lighter body (pink) gets progressively more energy from close encounters. Eventually, the light body may gain enough energy to escape entirely, leaving a stable binary behind. This is the most common long-term fate of three-body systems."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 
@@ -1400,8 +1383,8 @@ def _(COLORS, create_three_body_animation, np, simulate_three_body):
     v_third = np.sqrt(2.0 / third_dist) * 0.95
 
     positions_hier = [
-        (-binary_sep/2, 0.0),
-        (binary_sep/2, 0.0),
+        (-binary_sep / 2, 0.0),
+        (binary_sep / 2, 0.0),
         (third_dist, 0.0),
     ]
     velocities_hier = [
@@ -1440,14 +1423,17 @@ def _(COLORS, create_three_body_animation, np, simulate_three_body):
 
 @app.cell
 def _(hier_animation, mo):
-    mo.vstack(
-        [
-            hier_animation,
-            mo.md(
-                "**Hierarchical System:** A close binary pair (orange and gold) with a distant third body (green) orbiting them both. This configuration can be stable for long periods—the third body 'sees' the binary as roughly a single mass. Many real triple-star systems have this structure. But perturbations can eventually destabilize even these systems."
-            ),
-        ],
-        align="center",
+    _widget = mo.ui.plotly(hier_animation)
+    mo.output.replace(
+        mo.vstack(
+            [
+                _widget,
+                mo.md(
+                    "**Hierarchical System:** A close binary pair (orange and gold) with a distant third body (green) orbiting them both. This configuration can be stable for long periods—the third body 'sees' the binary as roughly a single mass. Many real triple-star systems have this structure. But perturbations can eventually destabilize even these systems."
+                ),
+            ],
+            align="center",
+        )
     )
     return
 

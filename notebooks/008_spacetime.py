@@ -9,12 +9,17 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+
+    from physics.constants import C
     from physics_explorations.visualization import (
         COLORS,
+        DARK_THEME,
+        SCENE_3D,
         create_play_pause_buttons,
+        get_plotly_config,
     )
 
-    return COLORS, create_play_pause_buttons, go, mo, np
+    return COLORS, DARK_THEME, SCENE_3D, C, create_play_pause_buttons, get_plotly_config, go, mo, np
 
 
 @app.cell
@@ -99,7 +104,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_light_clock_animation():
         """Animate the light clock thought experiment showing time dilation."""
         n_frames = 60
@@ -134,36 +139,78 @@ def _(go, np):
                 move_light_x = move_x_offset + velocity * (move_cycle * gamma) * 2
             else:
                 move_light_y = (1 - move_cycle) * 2 * clock_height
-                move_light_x = move_x_offset + velocity * ((move_cycle - 0.5) * gamma + 0.5 * gamma) * 2
+                move_light_x = (
+                    move_x_offset + velocity * ((move_cycle - 0.5) * gamma + 0.5 * gamma) * 2
+                )
 
             # Rest frame elements
             frame_data = [
                 # Rest clock mirrors
-                go.Scatter(x=[-0.3, 0.3], y=[0, 0], mode="lines",
-                          line=dict(color="silver", width=8), name="Bottom mirror (rest)"),
-                go.Scatter(x=[-0.3, 0.3], y=[clock_height, clock_height], mode="lines",
-                          line=dict(color="silver", width=8), name="Top mirror (rest)"),
+                go.Scatter(
+                    x=[-0.3, 0.3],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="silver", width=8),
+                    name="Bottom mirror (rest)",
+                ),
+                go.Scatter(
+                    x=[-0.3, 0.3],
+                    y=[clock_height, clock_height],
+                    mode="lines",
+                    line=dict(color="silver", width=8),
+                    name="Top mirror (rest)",
+                ),
                 # Rest light pulse
-                go.Scatter(x=[0], y=[rest_light_y], mode="markers",
-                          marker=dict(size=15, color="yellow"), name="Light (rest frame)"),
+                go.Scatter(
+                    x=[0],
+                    y=[rest_light_y],
+                    mode="markers",
+                    marker=dict(size=15, color="yellow"),
+                    name="Light (rest frame)",
+                ),
                 # Rest clock label
-                go.Scatter(x=[0], y=[-0.5], mode="text",
-                          text=["REST CLOCK"], textfont=dict(size=12)),
-
+                go.Scatter(
+                    x=[0], y=[-0.5], mode="text", text=["REST CLOCK"], textfont=dict(size=12)
+                ),
                 # Moving clock mirrors (at current position)
-                go.Scatter(x=[move_x_offset - 0.3, move_x_offset + 0.3], y=[0, 0], mode="lines",
-                          line=dict(color="lightblue", width=8), name="Bottom mirror (moving)"),
-                go.Scatter(x=[move_x_offset - 0.3, move_x_offset + 0.3], y=[clock_height, clock_height], mode="lines",
-                          line=dict(color="lightblue", width=8), name="Top mirror (moving)"),
+                go.Scatter(
+                    x=[move_x_offset - 0.3, move_x_offset + 0.3],
+                    y=[0, 0],
+                    mode="lines",
+                    line=dict(color="lightblue", width=8),
+                    name="Bottom mirror (moving)",
+                ),
+                go.Scatter(
+                    x=[move_x_offset - 0.3, move_x_offset + 0.3],
+                    y=[clock_height, clock_height],
+                    mode="lines",
+                    line=dict(color="lightblue", width=8),
+                    name="Top mirror (moving)",
+                ),
                 # Moving light pulse
-                go.Scatter(x=[move_light_x], y=[move_light_y], mode="markers",
-                          marker=dict(size=15, color="cyan"), name="Light (moving frame)"),
+                go.Scatter(
+                    x=[move_light_x],
+                    y=[move_light_y],
+                    mode="markers",
+                    marker=dict(size=15, color="cyan"),
+                    name="Light (moving frame)",
+                ),
                 # Show diagonal path
-                go.Scatter(x=[move_x_offset, move_light_x], y=[0, move_light_y], mode="lines",
-                          line=dict(color="cyan", width=1, dash="dash"), name="Light path"),
+                go.Scatter(
+                    x=[move_x_offset, move_light_x],
+                    y=[0, move_light_y],
+                    mode="lines",
+                    line=dict(color="cyan", width=1, dash="dash"),
+                    name="Light path",
+                ),
                 # Moving clock label
-                go.Scatter(x=[move_x_offset], y=[-0.5], mode="text",
-                          text=[f"MOVING at {velocity}c"], textfont=dict(size=12)),
+                go.Scatter(
+                    x=[move_x_offset],
+                    y=[-0.5],
+                    mode="text",
+                    text=[f"MOVING at {velocity}c"],
+                    textfont=dict(size=12),
+                ),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -172,32 +219,29 @@ def _(go, np):
             data=frames[0].data,
             layout=go.Layout(
                 title=dict(
-                    text=f"<b>Light Clock:</b> Time Dilation Visualized (v = {velocity}c, γ = {gamma:.2f})<br><sub>Moving clock ticks slower because light travels a longer diagonal path</sub>",
+                    text="<b>The Light Clock:</b> Time Dilation in Action<br><sub>Moving clocks run slow because light must travel further</sub>",
                     font=dict(size=16),
                 ),
-                xaxis=dict(range=[-1.5, 10], showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(range=[-1, 3], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
-                showlegend=False,
+                xaxis=dict(range=[-0.5, 3.5], showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(range=[-0.5, 2.5], showgrid=False, zeroline=False, showticklabels=False),
+                template="plotly_dark",
+                paper_bgcolor=COLORS["paper"],
+                plot_bgcolor=COLORS["background"],
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
                     dict(
                         type="buttons",
                         showactive=False,
-                        y=-0.1,
+                        y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 60, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
-                        ],
+                        buttons=create_play_pause_buttons(),
+                        bgcolor=COLORS["paper"],
+                        font=dict(color=COLORS["text"]),
                     )
                 ],
-                margin=dict(b=60),
+                margin=dict(t=80, b=60),
             ),
             frames=frames,
         )
@@ -205,8 +249,9 @@ def _(go, np):
         return fig
 
     light_clock_fig = create_light_clock_animation()
-    light_clock_fig
-    return (create_light_clock_animation, light_clock_fig)
+    light_clock_plot = mo.ui.plotly(light_clock_fig, config=get_plotly_config())
+    mo.output.replace(light_clock_plot)
+    return (create_light_clock_animation, light_clock_plot)
 
 
 @app.cell
@@ -258,12 +303,16 @@ def _(mo):
         label="Velocity (v/c)",
         show_value=True,
     )
-    mo.hstack([mo.md("**Set velocity as fraction of light speed:**"), velocity_slider], justify="start", gap=1)
+    mo.hstack(
+        [mo.md("**Set velocity as fraction of light speed:**"), velocity_slider],
+        justify="start",
+        gap=1,
+    )
     return (velocity_slider,)
 
 
 @app.cell
-def _(go, np, velocity_slider):
+def _(get_plotly_config, go, mo, np, velocity_slider):
     v = velocity_slider.value
     if v >= 1:
         v = 0.999
@@ -276,26 +325,26 @@ def _(go, np, velocity_slider):
     gamma_fig = go.Figure()
 
     # Gamma curve
-    gamma_fig.add_trace(go.Scatter(
-        x=velocities,
-        y=gammas,
-        mode="lines",
-        line=dict(color="steelblue", width=3),
-        name="γ(v)"
-    ))
+    gamma_fig.add_trace(
+        go.Scatter(
+            x=velocities, y=gammas, mode="lines", line=dict(color="steelblue", width=3), name="γ(v)"
+        )
+    )
 
     # Current point
-    gamma_fig.add_trace(go.Scatter(
-        x=[v],
-        y=[gamma_val],
-        mode="markers",
-        marker=dict(size=15, color="red"),
-        name=f"Current: γ = {gamma_val:.3f}"
-    ))
+    gamma_fig.add_trace(
+        go.Scatter(
+            x=[v],
+            y=[gamma_val],
+            mode="markers",
+            marker=dict(size=15, color="red"),
+            name=f"Current: γ = {gamma_val:.3f}",
+        )
+    )
 
     gamma_fig.update_layout(
         title=dict(
-            text=f"<b>The Gamma Factor</b><br><sub>At v = {v}c: γ = {gamma_val:.3f} → clocks run {gamma_val:.2f}× slower, lengths contract to {1/gamma_val:.2%}</sub>",
+            text=f"<b>The Gamma Factor</b><br><sub>At v = {v}c: γ = {gamma_val:.3f} → clocks run {gamma_val:.2f}× slower, lengths contract to {1 / gamma_val:.2%}</sub>",
             font=dict(size=16),
         ),
         xaxis_title="Velocity (v/c)",
@@ -304,8 +353,9 @@ def _(go, np, velocity_slider):
         showlegend=True,
     )
 
-    gamma_fig
-    return gamma_fig, gamma_val, gammas, v, velocities
+    gamma_plot = mo.ui.plotly(gamma_fig, config=get_plotly_config())
+    mo.output.replace(gamma_plot)
+    return gamma_plot, gamma_val, gammas, v, velocities
 
 
 @app.cell
@@ -342,7 +392,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_length_contraction_animation():
         """Animate length contraction of a spaceship."""
         n_frames = 60
@@ -366,12 +416,26 @@ def _(go, np):
                 contracted_length = ship_length
 
             # Ship shape (contracted in x)
-            ship_x = [-contracted_length/2, contracted_length/2, contracted_length/2,
-                      contracted_length/2 + 0.3, contracted_length/2, contracted_length/2,
-                      -contracted_length/2, -contracted_length/2]
-            ship_y = [-ship_height/2, -ship_height/2, -ship_height/4,
-                      0, ship_height/4, ship_height/2,
-                      ship_height/2, -ship_height/2]
+            ship_x = [
+                -contracted_length / 2,
+                contracted_length / 2,
+                contracted_length / 2,
+                contracted_length / 2 + 0.3,
+                contracted_length / 2,
+                contracted_length / 2,
+                -contracted_length / 2,
+                -contracted_length / 2,
+            ]
+            ship_y = [
+                -ship_height / 2,
+                -ship_height / 2,
+                -ship_height / 4,
+                0,
+                ship_height / 4,
+                ship_height / 2,
+                ship_height / 2,
+                -ship_height / 2,
+            ]
 
             # Reference grid
             grid_x = []
@@ -382,22 +446,39 @@ def _(go, np):
 
             frame_data = [
                 # Reference grid
-                go.Scatter(x=grid_x, y=grid_y, mode="lines",
-                          line=dict(color="rgba(100,100,100,0.3)", width=1),
-                          name="Reference grid"),
+                go.Scatter(
+                    x=grid_x,
+                    y=grid_y,
+                    mode="lines",
+                    line=dict(color="rgba(100,100,100,0.3)", width=1),
+                    name="Reference grid",
+                ),
                 # Spaceship
-                go.Scatter(x=ship_x, y=ship_y, mode="lines", fill="toself",
-                          fillcolor="rgba(100,150,255,0.5)",
-                          line=dict(color="steelblue", width=2),
-                          name=f"Spaceship (L = {contracted_length:.2f})"),
+                go.Scatter(
+                    x=ship_x,
+                    y=ship_y,
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100,150,255,0.5)",
+                    line=dict(color="steelblue", width=2),
+                    name=f"Spaceship (L = {contracted_length:.2f})",
+                ),
                 # Velocity indicator
-                go.Scatter(x=[0], y=[-1.2], mode="text",
-                          text=[f"v = {v:.2f}c, γ = {gamma:.2f}"],
-                          textfont=dict(size=14)),
+                go.Scatter(
+                    x=[0],
+                    y=[-1.2],
+                    mode="text",
+                    text=[f"v = {v:.2f}c, γ = {gamma:.2f}"],
+                    textfont=dict(size=14),
+                ),
                 # Rest length reference
-                go.Scatter(x=[-ship_length/2, ship_length/2], y=[1.0, 1.0], mode="lines",
-                          line=dict(color="red", width=2, dash="dash"),
-                          name=f"Rest length = {ship_length}"),
+                go.Scatter(
+                    x=[-ship_length / 2, ship_length / 2],
+                    y=[1.0, 1.0],
+                    mode="lines",
+                    line=dict(color="red", width=2, dash="dash"),
+                    name=f"Rest length = {ship_length}",
+                ),
             ]
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
@@ -410,7 +491,13 @@ def _(go, np):
                     font=dict(size=16),
                 ),
                 xaxis=dict(range=[-3, 3], showgrid=False, zeroline=False),
-                yaxis=dict(range=[-1.5, 1.5], scaleanchor="x", showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(
+                    range=[-1.5, 1.5],
+                    scaleanchor="x",
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False,
+                ),
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 updatemenus=[
@@ -421,14 +508,29 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 80, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 80, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -440,8 +542,12 @@ def _(go, np):
         return fig
 
     contraction_fig = create_length_contraction_animation()
-    contraction_fig
-    return (contraction_fig, create_length_contraction_animation)
+    contraction_plot = mo.ui.plotly(contraction_fig, config=get_plotly_config())
+    mo.output.replace(contraction_plot)
+    return (
+        contraction_plot,
+        create_length_contraction_animation,
+    )
 
 
 @app.cell
@@ -483,7 +589,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_simultaneity_animation():
         """Animate the relativity of simultaneity with Einstein's train."""
         n_frames = 60
@@ -524,54 +630,88 @@ def _(go, np):
 
             frame_data = [
                 # Ground (platform)
-                go.Scatter(x=[-5, 5], y=[-0.3, -0.3], mode="lines",
-                          line=dict(color="gray", width=10), name="Platform"),
-
+                go.Scatter(
+                    x=[-5, 5],
+                    y=[-0.3, -0.3],
+                    mode="lines",
+                    line=dict(color="gray", width=10),
+                    name="Platform",
+                ),
                 # Train
-                go.Scatter(x=[train_x - train_length/2, train_x + train_length/2,
-                             train_x + train_length/2, train_x - train_length/2,
-                             train_x - train_length/2],
-                          y=[0.1, 0.1, 0.6, 0.6, 0.1], mode="lines", fill="toself",
-                          fillcolor="rgba(100,150,200,0.5)",
-                          line=dict(color="steelblue", width=2), name="Train"),
-
+                go.Scatter(
+                    x=[
+                        train_x - train_length / 2,
+                        train_x + train_length / 2,
+                        train_x + train_length / 2,
+                        train_x - train_length / 2,
+                        train_x - train_length / 2,
+                    ],
+                    y=[0.1, 0.1, 0.6, 0.6, 0.1],
+                    mode="lines",
+                    fill="toself",
+                    fillcolor="rgba(100,150,200,0.5)",
+                    line=dict(color="steelblue", width=2),
+                    name="Train",
+                ),
                 # Train observer
-                go.Scatter(x=[observer_x], y=[0.35], mode="markers",
-                          marker=dict(size=15, color="blue", symbol="circle"),
-                          name="Train observer"),
-
+                go.Scatter(
+                    x=[observer_x],
+                    y=[0.35],
+                    mode="markers",
+                    marker=dict(size=15, color="blue", symbol="circle"),
+                    name="Train observer",
+                ),
                 # Ground observer
-                go.Scatter(x=[ground_observer_x], y=[-0.5], mode="markers",
-                          marker=dict(size=15, color="green", symbol="circle"),
-                          name="Ground observer"),
-
+                go.Scatter(
+                    x=[ground_observer_x],
+                    y=[-0.5],
+                    mode="markers",
+                    marker=dict(size=15, color="green", symbol="circle"),
+                    name="Ground observer",
+                ),
                 # Lightning strike points (fixed in ground frame)
-                go.Scatter(x=[train_length/2, -train_length/2], y=[0.8, 0.8], mode="markers",
-                          marker=dict(size=10, color="yellow", symbol="star"),
-                          name="Strike points"),
+                go.Scatter(
+                    x=[train_length / 2, -train_length / 2],
+                    y=[0.8, 0.8],
+                    mode="markers",
+                    marker=dict(size=10, color="yellow", symbol="star"),
+                    name="Strike points",
+                ),
             ]
 
             # Add light waves after t=0
             if t >= 0:
                 # Front light wave
-                frame_data.append(go.Scatter(
-                    x=[front_light_left, front_light_right],
-                    y=[0.35, 0.35], mode="lines",
-                    line=dict(color="yellow", width=4),
-                    name="Light from front"
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[front_light_left, front_light_right],
+                        y=[0.35, 0.35],
+                        mode="lines",
+                        line=dict(color="yellow", width=4),
+                        name="Light from front",
+                    )
+                )
                 # Rear light wave
-                frame_data.append(go.Scatter(
-                    x=[rear_light_left, rear_light_right],
-                    y=[0.35, 0.35], mode="lines",
-                    line=dict(color="orange", width=4),
-                    name="Light from rear"
-                ))
+                frame_data.append(
+                    go.Scatter(
+                        x=[rear_light_left, rear_light_right],
+                        y=[0.35, 0.35],
+                        mode="lines",
+                        line=dict(color="orange", width=4),
+                        name="Light from rear",
+                    )
+                )
 
             # Check if light has reached observers
             if t >= 0:
-                front_reached_train = observer_x <= front_strike_x + light_radius and observer_x >= front_strike_x - light_radius
-                rear_reached_train = observer_x <= rear_strike_x + light_radius and observer_x >= rear_strike_x - light_radius
+                front_reached_train = (
+                    observer_x <= front_strike_x + light_radius
+                    and observer_x >= front_strike_x - light_radius
+                )
+                rear_reached_train = (
+                    observer_x <= rear_strike_x + light_radius
+                    and observer_x >= rear_strike_x - light_radius
+                )
 
                 status = []
                 if front_reached_train and rear_reached_train:
@@ -581,15 +721,22 @@ def _(go, np):
                 elif rear_reached_train:
                     status.append("Train observer: Rear first!")
 
-                if abs(ground_observer_x - front_strike_x) <= light_radius and abs(ground_observer_x - rear_strike_x) <= light_radius:
+                if (
+                    abs(ground_observer_x - front_strike_x) <= light_radius
+                    and abs(ground_observer_x - rear_strike_x) <= light_radius
+                ):
                     status.append("Ground observer: Simultaneous!")
 
                 if status:
-                    frame_data.append(go.Scatter(
-                        x=[0], y=[1.2], mode="text",
-                        text=["<br>".join(status)],
-                        textfont=dict(size=12)
-                    ))
+                    frame_data.append(
+                        go.Scatter(
+                            x=[0],
+                            y=[1.2],
+                            mode="text",
+                            text=["<br>".join(status)],
+                            textfont=dict(size=12),
+                        )
+                    )
 
             frames.append(go.Frame(data=frame_data, name=str(i)))
 
@@ -603,7 +750,14 @@ def _(go, np):
                 xaxis=dict(range=[-5, 5], showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(range=[-1, 1.5], showgrid=False, zeroline=False, showticklabels=False),
                 showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, font=dict(size=9)),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    font=dict(size=9),
+                ),
                 updatemenus=[
                     dict(
                         type="buttons",
@@ -612,18 +766,37 @@ def _(go, np):
                         x=0.5,
                         xanchor="center",
                         buttons=[
-                            dict(label="▶ Play",
-                                 method="animate",
-                                 args=[None, {"frame": {"duration": 100, "redraw": True},
-                                            "fromcurrent": True, "transition": {"duration": 0}}]),
-                            dict(label="⏸ Pause",
-                                 method="animate",
-                                 args=[[None], {"frame": {"duration": 0, "redraw": False},
-                                              "mode": "immediate"}]),
-                            dict(label="↺ Reset",
-                                 method="animate",
-                                 args=[["0"], {"frame": {"duration": 0, "redraw": True},
-                                              "mode": "immediate"}]),
+                            dict(
+                                label="▶ Play",
+                                method="animate",
+                                args=[
+                                    None,
+                                    {
+                                        "frame": {"duration": 100, "redraw": True},
+                                        "fromcurrent": True,
+                                        "transition": {"duration": 0},
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="⏸ Pause",
+                                method="animate",
+                                args=[
+                                    [None],
+                                    {
+                                        "frame": {"duration": 0, "redraw": False},
+                                        "mode": "immediate",
+                                    },
+                                ],
+                            ),
+                            dict(
+                                label="↺ Reset",
+                                method="animate",
+                                args=[
+                                    ["0"],
+                                    {"frame": {"duration": 0, "redraw": True}, "mode": "immediate"},
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -635,8 +808,12 @@ def _(go, np):
         return fig
 
     simultaneity_fig = create_simultaneity_animation()
-    simultaneity_fig
-    return (create_simultaneity_animation, simultaneity_fig)
+    simultaneity_plot = mo.ui.plotly(simultaneity_fig, config=get_plotly_config())
+    mo.output.replace(simultaneity_plot)
+    return (
+        create_simultaneity_animation,
+        simultaneity_plot,
+    )
 
 
 @app.cell
@@ -669,7 +846,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     def create_spacetime_diagram():
         """Create an interactive spacetime diagram."""
         # Light cone
@@ -691,120 +868,181 @@ def _(go, np):
         fig = go.Figure()
 
         # Elsewhere regions (shaded)
-        fig.add_trace(go.Scatter(
-            x=[-4, 0, -4, -4],
-            y=[0, 0, 4, 0],
-            fill="toself",
-            fillcolor="rgba(150,150,150,0.2)",
-            line=dict(width=0),
-            name="Elsewhere (spacelike)",
-            hoverinfo="skip"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[4, 0, 4, 4],
-            y=[0, 0, 4, 0],
-            fill="toself",
-            fillcolor="rgba(150,150,150,0.2)",
-            line=dict(width=0),
-            showlegend=False,
-            hoverinfo="skip"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[-4, 0, -4, -4],
-            y=[0, 0, -4, 0],
-            fill="toself",
-            fillcolor="rgba(150,150,150,0.2)",
-            line=dict(width=0),
-            showlegend=False,
-            hoverinfo="skip"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[4, 0, 4, 4],
-            y=[0, 0, -4, 0],
-            fill="toself",
-            fillcolor="rgba(150,150,150,0.2)",
-            line=dict(width=0),
-            showlegend=False,
-            hoverinfo="skip"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[-4, 0, -4, -4],
+                y=[0, 0, 4, 0],
+                fill="toself",
+                fillcolor="rgba(150,150,150,0.2)",
+                line=dict(width=0),
+                name="Elsewhere (spacelike)",
+                hoverinfo="skip",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[4, 0, 4, 4],
+                y=[0, 0, 4, 0],
+                fill="toself",
+                fillcolor="rgba(150,150,150,0.2)",
+                line=dict(width=0),
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[-4, 0, -4, -4],
+                y=[0, 0, -4, 0],
+                fill="toself",
+                fillcolor="rgba(150,150,150,0.2)",
+                line=dict(width=0),
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[4, 0, 4, 4],
+                y=[0, 0, -4, 0],
+                fill="toself",
+                fillcolor="rgba(150,150,150,0.2)",
+                line=dict(width=0),
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
 
         # Future light cone
-        fig.add_trace(go.Scatter(
-            x=np.concatenate([future_right_x, future_left_x[::-1]]),
-            y=np.concatenate([future_right_t, future_left_t[::-1]]),
-            fill="toself",
-            fillcolor="rgba(255,200,100,0.3)",
-            line=dict(color="orange", width=2),
-            name="Future light cone"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=np.concatenate([future_right_x, future_left_x[::-1]]),
+                y=np.concatenate([future_right_t, future_left_t[::-1]]),
+                fill="toself",
+                fillcolor="rgba(255,200,100,0.3)",
+                line=dict(color="orange", width=2),
+                name="Future light cone",
+            )
+        )
 
         # Past light cone
-        fig.add_trace(go.Scatter(
-            x=np.concatenate([past_right_x, past_left_x[::-1]]),
-            y=np.concatenate([past_right_t, past_left_t[::-1]]),
-            fill="toself",
-            fillcolor="rgba(100,150,255,0.3)",
-            line=dict(color="blue", width=2),
-            name="Past light cone"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=np.concatenate([past_right_x, past_left_x[::-1]]),
+                y=np.concatenate([past_right_t, past_left_t[::-1]]),
+                fill="toself",
+                fillcolor="rgba(100,150,255,0.3)",
+                line=dict(color="blue", width=2),
+                name="Past light cone",
+            )
+        )
 
         # Light rays (45° lines)
-        fig.add_trace(go.Scatter(
-            x=[-3, 3], y=[-3, 3], mode="lines",
-            line=dict(color="yellow", width=2, dash="dash"),
-            name="Light ray"
-        ))
-        fig.add_trace(go.Scatter(
-            x=[3, -3], y=[-3, 3], mode="lines",
-            line=dict(color="yellow", width=2, dash="dash"),
-            showlegend=False
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[-3, 3],
+                y=[-3, 3],
+                mode="lines",
+                line=dict(color="yellow", width=2, dash="dash"),
+                name="Light ray",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[3, -3],
+                y=[-3, 3],
+                mode="lines",
+                line=dict(color="yellow", width=2, dash="dash"),
+                showlegend=False,
+            )
+        )
 
         # World line of stationary observer
-        fig.add_trace(go.Scatter(
-            x=[0, 0], y=[-3, 3], mode="lines",
-            line=dict(color="white", width=3),
-            name="Stationary observer"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[0, 0],
+                y=[-3, 3],
+                mode="lines",
+                line=dict(color="white", width=3),
+                name="Stationary observer",
+            )
+        )
 
         # World line of moving observer (v = 0.5c)
         v = 0.5
-        fig.add_trace(go.Scatter(
-            x=[-1.5, 1.5], y=[-3, 3], mode="lines",
-            line=dict(color="cyan", width=3),
-            name=f"Moving observer (v={v}c)"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[-1.5, 1.5],
+                y=[-3, 3],
+                mode="lines",
+                line=dict(color="cyan", width=3),
+                name=f"Moving observer (v={v}c)",
+            )
+        )
 
         # Origin event
-        fig.add_trace(go.Scatter(
-            x=[0], y=[0], mode="markers",
-            marker=dict(size=12, color="red"),
-            name="Event (here, now)"
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[0],
+                y=[0],
+                mode="markers",
+                marker=dict(size=12, color="red"),
+                name="Event (here, now)",
+            )
+        )
 
         # Labels
-        fig.add_annotation(x=0, y=2.5, text="FUTURE", showarrow=False, font=dict(size=14, color="orange"))
-        fig.add_annotation(x=0, y=-2.5, text="PAST", showarrow=False, font=dict(size=14, color="blue"))
-        fig.add_annotation(x=2.5, y=0, text="ELSEWHERE", showarrow=False, font=dict(size=12, color="gray"))
-        fig.add_annotation(x=-2.5, y=0, text="ELSEWHERE", showarrow=False, font=dict(size=12, color="gray"))
+        fig.add_annotation(
+            x=0, y=2.5, text="FUTURE", showarrow=False, font=dict(size=14, color="orange")
+        )
+        fig.add_annotation(
+            x=0, y=-2.5, text="PAST", showarrow=False, font=dict(size=14, color="blue")
+        )
+        fig.add_annotation(
+            x=2.5, y=0, text="ELSEWHERE", showarrow=False, font=dict(size=12, color="gray")
+        )
+        fig.add_annotation(
+            x=-2.5, y=0, text="ELSEWHERE", showarrow=False, font=dict(size=12, color="gray")
+        )
 
         fig.update_layout(
             title=dict(
                 text="<b>Spacetime Diagram:</b> Light Cones and Causality<br><sub>Only events inside your light cone can affect you or be affected by you</sub>",
                 font=dict(size=16),
             ),
-            xaxis=dict(title="Space (x)", range=[-4, 4], zeroline=True, zerolinecolor="white", zerolinewidth=1),
-            yaxis=dict(title="Time (ct)", range=[-4, 4], zeroline=True, zerolinecolor="white", zerolinewidth=1, scaleanchor="x"),
+            xaxis=dict(
+                title="Space (x)",
+                range=[-4, 4],
+                zeroline=True,
+                zerolinecolor="white",
+                zerolinewidth=1,
+            ),
+            yaxis=dict(
+                title="Time (ct)",
+                range=[-4, 4],
+                zeroline=True,
+                zerolinecolor="white",
+                zerolinewidth=1,
+                scaleanchor="x",
+            ),
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, font=dict(size=9)),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="center",
+                x=0.5,
+                font=dict(size=9),
+            ),
             plot_bgcolor="rgba(0,0,30,0.9)",
         )
 
         return fig
 
     spacetime_fig = create_spacetime_diagram()
-    spacetime_fig
-    return (create_spacetime_diagram, spacetime_fig)
+    spacetime_plot = mo.ui.plotly(spacetime_fig, config=get_plotly_config())
+    mo.output.replace(spacetime_plot)
+    return (create_spacetime_diagram, spacetime_plot)
 
 
 @app.cell
@@ -899,7 +1137,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(get_plotly_config, go, mo, np):
     # E vs v showing rest energy and kinetic energy
     v_range = np.linspace(0, 0.99, 100)
     gamma_range = 1 / np.sqrt(1 - v_range**2)
@@ -915,29 +1153,39 @@ def _(go, np):
     energy_fig = go.Figure()
 
     # Rest energy
-    energy_fig.add_trace(go.Scatter(
-        x=v_range, y=rest_energy,
-        mode="lines", fill="tozeroy",
-        fillcolor="rgba(100,100,255,0.3)",
-        line=dict(color="blue", width=2),
-        name="Rest energy (mc²)"
-    ))
+    energy_fig.add_trace(
+        go.Scatter(
+            x=v_range,
+            y=rest_energy,
+            mode="lines",
+            fill="tozeroy",
+            fillcolor="rgba(100,100,255,0.3)",
+            line=dict(color="blue", width=2),
+            name="Rest energy (mc²)",
+        )
+    )
 
     # Total energy
-    energy_fig.add_trace(go.Scatter(
-        x=v_range, y=total_energy,
-        mode="lines",
-        line=dict(color="red", width=3),
-        name="Total energy (γmc²)"
-    ))
+    energy_fig.add_trace(
+        go.Scatter(
+            x=v_range,
+            y=total_energy,
+            mode="lines",
+            line=dict(color="red", width=3),
+            name="Total energy (γmc²)",
+        )
+    )
 
     # Classical KE for comparison
-    energy_fig.add_trace(go.Scatter(
-        x=v_range, y=1 + classical_ke,
-        mode="lines",
-        line=dict(color="green", width=2, dash="dash"),
-        name="Classical prediction"
-    ))
+    energy_fig.add_trace(
+        go.Scatter(
+            x=v_range,
+            y=1 + classical_ke,
+            mode="lines",
+            line=dict(color="green", width=2, dash="dash"),
+            name="Classical prediction",
+        )
+    )
 
     energy_fig.update_layout(
         title=dict(
@@ -951,10 +1199,11 @@ def _(go, np):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
     )
 
-    energy_fig
+    energy_plot = mo.ui.plotly(energy_fig, config=get_plotly_config())
+    mo.output.replace(energy_plot)
     return (
         classical_ke,
-        energy_fig,
+        energy_plot,
         gamma_range,
         kinetic_energy,
         rest_energy,

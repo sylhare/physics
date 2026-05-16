@@ -1,13 +1,13 @@
 """Animation utilities for physics visualizations."""
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
+
 import plotly.graph_objects as go
 
 from physics_explorations.visualization.styles import (
-    COLORS,
-    DARK_THEME,
     ANIMATION_SETTINGS,
-    SLIDER_STYLE,
+    COLORS,
 )
 
 
@@ -72,23 +72,22 @@ def create_slider_steps(
     """
     steps = []
     for i in range(n_frames):
-        if labels and i < len(labels):
-            label = labels[i]
-        else:
-            label = f"{prefix}{i}{suffix}"
+        label = labels[i] if labels and i < len(labels) else f"{prefix}{i}{suffix}"
 
-        steps.append({
-            "args": [
-                [str(i)],
-                {
-                    "frame": {"duration": ANIMATION_SETTINGS["frame_duration"], "redraw": True},
-                    "mode": "immediate",
-                    "transition": {"duration": ANIMATION_SETTINGS["transition_duration"]},
-                },
-            ],
-            "label": label,
-            "method": "animate",
-        })
+        steps.append(
+            {
+                "args": [
+                    [str(i)],
+                    {
+                        "frame": {"duration": ANIMATION_SETTINGS["frame_duration"], "redraw": True},
+                        "mode": "immediate",
+                        "transition": {"duration": ANIMATION_SETTINGS["transition_duration"]},
+                    },
+                ],
+                "label": label,
+                "method": "animate",
+            }
+        )
 
     return steps
 

@@ -2,6 +2,9 @@
 
 from typing import Any
 
+import plotly.graph_objects as go
+import plotly.io as pio
+
 # Dark theme color palette - physics-specific
 COLORS = {
     # Base colors
@@ -11,33 +14,35 @@ COLORS = {
     "text_secondary": "#a0a0a0",
     "grid": "#2d3a4f",
     # Primary palette
-    "primary": "#00d4ff",       # Cyan - main elements
-    "secondary": "#ff6b6b",     # Coral - secondary/contrast
-    "tertiary": "#4ecdc4",      # Teal - tertiary elements
-    "quaternary": "#ffe66d",    # Yellow - highlights
+    "primary": "#00d4ff",  # Cyan - main elements
+    "secondary": "#ff6b6b",  # Coral - secondary/contrast
+    "tertiary": "#4ecdc4",  # Teal - tertiary elements
+    "quaternary": "#ffe66d",  # Yellow - highlights
     # Physics-specific colors
-    "spacetime": "#a78bfa",     # Purple - spacetime/relativity
-    "quantum": "#60a5fa",       # Blue - quantum mechanics
-    "gravity": "#f97316",       # Orange - gravity/mass
-    "electric": "#facc15",      # Yellow - electric fields
-    "magnetic": "#22d3ee",      # Cyan - magnetic fields
-    "photon": "#fbbf24",        # Gold - light/photons
-    "particle": "#f472b6",      # Pink - particles
-    "wave": "#34d399",          # Green - waves
+    "spacetime": "#a78bfa",  # Purple - spacetime/relativity
+    "quantum": "#60a5fa",  # Blue - quantum mechanics
+    "gravity": "#f97316",  # Orange - gravity/mass
+    "electric": "#facc15",  # Yellow - electric fields
+    "magnetic": "#22d3ee",  # Cyan - magnetic fields
+    "photon": "#fbbf24",  # Gold - light/photons
+    "particle": "#f472b6",  # Pink - particles
+    "wave": "#34d399",  # Green - waves
     # Accent colors
-    "accent1": "#95e1d3",       # Mint
-    "accent2": "#f38181",       # Salmon
-    "accent3": "#aa96da",       # Lavender
-    "accent4": "#fcbad3",       # Pink
+    "accent1": "#95e1d3",  # Mint
+    "accent2": "#f38181",  # Salmon
+    "accent3": "#aa96da",  # Lavender
+    "accent4": "#fcbad3",  # Pink
 }
 
 # Plotly layout template
 DARK_THEME: dict[str, Any] = {
     "paper_bgcolor": COLORS["paper"],
     "plot_bgcolor": COLORS["background"],
+    "autosize": True,
+    "margin": {"l": 50, "r": 30, "t": 80, "b": 50, "pad": 4},
     "font": {
-        "family": "JetBrains Mono, Fira Code, monospace",
-        "size": 14,
+        "family": "Inter, system-ui, -apple-system, sans-serif",
+        "size": 13,
         "color": COLORS["text"],
     },
     "title": {
@@ -47,36 +52,68 @@ DARK_THEME: dict[str, Any] = {
         },
         "x": 0.5,
         "xanchor": "center",
+        "pad": {"t": 10},
     },
     "xaxis": {
         "gridcolor": COLORS["grid"],
         "gridwidth": 1,
         "zerolinecolor": COLORS["text_secondary"],
-        "zerolinewidth": 2,
-        "tickfont": {"color": COLORS["text_secondary"]},
-        "titlefont": {"color": COLORS["text"]},
+        "zerolinewidth": 1,
+        "tickfont": {"color": COLORS["text_secondary"], "size": 11},
+        "title_font": {"color": COLORS["text"], "size": 13},
         "showgrid": True,
+        "automargin": True,
     },
     "yaxis": {
         "gridcolor": COLORS["grid"],
         "gridwidth": 1,
         "zerolinecolor": COLORS["text_secondary"],
-        "zerolinewidth": 2,
-        "tickfont": {"color": COLORS["text_secondary"]},
-        "titlefont": {"color": COLORS["text"]},
+        "zerolinewidth": 1,
+        "tickfont": {"color": COLORS["text_secondary"], "size": 11},
+        "title_font": {"color": COLORS["text"], "size": 13},
         "showgrid": True,
+        "automargin": True,
     },
     "legend": {
-        "bgcolor": "rgba(22, 33, 62, 0.8)",
+        "bgcolor": "rgba(22, 33, 62, 0.7)",
         "bordercolor": COLORS["grid"],
         "borderwidth": 1,
-        "font": {"color": COLORS["text"]},
+        "font": {"color": COLORS["text"], "size": 11},
+        "orientation": "h",
+        "yanchor": "bottom",
+        "y": -0.2,
+        "xanchor": "center",
+        "x": 0.5,
     },
     "hoverlabel": {
         "bgcolor": COLORS["paper"],
         "bordercolor": COLORS["primary"],
-        "font": {"color": COLORS["text"], "family": "JetBrains Mono, monospace"},
+        "font": {"color": COLORS["text"], "family": "Inter, sans-serif"},
     },
+    "hovermode": "closest",
+}
+
+# 3D Scene settings
+SCENE_3D: dict[str, Any] = {
+    "xaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "yaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "zaxis": {
+        "gridcolor": COLORS["grid"],
+        "zerolinecolor": COLORS["text_secondary"],
+        "showbackground": True,
+        "backgroundcolor": COLORS["background"],
+    },
+    "camera": {"eye": {"x": 1.5, "y": 1.5, "z": 1.5}},
 }
 
 # Animation settings
@@ -109,6 +146,23 @@ def apply_dark_theme(fig: Any) -> Any:
     """
     fig.update_layout(**DARK_THEME)
     return fig
+
+
+def get_plotly_config() -> dict[str, Any]:
+    """Get the recommended Plotly configuration for responsiveness and clean UI."""
+    return {
+        "responsive": True,
+        "displaylogo": False,
+        "modeBarButtonsToRemove": [
+            "select2d",
+            "lasso2d",
+            "autoScale2d",
+            "hoverClosestCartesian",
+            "hoverCompareCartesian",
+        ],
+        "displayModeBar": "hover",
+        "scrollZoom": False,
+    }
 
 
 def get_color_palette() -> list[str]:
@@ -191,5 +245,18 @@ def get_trace_style(trace_type: str = "primary") -> dict[str, Any]:
             "line": {"color": COLORS["electric"], "width": 1},
             "mode": "lines",
         },
+        "translucent_area": {
+            "fillcolor": "rgba(96, 165, 250, 0.2)",  # Transparent blue
+            "line": {"width": 0},
+        },
+        "translucent_field": {
+            "line": {"color": "rgba(34, 211, 238, 0.3)", "width": 1},
+            "mode": "lines",
+        },
     }
     return styles.get(trace_type, styles["primary"])
+
+
+# Set the default template
+pio.templates["physics_dark"] = go.layout.Template(layout=DARK_THEME)
+pio.templates.default = "physics_dark"
