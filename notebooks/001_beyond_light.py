@@ -12,6 +12,7 @@ def _():
     from plotly.subplots import make_subplots
 
     from physics.constants import C
+    from physics.geometry import polar_mesh
     from physics.relativity import lorentz_factor, lorentz_transform
     from physics_explorations.visualization import (
         COLORS,
@@ -36,6 +37,7 @@ def _():
         make_subplots,
         mo,
         np,
+        polar_mesh,
     )
 
 
@@ -1997,7 +1999,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, np, polar_mesh):
     def create_wormhole_animation():
         """Visualize a wormhole connecting distant regions of spacetime."""
         n_frames = 50
@@ -2013,16 +2015,12 @@ def _(go, np):
             # Radial coordinate
             r = np.linspace(0.5, 4, 40)
             theta = np.linspace(0, 2 * np.pi, 30)
-            R, Theta = np.meshgrid(r, theta)
+            X, Y, R, _Theta = polar_mesh(r, theta)
 
             # Embedding function: z = sqrt(r² - b²) for r > b (throat radius b)
             b = 0.5  # Throat radius
             Z_upper = np.sqrt(R**2 - b**2 + 0.01)
             Z_lower = -np.sqrt(R**2 - b**2 + 0.01)
-
-            # Convert to Cartesian for 3D plot
-            X = R * np.cos(Theta)
-            Y = R * np.sin(Theta)
 
             # Traveler position
             if progress < 0.4:

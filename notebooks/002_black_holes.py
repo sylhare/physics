@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
 
     from physics.constants import M_SUN, C, G
+    from physics.geometry import circle, polar_mesh
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -28,9 +29,11 @@ def _():
         M_SUN,
         create_play_pause_buttons,
         get_plotly_config,
+        circle,
         go,
         mo,
         np,
+        polar_mesh,
     )
 
 
@@ -1160,7 +1163,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(circle, get_plotly_config, go, mo, np, polar_mesh):
     # Visualization: Embedding diagram of curved space
     def create_embedding_diagram():
         # Create a 3D embedding of 2D curved space (Flamm's paraboloid)
@@ -1170,14 +1173,10 @@ def _(get_plotly_config, go, mo, np):
         r = np.linspace(r_s * 1.01, 6, 100)
         theta = np.linspace(0, 2 * np.pi, 60)
 
-        R, Theta = np.meshgrid(r, theta)
+        X, Y, R, _Theta = polar_mesh(r, theta)
 
         # Flamm's paraboloid: z = 2*sqrt(r_s*(r - r_s))
         Z = 2 * np.sqrt(r_s * (R - r_s))
-
-        # Convert to Cartesian
-        X = R * np.cos(Theta)
-        Y = R * np.sin(Theta)
 
         # Create the surface
         fig = go.Figure()
@@ -1196,10 +1195,8 @@ def _(get_plotly_config, go, mo, np):
         )
 
         # Event horizon circle
-        theta_eh = np.linspace(0, 2 * np.pi, 100)
-        x_eh = r_s * np.cos(theta_eh)
-        y_eh = r_s * np.sin(theta_eh)
-        z_eh = np.zeros_like(theta_eh)
+        x_eh, y_eh = circle(r_s, 100)
+        z_eh = np.zeros_like(x_eh)
 
         fig.add_trace(
             go.Scatter3d(

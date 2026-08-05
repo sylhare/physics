@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
 
     from physics.constants import C, G
+    from physics.geometry import rotation_matrix
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -30,6 +31,7 @@ def _():
         go,
         mo,
         np,
+        rotation_matrix,
     )
 
 
@@ -964,7 +966,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, mo, np, rotation_matrix):
     # Animation: DC Motor operation
     def create_dc_motor_animation():
         n_frames = 120
@@ -1049,8 +1051,7 @@ def _(get_plotly_config, go, mo, np):
             )
 
             # Rotate
-            cos_a, sin_a = np.cos(angle), np.sin(angle)
-            rotation = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
+            rotation = rotation_matrix(angle)
             corners_rotated = corners_local @ rotation.T
 
             # Current direction depends on commutator position

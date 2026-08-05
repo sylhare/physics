@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
+    from physics.geometry import rotate2d
     from physics_explorations.visualization import (
         COLORS,
         create_play_pause_buttons,
@@ -25,6 +26,7 @@ def _():
         make_subplots,
         mo,
         np,
+        rotate2d,
     )
 
 
@@ -396,7 +398,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, get_plotly_config, go, mo, np, seesaw_pos):
+def _(COLORS, get_plotly_config, go, mo, np, rotate2d, seesaw_pos):
     def seesaw_figure(d2):
         d1 = 2.0  # left block fixed 2 m from pivot
         w1 = w2 = 1.0  # equal-weight blocks
@@ -411,7 +413,7 @@ def _(COLORS, get_plotly_config, go, mo, np, seesaw_pos):
         length = 4.0
 
         def rotate(x):
-            return x * np.cos(phi), x * np.sin(phi)
+            return rotate2d(x, 0.0, phi)
 
         lx, ly = rotate(-d1)
         rx, ry = rotate(d2)

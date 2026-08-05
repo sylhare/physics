@@ -12,6 +12,7 @@ def _():
     from plotly.subplots import make_subplots
 
     from physics.constants import C, G
+    from physics.geometry import rotate2d
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -32,6 +33,7 @@ def _():
         make_subplots,
         mo,
         np,
+        rotate2d,
     )
 
 
@@ -1006,7 +1008,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, mo, np, rotate2d):
     def create_squeezed_vacuum_animation():
         """Visualize squeezed vacuum states and negative energy density."""
         n_frames = 80
@@ -1031,8 +1033,7 @@ def _(get_plotly_config, go, mo, np):
 
             # Rotate ellipse with time
             angle = t / 2
-            x_sq_rot = x_squeeze * np.cos(angle) - y_squeeze * np.sin(angle)
-            y_sq_rot = x_squeeze * np.sin(angle) + y_squeeze * np.cos(angle)
+            x_sq_rot, y_sq_rot = rotate2d(x_squeeze, y_squeeze, angle)
 
             # Energy density over time
             rho = np.cosh(2 * r) - np.sinh(2 * r) * np.cos(2 * time_array)
@@ -1073,8 +1074,7 @@ def _(get_plotly_config, go, mo, np):
             phase_angle = t
             x_point = 0.8 * np.exp(-r) * np.cos(phase_angle)
             y_point = 0.8 * np.exp(r) * np.sin(phase_angle)
-            x_point_rot = x_point * np.cos(angle) - y_point * np.sin(angle)
-            y_point_rot = x_point * np.sin(angle) + y_point * np.cos(angle)
+            x_point_rot, y_point_rot = rotate2d(x_point, y_point, angle)
 
             frame_data.append(
                 go.Scatter(
