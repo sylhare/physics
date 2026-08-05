@@ -9,6 +9,7 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 
     from physics_explorations.visualization import (
         COLORS,
@@ -21,6 +22,7 @@ def _():
         create_play_pause_buttons,
         get_plotly_config,
         go,
+        make_subplots,
         mo,
         np,
     )
@@ -61,9 +63,14 @@ def _(mo):
         5. **Friction** — the sideways force that lets us walk, and stops boxes from sliding
         6. **Stress and strain** — what a force feels like *inside* the material
         7. **Everyday materials** — steel, aluminium, concrete, wood, rubber, compared honestly
-        8. **Beams** — why *shape* beats *material*, and why a plank is stiff on its edge
-        9. **Stress concentration** — where a shape secretly breaks first
-        10. **Buckling** — why a long thin thing folds instead of crushing
+        8. **Heat and thermal stress** — why a trapped material pushes back when it's warmed
+        9. **Inside a beam** — reading the shear and bending along its length
+        10. **Beams** — why *shape* beats *material*, and why a plank is stiff on its edge
+        11. **Torsion** — twisting instead of bending, and why shafts are hollow
+        12. **Stress concentration** — where a shape secretly breaks first
+        13. **Fatigue** — how repeated loads snap things far below their strength
+        14. **Buckling** — why a long thin thing folds instead of crushing
+        15. **Factor of safety** — how much margin to leave, and why
 
         Nothing here needs more than school algebra. Every number is a real, measured one, and
         every claim links to where you can check it. Let's go and look.
@@ -517,7 +524,7 @@ def _(mo):
         and wherever a constraint forbids a motion, it does so by supplying a **reaction force**
         (or a reaction moment) exactly big enough to make the equilibrium equations balance.
 
-        Engineers-in-spirit sort supports by *what they can push with*:
+        It helps to sort supports by *what they can push back with*:
 
         - A **roller** (or a smooth floor) can only push **perpendicular** to the surface. It
           supplies one reaction — the normal force. Think of a can rolling on a table: the table
@@ -1133,7 +1140,327 @@ def _(mo):
         r"""
         ---
 
-        ## 8. Beams: why *shape* beats *material*
+        ## 8. Heat and thermal stress: the force a trapped material makes
+
+        There's one more property of a material that quietly causes an enormous amount of trouble:
+        it changes size with temperature. Warm almost anything and it swells; cool it and it
+        shrinks. The amount is set by the **coefficient of thermal expansion** $\alpha$ — the
+        fractional stretch per degree:
+
+        $$\frac{\Delta L}{L} = \alpha\,\Delta T$$
+
+        The numbers are tiny (a few parts in a hundred-thousand per degree) but the *material
+        matters*: aluminium expands about **twice as much as steel** for the same warming, and a
+        special alloy called Invar barely expands at all. If the object is free to move, this is
+        harmless — it just quietly gets a little bigger.
+
+        The trouble starts when the material is **not free** — when it's clamped between two things
+        that won't budge (a callback to the constraints of §4). Now it *wants* to expand but can't,
+        and the constraint pushes back exactly hard enough to squash it back to size. That squeezing
+        builds a real internal stress, and here's the startling part — it doesn't depend on the
+        length at all:
+
+        $$\sigma_{\text{thermal}} = E\,\alpha\,\Delta T$$
+
+        A steel bar warmed by just $50°C$ and prevented from expanding develops about **120 MPa** of
+        stress — roughly *half its yield strength* — from a temperature change you'd barely feel.
+        This is why bridges sit on sliding **expansion joints** and why railway rails can buckle
+        sideways in a heatwave. (One subtlety worth its own note: *heating* a trapped bar **squeezes**
+        it — the stress is compression. To crack a brittle thing like glass you need *tension*, which
+        is why it's a sudden *temperature difference* that does the damage: pour boiling water into a
+        cold thick glass and the inner face expands while the cold outer face holds it back, putting
+        that outer skin in tension until it splits.) *Pick a metal, turn up the temperature, and watch
+        the compressive stress climb toward the yield point when the bar is held fast.*
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    thermal_material = mo.ui.dropdown(
+        options={
+            "Aluminium  (α ≈ 23 ×10⁻⁶/°C)": "Aluminium",
+            "Steel  (α ≈ 12 ×10⁻⁶/°C)": "Steel",
+        },
+        value="Steel  (α ≈ 12 ×10⁻⁶/°C)",
+        label="Material",
+    )
+    delta_t = mo.ui.slider(
+        start=0,
+        stop=120,
+        step=5,
+        value=50,
+        label="Temperature rise ΔT (°C)",
+        show_value=True,
+    )
+    mo.vstack(
+        [
+            mo.hstack([mo.md("**Material:**"), thermal_material], justify="start", gap=1),
+            mo.hstack([mo.md("**Warm it up:**"), delta_t], justify="start", gap=1),
+        ]
+    )
+    return delta_t, thermal_material
+
+
+@app.cell
+def _(COLORS, delta_t, get_plotly_config, go, mo, thermal_material):
+    def thermal_figure(name, dt):
+        # (alpha ×10⁻⁶/°C, E in GPa, danger stress in MPa, what "danger" means)
+        props = {
+            "Aluminium": (23.0, 69.0, 275.0, "yield"),
+            "Steel": (12.0, 200.0, 250.0, "yield"),
+        }
+        alpha, e_gpa, danger, danger_label = props[name]
+        free_strain_pct = alpha * 1e-6 * dt * 100
+        stress = e_gpa * alpha * dt / 1000.0  # MPa, = E·α·ΔT
+        over = stress >= danger
+        bar_color = COLORS["secondary"] if over else COLORS["wave"]
+
+        fig = go.Figure()
+
+        # Two rigid walls
+        for wx in (0.0, 6.0):
+            fig.add_trace(
+                go.Scatter(
+                    x=[wx, wx],
+                    y=[-1, 1],
+                    mode="lines",
+                    line={"color": COLORS["text_secondary"], "width": 10},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+        # The clamped bar
+        fig.add_trace(
+            go.Scatter(
+                x=[0.1, 5.9, 5.9, 0.1, 0.1],
+                y=[-0.4, -0.4, 0.4, 0.4, -0.4],
+                mode="lines",
+                fill="toself",
+                fillcolor=bar_color,
+                line={"color": bar_color, "width": 2},
+                name=name,
+                hoverinfo="skip",
+            )
+        )
+
+        verdict = (
+            f"σ ≥ {danger_label} strength ({danger:.0f} MPa) → it would {danger_label}!"
+            if over
+            else f"still safe (below {danger_label} ≈ {danger:.0f} MPa)"
+        )
+        fig.update_layout(
+            title={
+                "text": f"<b>A Bar Clamped Between Two Walls, Warmed by {dt}°C</b><br>"
+                f"<sub>if free it would grow {free_strain_pct:.3f}%  ·  held fast it builds "
+                f"σ = E·α·ΔT = {stress:.0f} MPa</sub>"
+            },
+            xaxis={
+                "range": [-0.6, 6.6],
+                "showgrid": False,
+                "zeroline": False,
+                "showticklabels": False,
+            },
+            yaxis={
+                "range": [-1.6, 1.6],
+                "showgrid": False,
+                "zeroline": False,
+                "showticklabels": False,
+                "scaleanchor": "x",
+            },
+            annotations=[
+                {
+                    "x": 3,
+                    "y": 1.25,
+                    "text": f"<b>{verdict}</b>",
+                    "showarrow": False,
+                    "font": {"color": bar_color, "size": 14},
+                },
+            ],
+            showlegend=False,
+            height=420,
+        )
+        return fig
+
+    thermal_plot = mo.ui.plotly(
+        thermal_figure(thermal_material.value, delta_t.value), config=get_plotly_config()
+    )
+    mo.output.replace(thermal_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 9. Inside a beam: shear and bending, section by section
+
+        In §4 we found the forces the supports push back with. But those are at the *ends* — to know
+        where a beam is actually working hardest, and where it will crack, we have to walk along its
+        length and ask, at each cross-section: *what is the material here having to carry?*
+
+        The trick is to imagine slicing the beam at some point and looking at one of the two pieces.
+        That piece must still be in equilibrium all by itself, so whatever the missing half used to
+        provide, the material at the cut must now supply. It comes in two parts:
+
+        - the **shear force** $V$ — the up-and-down force transmitted across the cut (what would make
+          one half slide past the other), and
+        - the **bending moment** $M$ — the turning effort carried through the cut (what actually
+          bends the beam).
+
+        Both change as you move along the beam, and we draw them as two curves beneath the beam: the
+        **shear diagram** and the **bending-moment diagram**. Together they are a kind of X-ray of
+        the beam. The bending moment is the one that matters most, because — as we'll see in §10 — the
+        bending stress is $\sigma = M y / I$, so **the cross-section carrying the largest bending
+        moment is the one most likely to fail.** For a simply supported beam with a single load at
+        position $a$, the moment peaks *right under the load* at
+
+        $$M_{\max} = \frac{P\,a\,(L-a)}{L},$$
+
+        which is largest when the load sits at mid-span. *Slide the load and watch both diagrams
+        breathe — notice the sharp kink in the moment right where the load sits.*
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    sfbm_pos = mo.ui.slider(
+        start=0.5,
+        stop=5.5,
+        step=0.1,
+        value=3.0,
+        label="Load position a (m from left support)",
+        show_value=True,
+    )
+    mo.hstack([mo.md("**Move the load:**"), sfbm_pos], justify="start", gap=1)
+    return (sfbm_pos,)
+
+
+@app.cell
+def _(COLORS, get_plotly_config, make_subplots, mo, sfbm_pos):
+    def shear_moment_figure(a):
+        span = 6.0
+        load = 10.0  # kN
+        r_left = load * (span - a) / span
+        m_max = load * a * (span - a) / span
+
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            shared_xaxes=True,
+            row_heights=[0.36, 0.32, 0.32],
+            vertical_spacing=0.07,
+            subplot_titles=(
+                "the beam and its load",
+                "shear force  V (kN)",
+                "bending moment  M (kN·m)",
+            ),
+        )
+
+        # Row 1: beam + supports + load marker
+        fig.add_scatter(
+            x=[0, span],
+            y=[0, 0],
+            mode="lines",
+            line={"color": COLORS["primary"], "width": 8},
+            showlegend=False,
+            hoverinfo="skip",
+            row=1,
+            col=1,
+        )
+        for sx in (0.0, span):
+            fig.add_scatter(
+                x=[sx - 0.25, sx + 0.25, sx, sx - 0.25],
+                y=[-0.6, -0.6, 0, -0.6],
+                mode="lines",
+                fill="toself",
+                fillcolor="rgba(160,160,160,0.5)",
+                line={"color": COLORS["text_secondary"], "width": 1},
+                showlegend=False,
+                hoverinfo="skip",
+                row=1,
+                col=1,
+            )
+        fig.add_scatter(
+            x=[a],
+            y=[0.2],
+            mode="markers",
+            marker={"size": 16, "color": COLORS["gravity"], "symbol": "triangle-down"},
+            showlegend=False,
+            hovertemplate=f"load {load:.0f} kN at a={a:.1f} m<extra></extra>",
+            row=1,
+            col=1,
+        )
+
+        # Row 2: shear force (step)
+        fig.add_scatter(
+            x=[0, a, a, span],
+            y=[r_left, r_left, r_left - load, r_left - load],
+            mode="lines",
+            fill="tozeroy",
+            fillcolor="rgba(78, 205, 196, 0.3)",
+            line={"color": COLORS["tertiary"], "width": 3},
+            showlegend=False,
+            hovertemplate="V = %{y:.1f} kN<extra></extra>",
+            row=2,
+            col=1,
+        )
+
+        # Row 3: bending moment (triangle, peak under the load)
+        fig.add_scatter(
+            x=[0, a, span],
+            y=[0, m_max, 0],
+            mode="lines",
+            fill="tozeroy",
+            fillcolor="rgba(255, 107, 107, 0.3)",
+            line={"color": COLORS["secondary"], "width": 3},
+            showlegend=False,
+            hovertemplate="M = %{y:.1f} kN·m<extra></extra>",
+            row=3,
+            col=1,
+        )
+        fig.add_scatter(
+            x=[a],
+            y=[m_max],
+            mode="markers+text",
+            marker={"size": 10, "color": COLORS["secondary"]},
+            text=[f" M_max = {m_max:.1f}"],
+            textposition="top center",
+            textfont={"color": COLORS["secondary"], "size": 12},
+            showlegend=False,
+            hoverinfo="skip",
+            row=3,
+            col=1,
+        )
+
+        fig.update_xaxes(
+            range=[-0.5, span + 0.5], row=3, col=1, title_text="position along beam (m)"
+        )
+        fig.update_yaxes(showticklabels=False, row=1, col=1, range=[-0.9, 0.7])
+        fig.update_layout(
+            title={"text": "<b>Shear & Bending-Moment Diagrams</b>"},
+            height=640,
+            showlegend=False,
+        )
+        return fig
+
+    sfbm_plot = mo.ui.plotly(shear_moment_figure(sfbm_pos.value), config=get_plotly_config())
+    mo.output.replace(sfbm_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 10. Beams: why *shape* beats *material*
 
         Here is the most useful single idea for anyone looking at a structure. When a beam carries a
         load across a gap, it **bends**, and bending does something clever: the top surface gets
@@ -1444,7 +1771,153 @@ def _(mo):
         r"""
         ---
 
-        ## 9. Stress concentration: where a shape secretly breaks first
+        ## 11. Torsion: twisting instead of bending
+
+        Bending isn't the only way to load a bar. You can also **twist** it — that's what happens to
+        the shaft turning a wheel, the spindle behind a doorknob, the bit of a screwdriver, or a
+        wrench handle. Twisting is called **torsion**, and it rhymes beautifully with everything we
+        just learned about beams.
+
+        When you twist a round shaft, the outer skin is sheared the most and the material right on
+        the central axis isn't worked at all — the axis is the torsional twin of a beam's *neutral
+        axis*. So, exactly as with bending, what resists the twist is how far the material sits from
+        the centre, captured this time by the **polar second moment of area** $J$. The angle the
+        shaft twists through is
+
+        $$\theta = \frac{T\,L}{G\,J},$$
+
+        where $T$ is the applied torque and $G$ is the **shear modulus** — the material's stiffness
+        against shearing, a cousin of Young's modulus (steel $\approx 79$ GPa, aluminium
+        $\approx 26$ GPa, each roughly $0.4\times$ its $E$). For a solid round shaft
+        $J = \pi d^4/32$.
+
+        And now the same punchline as the I-beam, because it's the same physics: since the core does
+        almost nothing, you can **hollow it out** and lose almost no stiffness while shedding a lot
+        of weight. A **tube** of the same weight as a solid rod is far stiffer in twist — which is
+        exactly why bicycle frames, scaffolding poles, and drive shafts are hollow tubes, not solid
+        bars. The figure compares a solid shaft with a tube of the *same cross-sectional area*.
+        """
+    )
+    return
+
+
+@app.cell
+def _(COLORS, get_plotly_config, go, mo, np):
+    def torsion_figure():
+        theta = np.linspace(0, 2 * np.pi, 100)
+
+        # Solid shaft: radius r, area = π r²  (take r = 1)
+        r = 1.0
+        area = np.pi * r**2
+        j_solid = np.pi * r**4 / 2
+
+        # Tube of the SAME area: choose inner radius, solve outer from equal area
+        r_in = 1.0
+        r_out = (r_in**2 + area / np.pi) ** 0.5  # π(r_out² − r_in²) = area
+        j_tube = np.pi * (r_out**4 - r_in**4) / 2
+
+        fig = go.Figure()
+
+        # --- Solid shaft (left), centred at x = -2.2 ---
+        cxs = -2.2
+        fig.add_trace(
+            go.Scatter(
+                x=cxs + r * np.cos(theta),
+                y=r * np.sin(theta),
+                mode="lines",
+                fill="toself",
+                fillcolor="rgba(160,160,160,0.5)",
+                line={"color": COLORS["text_secondary"], "width": 2},
+                name="Solid shaft",
+                hoverinfo="skip",
+            )
+        )
+
+        # --- Tube (right), centred at x = +2.2: outer disk with a punched hole ---
+        cxt = 2.2
+        fig.add_trace(
+            go.Scatter(
+                x=cxt + r_out * np.cos(theta),
+                y=r_out * np.sin(theta),
+                mode="lines",
+                fill="toself",
+                fillcolor="rgba(0, 212, 255, 0.35)",
+                line={"color": COLORS["primary"], "width": 2},
+                name="Tube",
+                hoverinfo="skip",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=cxt + r_in * np.cos(theta),
+                y=r_in * np.sin(theta),
+                mode="lines",
+                fill="toself",
+                fillcolor=COLORS["background"],
+                line={"color": COLORS["primary"], "width": 2},
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+
+        fig.update_layout(
+            title={
+                "text": "<b>Same Material, Solid vs. Hollow — in Twist</b><br>"
+                "<sub>equal cross-sectional area; the tube's material sits farther from the axis</sub>"
+            },
+            xaxis={
+                "range": [-4, 4.5],
+                "showgrid": False,
+                "zeroline": False,
+                "showticklabels": False,
+            },
+            yaxis={
+                "range": [-2, 2.4],
+                "showgrid": False,
+                "zeroline": False,
+                "showticklabels": False,
+                "scaleanchor": "x",
+            },
+            annotations=[
+                {
+                    "x": cxs,
+                    "y": -1.7,
+                    "text": f"solid<br>J ≈ {j_solid:.1f}",
+                    "showarrow": False,
+                    "font": {"color": COLORS["text_secondary"], "size": 13},
+                },
+                {
+                    "x": cxt,
+                    "y": -1.7,
+                    "text": f"tube (same area)<br>J ≈ {j_tube:.1f}",
+                    "showarrow": False,
+                    "font": {"color": COLORS["primary"], "size": 13},
+                },
+                {
+                    "x": 0,
+                    "y": 2.05,
+                    "text": f"the tube is {j_tube / j_solid:.1f}× stiffer in twist, for the same metal",
+                    "showarrow": False,
+                    "font": {"color": COLORS["text"], "size": 13},
+                },
+            ],
+            showlegend=False,
+            height=460,
+        )
+        return fig
+
+    torsion_plot = mo.ui.plotly(torsion_figure(), config=get_plotly_config())
+    mo.output.replace(torsion_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 12. Stress concentration: where a shape secretly breaks first
 
         A structure rarely fails in the calm, average place. It fails at a **corner, a hole, a
         notch, a scratch** — anywhere the smooth flow of stress is forced to swerve. Picture the
@@ -1559,7 +2032,126 @@ def _(mo):
         r"""
         ---
 
-        ## 10. Buckling: why long thin things fold instead of crush
+        ## 13. Fatigue: how repeated loads snap things far below their strength
+
+        Section 12 found the *hotspots* — the corners, holes and scratches where stress spikes. Now
+        add the one ingredient that turns a hotspot into a disaster: **repetition**. Bend a paperclip
+        once and it's fine; bend it back and forth a dozen times and it snaps. Nothing about the
+        single bend was dangerous — it was the *cycling* that did it. This is **fatigue**, and it is
+        behind a huge share of all real-world mechanical failures precisely because it strikes at
+        stresses *well below* the one a material could survive if you loaded it only once.
+
+        What happens physically: at a stress raiser, a microscopic crack forms, then creeps forward a
+        tiny bit on every cycle. For a long time you'd never know — until the crack has eaten enough
+        of the cross-section that the remainder can't carry even the ordinary load, and the part
+        breaks suddenly, with no bending or warning. The map of this behaviour is the **S–N curve**:
+        the stress amplitude $S$ against the number of cycles $N$ a specimen survives. It was first
+        charted by August Wöhler in the 1860s, trying to understand why railway axles kept breaking.
+
+        The plot below shows the single most important difference between two everyday metals:
+
+        - **Steel has an *endurance limit*** — a stress (very roughly *half* its ultimate strength)
+          **below which it survives essentially forever.** Keep the cycling gentler than that line
+          and a steel part has, for practical purposes, infinite life.
+        - **Aluminium has no such floor.** Its curve keeps sliding downward — cycle it long enough,
+          however gently, and it *will* eventually fail. So aluminium parts must be designed for a
+          finite life and retired on schedule, never assumed to last forever.
+
+        (These are polished-laboratory numbers. Real notches, welds and rough surfaces — the very
+        stress raisers of §12 — pull the usable limit *lower*, which is why fatigue and stress
+        concentration are two halves of the same safety story.)
+        """
+    )
+    return
+
+
+@app.cell
+def _(COLORS, get_plotly_config, go, mo, np):
+    def fatigue_figure():
+        log_n = np.linspace(3, 9, 200)  # 10³ … 10⁹ cycles
+
+        # Steel: slopes down, then flattens at an endurance limit (~half UTS)
+        steel_endurance = 225.0
+        steel = np.where(
+            log_n < 6,
+            450 - (450 - steel_endurance) * (log_n - 3) / 3,
+            steel_endurance,
+        )
+        # Aluminium: keeps declining, no endurance limit
+        aluminium = 300 - 35 * (log_n - 3)
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=10**log_n,
+                y=steel,
+                mode="lines",
+                line={"color": COLORS["primary"], "width": 4},
+                name="Steel — has an endurance limit",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=10**log_n,
+                y=aluminium,
+                mode="lines",
+                line={"color": COLORS["tertiary"], "width": 4},
+                name="Aluminium — no endurance limit",
+            )
+        )
+        # Endurance-limit guide line for steel
+        fig.add_trace(
+            go.Scatter(
+                x=[10**3, 10**9],
+                y=[steel_endurance, steel_endurance],
+                mode="lines",
+                line={"color": COLORS["primary"], "width": 1, "dash": "dot"},
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+
+        fig.update_layout(
+            title={
+                "text": "<b>The S–N Curve: Strength Fades with Repetition</b><br><sub>lower stress → more cycles survived; steel finds a floor, aluminium never does</sub>"
+            },
+            xaxis={"title": "cycles to failure  N  (log scale)", "type": "log"},
+            yaxis={"title": "repeated stress amplitude  S (MPa)", "range": [0, 470]},
+            annotations=[
+                {
+                    "x": 7,
+                    "y": 250,
+                    "text": "steel's endurance limit — safe below here forever",
+                    "showarrow": False,
+                    "font": {"color": COLORS["primary"], "size": 11},
+                    "xref": "x",
+                    "xanchor": "center",
+                },
+                {
+                    "x": 8.3,
+                    "y": 100,
+                    "text": "aluminium keeps falling",
+                    "showarrow": False,
+                    "font": {"color": COLORS["tertiary"], "size": 11},
+                    "xref": "x",
+                },
+            ],
+            height=520,
+        )
+        return fig
+
+    fatigue_plot = mo.ui.plotly(fatigue_figure(), config=get_plotly_config())
+    mo.output.replace(fatigue_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 14. Buckling: why long thin things fold instead of crushing
 
         There's one last way to fail that has nothing to do with running out of strength. Take a
         strand of dry spaghetti, or a plastic ruler, and push on its ends. It doesn't crush — long
@@ -1700,12 +2292,170 @@ def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np, column_l
 
 @app.cell
 def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 15. Factor of safety: how much margin to leave
+
+        We can now find the stress inside a part (§6, §9–§11) and the stress a material can take
+        (§7, §13). The last idea is the humblest and quietly the most important of all: **never run
+        a part right up to its limit.**
+
+        Why not? Because every number you used is a little bit wrong in the dangerous direction. The
+        real load is heavier than you guessed — someone stands on the shelf, the wind gusts, a
+        pothole doubles the force for an instant. The real material is a little weaker than the
+        handbook — a flaw, a bad batch, a cold day. So you take the strength the material can bear,
+        divide it by a **factor of safety**, and only ever allow the part to be stressed up to that
+        lower "allowable" level:
+
+        $$\text{factor of safety} = \frac{\text{strength the material can take}}{\text{stress it actually sees}}$$
+
+        A factor of $1$ means it fails exactly at the expected load — no margin at all, one surprise
+        from disaster. Ordinary, well-understood, non-critical things live around **1.5–2**. When
+        the loads are uncertain, the material is brittle (it cracks with no warning — §7), the part
+        will be cycled for years (§13), or a failure would hurt someone, the margin climbs to **3, 4,
+        or more.** Too small and it breaks; too large and it's needlessly heavy, bulky and expensive.
+        Choosing the number is a genuine act of judgement, and it draws on *every* idea in this
+        notebook. *Push the load up and watch the margin shrink from comfortable, to nervous, to
+        gone.*
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    applied_stress = mo.ui.slider(
+        start=20,
+        stop=280,
+        step=10,
+        value=90,
+        label="Working stress the part actually sees (MPa)",
+        show_value=True,
+    )
+    mo.hstack([mo.md("**Load it harder:**"), applied_stress], justify="start", gap=1)
+    return (applied_stress,)
+
+
+@app.cell
+def _(COLORS, applied_stress, get_plotly_config, go, mo):
+    def safety_figure(working):
+        yield_stress = 250.0  # mild steel
+        ultimate = 400.0
+        fos = yield_stress / working
+
+        if fos >= 2:
+            color, mood = COLORS["wave"], "comfortable margin"
+        elif fos >= 1.5:
+            color, mood = COLORS["quaternary"], "getting tight"
+        elif fos > 1:
+            color, mood = COLORS["gravity"], "dangerously little margin"
+        else:
+            color, mood = COLORS["secondary"], "past yield — it fails!"
+
+        fig = go.Figure()
+
+        # Coloured strength zones along a horizontal stress axis
+        fig.add_trace(
+            go.Scatter(
+                x=[0, yield_stress, yield_stress, 0, 0],
+                y=[0, 0, 1, 1, 0],
+                mode="lines",
+                fill="toself",
+                fillcolor="rgba(52, 211, 153, 0.18)",
+                line={"width": 0},
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[yield_stress, ultimate, ultimate, yield_stress, yield_stress],
+                y=[0, 0, 1, 1, 0],
+                mode="lines",
+                fill="toself",
+                fillcolor="rgba(249, 115, 22, 0.20)",
+                line={"width": 0},
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        # Yield & ultimate markers
+        for xval, lbl, col in [
+            (yield_stress, f"yield {yield_stress:.0f}", COLORS["quaternary"]),
+            (ultimate, f"ultimate {ultimate:.0f}", COLORS["secondary"]),
+        ]:
+            fig.add_trace(
+                go.Scatter(
+                    x=[xval, xval],
+                    y=[0, 1.15],
+                    mode="lines",
+                    line={"color": col, "width": 2, "dash": "dash"},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+            fig.add_annotation(
+                x=xval, y=1.28, text=lbl, showarrow=False, font={"color": col, "size": 12}
+            )
+
+        # The working-stress marker
+        fig.add_trace(
+            go.Scatter(
+                x=[working],
+                y=[0.5],
+                mode="markers",
+                marker={"size": 26, "color": color, "symbol": "triangle-up"},
+                name="working stress",
+                hoverinfo="skip",
+            )
+        )
+
+        fig.update_layout(
+            title={
+                "text": f"<b>Factor of Safety = strength ÷ working stress = {fos:.2f}</b><br>"
+                f"<sub>working stress {working:.0f} MPa vs. yield {yield_stress:.0f} MPa  →  {mood}</sub>"
+            },
+            xaxis={
+                "title": "stress (MPa)",
+                "range": [0, 440],
+                "showgrid": False,
+                "zeroline": False,
+            },
+            yaxis={
+                "range": [0, 1.5],
+                "showgrid": False,
+                "zeroline": False,
+                "showticklabels": False,
+            },
+            annotations=[
+                {
+                    "x": working,
+                    "y": 0.15,
+                    "text": f"<b>FoS = {fos:.2f}</b>",
+                    "showarrow": False,
+                    "font": {"color": color, "size": 15},
+                },
+            ],
+            showlegend=False,
+            height=380,
+        )
+        return fig
+
+    safety_plot = mo.ui.plotly(safety_figure(applied_stress.value), config=get_plotly_config())
+    mo.output.replace(safety_plot)
+    return
+
+
+@app.cell
+def _(mo):
     mo.accordion(
         {
             "A checklist: what to look at in any structure": mo.md(
                 r"""
         When you look at a shelf, a bracket, a bench, or a bridge, run down this list — it's just
-        the ten ideas above, in order:
+        the fifteen ideas above, in order:
 
         1. **Draw the forces.** What's pushing or pulling on the piece? Gravity, applied loads,
            the pushes from whatever it touches. Draw every arrow (§1).
@@ -1721,12 +2471,22 @@ def _(mo):
            stress and yield first (§6).
         7. **Know the material.** Stiff or floppy ($E$), strong or weak, ductile (bends first, like
            steel) or brittle (cracks with no warning, like glass or concrete in tension) (§7).
-        8. **Look at the cross-section.** Depth matters *cubed*. Is the material placed far from the
-           neutral axis, where it does the work? (§8).
-        9. **Hunt the stress raisers.** Holes, sharp corners, notches, scratches — the real cracks
-           start there, at up to 3× the average stress or more (§9).
-        10. **Watch for slender parts.** Anything long and thin under a push can buckle far below
-            its crushing strength (§10).
+        8. **Ask about temperature.** Will it be warmed or cooled while held fast? A trapped material
+           builds real stress, $\sigma = E\alpha\Delta T$, from a change you'd barely feel (§8).
+        9. **Walk along the beam.** Where is the bending moment largest? That cross-section — often
+           mid-span or right under a load — is the one most likely to fail (§9).
+        10. **Look at the cross-section.** Depth matters *cubed*. Is the material placed far from the
+            neutral axis, where it does the work? (§10).
+        11. **Check for twist.** Is anything being turned rather than bent? Shafts carry torque, and
+            a hollow tube does it far more efficiently than a solid rod (§11).
+        12. **Hunt the stress raisers.** Holes, sharp corners, notches, scratches — the real cracks
+            start there, at up to 3× the average stress or more (§12).
+        13. **Count the cycles.** Will the load repeat? If so, fatigue can snap it far below its
+            one-time strength — and aluminium never gets a safe floor the way steel does (§13).
+        14. **Watch for slender parts.** Anything long and thin under a push can buckle far below
+            its crushing strength (§14).
+        15. **Leave a margin.** Never run to the limit — divide the strength by a factor of safety,
+            larger when the loads, the material, or the stakes are uncertain (§15).
 
         None of this needs heavy mathematics. It needs the *habit of looking* — and now you have it.
         """
@@ -1754,7 +2514,9 @@ def _(mo):
           (how real materials respond in every direction)
         - **Material stiffness data — [The Engineering ToolBox: Young's Modulus](https://www.engineeringtoolbox.com/young-modulus-d_417.html)**
         - **Friction data — [The Engineering ToolBox: Friction Coefficients](https://www.engineeringtoolbox.com/friction-coefficients-d_778.html)**
+        - **Thermal expansion data — [The Engineering ToolBox: Coefficients of Linear Thermal Expansion](https://www.engineeringtoolbox.com/linear-expansion-coefficients-d_95.html)**
         - **Stress concentration — [Fracture Mechanics: Stress Concentrations at Holes](https://www.fracturemechanics.org/hole.html)**
+        - **Fatigue and the endurance limit — [Wikipedia: Fatigue limit](https://en.wikipedia.org/wiki/Fatigue_limit)**
 
         And if you want the friendliest book ever written on why structures hold together, look up
         J. E. Gordon's *Structures: Or Why Things Don't Fall Down* — same spirit as this notebook,

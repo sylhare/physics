@@ -232,9 +232,14 @@ uv run marimo edit notebooks/012_forces_and_materials.py  # Edit mode
 - Friction: static vs kinetic, the slope-slip angle, real μ values (interactive)
 - Stress, strain, and Young's modulus — the stress–strain curve
 - Everyday materials compared: steel, aluminium, wood, concrete, rubber (stiffness vs weight)
+- Heat and thermal stress: σ = E·α·ΔT in a clamped bar (interactive)
+- Inside a beam: shear-force and bending-moment diagrams (interactive)
 - Beams: why depth matters cubed, and the trick behind the I-beam (interactive)
+- Torsion: twisting, and why shafts are hollow tubes
 - Stress concentration around a hole — Kirsch's factor of three
+- Fatigue: the S–N curve and steel's endurance limit vs aluminium
 - Buckling: why long thin columns fold (animated)
+- Factor of safety: how much margin to leave (interactive)
 
 ## Features
 
