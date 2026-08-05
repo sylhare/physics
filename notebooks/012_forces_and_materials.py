@@ -40,6 +40,14 @@ def _(mo):
         quietly sags to the floor — built in the spirit of the
         [Feynman Lectures on Physics](https://www.feynmanlectures.caltech.edu/).*
 
+        **Drawn from these Feynman lectures:**
+        [Vol I, Ch 12 — The Characteristics of Force](https://www.feynmanlectures.caltech.edu/I_12.html)
+        (force & friction) ·
+        [Vol II, Ch 38 — Elasticity](https://www.feynmanlectures.caltech.edu/II_38.html) ·
+        [Vol II, Ch 39 — Elastic Materials](https://www.feynmanlectures.caltech.edu/II_39.html)
+        (stress, strain & Young's modulus). This one weaves several chapters together rather
+        than following a single lecture, so it lives here under *Explorations*.
+
         ---
 
         ## Why should you care how a plank bends?
@@ -255,8 +263,8 @@ def _(mo):
 @app.cell
 def _(mo):
     rope_angle = mo.ui.slider(
-        start=5,
-        stop=85,
+        start=8,
+        stop=65,
         step=1,
         value=45,
         label="Rope angle θ (degrees from horizontal)",
@@ -267,76 +275,100 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, get_plotly_config, go, mo, np, rope_angle):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np, rope_angle):
     def two_rope_figure(theta_deg):
-        theta = np.radians(theta_deg)
         weight = 100.0  # newtons
-        tension = weight / (2 * np.sin(theta))
+        span = 2.0  # knot at origin, ropes go up-left and up-right to the anchors
 
-        # Geometry: knot at origin, ropes go up-left and up-right to anchors
-        span = 2.0
-        anchor_y = span * np.tan(theta)
-        left_anchor = (-span, anchor_y)
-        right_anchor = (span, anchor_y)
-
-        fig = go.Figure()
-
-        # Ceiling
-        fig.add_trace(
-            go.Scatter(
+        def rope_traces(td):
+            """Ceiling + the two ropes at rope angle td (degrees)."""
+            anchor_y = span * np.tan(np.radians(td))
+            ceiling = go.Scatter(
                 x=[-span - 0.5, span + 0.5],
                 y=[anchor_y, anchor_y],
                 mode="lines",
                 line={"color": COLORS["text_secondary"], "width": 4},
                 name="Ceiling",
+                showlegend=False,
                 hoverinfo="skip",
             )
-        )
-        # Ropes
-        for anchor in (left_anchor, right_anchor):
-            fig.add_trace(
-                go.Scatter(
-                    x=[0, anchor[0]],
-                    y=[0, anchor[1]],
-                    mode="lines",
-                    line={"color": COLORS["primary"], "width": 4},
-                    showlegend=False,
-                    hoverinfo="skip",
-                )
+            left = go.Scatter(
+                x=[0, -span],
+                y=[0, anchor_y],
+                mode="lines",
+                line={"color": COLORS["primary"], "width": 4},
+                showlegend=False,
+                hoverinfo="skip",
             )
-        # The weight
-        fig.add_trace(
-            go.Scatter(
-                x=[0],
-                y=[-0.35],
-                mode="markers",
-                marker={"size": 34, "color": COLORS["gravity"], "symbol": "square"},
-                name="Weight W = 100 N",
+            right = go.Scatter(
+                x=[0, span],
+                y=[0, anchor_y],
+                mode="lines",
+                line={"color": COLORS["primary"], "width": 4},
+                showlegend=False,
+                hoverinfo="skip",
             )
-        )
+            return [ceiling, left, right]
 
-        color = COLORS["wave"] if tension <= weight else COLORS["secondary"]
+        def layout_for(td):
+            tension = weight / (2 * np.sin(np.radians(td)))
+            color = COLORS["wave"] if tension <= weight else COLORS["secondary"]
+            return {
+                "title": {
+                    "text": f"<b>Two Ropes Holding One Weight</b><br>"
+                    f"<sub>θ = {td:.0f}°  →  each rope tension T = {tension:.0f} N "
+                    f"({tension / weight:.1f}× the whole weight)</sub>"
+                },
+                "annotations": [
+                    {
+                        "x": 0,
+                        "y": 4.6,
+                        "text": f"<b>T = {tension:.0f} N per rope</b>",
+                        "showarrow": False,
+                        "font": {"color": color, "size": 15},
+                    }
+                ],
+            }
+
+        weight_marker = go.Scatter(
+            x=[0],
+            y=[-0.35],
+            mode="markers",
+            marker={"size": 34, "color": COLORS["gravity"], "symbol": "square"},
+            name="Weight W = 100 N",
+        )
+        fig = go.Figure(data=[*rope_traces(theta_deg), weight_marker])
+
+        # Animate flattening the ropes: as θ drops the ropes go horizontal and the
+        # tension in each one runs away far past the weight it is holding.
+        frames = [
+            go.Frame(data=rope_traces(td), traces=[0, 1, 2], layout=layout_for(td), name=str(i))
+            for i, td in enumerate(np.linspace(65, 8, 30))
+        ]
+        fig.frames = frames
+
+        base_layout = layout_for(theta_deg)
         fig.update_layout(
-            title={
-                "text": f"<b>Two Ropes Holding One Weight</b><br>"
-                f"<sub>θ = {theta_deg}°  →  each rope tension T = {tension:.0f} N "
-                f"({tension / weight:.1f}× the whole weight)</sub>"
-            },
+            title=base_layout["title"],
+            annotations=base_layout["annotations"],
             xaxis={"range": [-3, 3], "showgrid": False, "zeroline": False, "showticklabels": False},
             yaxis={
-                "range": [-1, max(anchor_y, 1) + 0.3],
+                "range": [-1, 4.8],
                 "showgrid": False,
                 "zeroline": False,
                 "showticklabels": False,
                 "scaleanchor": "x",
             },
-            annotations=[
+            updatemenus=[
                 {
-                    "x": 0,
-                    "y": max(anchor_y, 1) + 0.15,
-                    "text": f"<b>T = {tension:.0f} N per rope</b>",
-                    "showarrow": False,
-                    "font": {"color": color, "size": 15},
+                    "type": "buttons",
+                    "showactive": False,
+                    "y": 1.15,
+                    "x": 0.5,
+                    "xanchor": "center",
+                    "buttons": create_play_pause_buttons(),
+                    "bgcolor": COLORS["paper"],
+                    "font": {"color": COLORS["text"]},
                 }
             ],
             height=520,
@@ -777,20 +809,16 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, get_plotly_config, go, incline_angle, material_pair, mo, np):
+def _(
+    COLORS, create_play_pause_buttons, get_plotly_config, go, incline_angle, material_pair, mo, np
+):
     def incline_figure(theta_deg, mu):
-        theta = np.radians(theta_deg)
         base = 3.0
-        height = base * np.tan(theta)
+        size = 0.35
 
-        slips = np.tan(theta) > mu
-        block_color = COLORS["secondary"] if slips else COLORS["wave"]
-
-        fig = go.Figure()
-
-        # The wedge (incline)
-        fig.add_trace(
-            go.Scatter(
+        def wedge_trace(td):
+            height = base * np.tan(np.radians(td))
+            return go.Scatter(
                 x=[0, base, 0, 0],
                 y=[0, 0, height, 0],
                 mode="lines",
@@ -800,47 +828,90 @@ def _(COLORS, get_plotly_config, go, incline_angle, material_pair, mo, np):
                 showlegend=False,
                 hoverinfo="skip",
             )
-        )
 
-        # Block sitting on the slope, partway up
-        along = 1.6
-        bx = base - along * np.cos(theta)
-        by = height - along * np.sin(theta) if theta_deg > 0 else 0.0
-        # offset the block slightly above the surface (perpendicular)
-        nx, ny = -np.sin(theta), np.cos(theta)
-        size = 0.35
-        cx, cy = bx + nx * size, by + ny * size
-        # corners of a small square aligned with the slope
-        ux, uy = np.cos(theta), np.sin(theta)
-        corners_x = [
-            cx + s1 * ux * size + s2 * nx * size for s1, s2 in [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-        ]
-        corners_y = [
-            cy + s1 * uy * size + s2 * ny * size for s1, s2 in [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-        ]
-        corners_x.append(corners_x[0])
-        corners_y.append(corners_y[0])
-        fig.add_trace(
-            go.Scatter(
+        def block_trace(td, along, color):
+            theta = np.radians(td)
+            height = base * np.tan(theta)
+            bx = base - along * np.cos(theta)
+            by = height - along * np.sin(theta) if td > 0 else 0.0
+            # perpendicular offset so the block sits on top of the surface
+            nx, ny = -np.sin(theta), np.cos(theta)
+            cx, cy = bx + nx * size, by + ny * size
+            # corners of a small square aligned with the slope
+            ux, uy = np.cos(theta), np.sin(theta)
+            corners_x = [
+                cx + s1 * ux * size + s2 * nx * size
+                for s1, s2 in [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+            ]
+            corners_y = [
+                cy + s1 * uy * size + s2 * ny * size
+                for s1, s2 in [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+            ]
+            corners_x.append(corners_x[0])
+            corners_y.append(corners_y[0])
+            return go.Scatter(
                 x=corners_x,
                 y=corners_y,
                 mode="lines",
                 fill="toself",
-                fillcolor=block_color,
-                line={"color": block_color, "width": 2},
+                fillcolor=color,
+                line={"color": color, "width": 2},
                 name="Block",
+                showlegend=False,
                 hoverinfo="skip",
             )
-        )
 
-        pull = np.sin(theta)  # mg sinθ per unit mg
-        grip = mu * np.cos(theta)  # μ mg cosθ per unit mg
-        verdict = "SLIPS!" if slips else "holds"
+        def layout_for(td):
+            theta = np.radians(td)
+            slips = np.tan(theta) > mu
+            verdict = "SLIPS!" if slips else "holds"
+            return {
+                "title": {
+                    "text": f"<b>Block on a Slope</b><br>"
+                    f"<sub>tan θ = {np.tan(theta):.2f}   vs   μ = {mu:.2f}   →   "
+                    f"the block {verdict}</sub>"
+                },
+                "annotations": [
+                    {
+                        "x": 1.6,
+                        "y": 3.3,
+                        "text": f"pull down-slope ∝ sin θ = {np.sin(theta):.2f}<br>"
+                        f"max friction ∝ μ cos θ = {mu * np.cos(theta):.2f}",
+                        "showarrow": False,
+                        "font": {"color": COLORS["text"], "size": 12},
+                        "align": "left",
+                    }
+                ],
+            }
+
+        rest = 1.6  # resting position, measured up-slope from the base
+        init_slips = np.tan(np.radians(theta_deg)) > mu
+        init_color = COLORS["secondary"] if init_slips else COLORS["wave"]
+        fig = go.Figure(data=[wedge_trace(theta_deg), block_trace(theta_deg, rest, init_color)])
+
+        # Animate tilting the slope up from flat. While tan θ <= μ the block holds
+        # (green); once it exceeds μ the block turns red and slides down the slope.
+        along = rest
+        frames = []
+        for i, td in enumerate(np.linspace(0, 45, 30)):
+            slips = np.tan(np.radians(td)) > mu
+            if slips:
+                along = max(along - 0.11, 0.35)  # slide down toward the base
+            color = COLORS["secondary"] if slips else COLORS["wave"]
+            frames.append(
+                go.Frame(
+                    data=[wedge_trace(td), block_trace(td, along, color)],
+                    traces=[0, 1],
+                    layout=layout_for(td),
+                    name=str(i),
+                )
+            )
+        fig.frames = frames
+
+        base_layout = layout_for(theta_deg)
         fig.update_layout(
-            title={
-                "text": f"<b>Block on a Slope</b><br>"
-                f"<sub>tan θ = {np.tan(theta):.2f}   vs   μ = {mu:.2f}   →   the block {verdict}</sub>"
-            },
+            title=base_layout["title"],
+            annotations=base_layout["annotations"],
             xaxis={
                 "range": [-0.5, 3.5],
                 "showgrid": False,
@@ -848,20 +919,22 @@ def _(COLORS, get_plotly_config, go, incline_angle, material_pair, mo, np):
                 "showticklabels": False,
             },
             yaxis={
-                "range": [-0.5, 3.2],
+                "range": [-0.5, 3.6],
                 "showgrid": False,
                 "zeroline": False,
                 "showticklabels": False,
                 "scaleanchor": "x",
             },
-            annotations=[
+            updatemenus=[
                 {
-                    "x": 1.6,
-                    "y": 2.9,
-                    "text": f"pull down-slope ∝ sin θ = {pull:.2f}<br>max friction ∝ μ cos θ = {grip:.2f}",
-                    "showarrow": False,
-                    "font": {"color": COLORS["text"], "size": 12},
-                    "align": "left",
+                    "type": "buttons",
+                    "showactive": False,
+                    "y": 1.15,
+                    "x": 0.5,
+                    "xanchor": "center",
+                    "buttons": create_play_pause_buttons(),
+                    "bgcolor": COLORS["paper"],
+                    "font": {"color": COLORS["text"]},
                 }
             ],
             showlegend=False,
@@ -979,7 +1052,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, get_plotly_config, go, mo, np):
+def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
     def stress_strain_figure():
         # Elastic slopes use real Young's moduli (converted to MPa: 1 GPa = 1000 MPa)
         materials = [
@@ -990,6 +1063,7 @@ def _(COLORS, get_plotly_config, go, mo, np):
         ]
 
         fig = go.Figure()
+        loads = []  # (strain_yield, E_mpa, yield_mpa, color) for the moving load markers
         for name, e_gpa, yield_mpa, color in materials:
             e_mpa = e_gpa * 1000.0
             strain_yield = yield_mpa / e_mpa
@@ -1015,15 +1089,56 @@ def _(COLORS, get_plotly_config, go, mo, np):
                     hovertemplate=f"{name}<br>yield ≈ {yield_mpa} MPa<extra></extra>",
                 )
             )
+            loads.append((strain_yield, e_mpa, yield_mpa, color))
+
+        # Moving "loading" markers that ride up each line as the load increases.
+        marker_indices = [len(fig.data) + i for i in range(len(loads))]
+        for _strain_yield, _e_mpa, _yield_mpa, color in loads:
+            fig.add_trace(
+                go.Scatter(
+                    x=[0],
+                    y=[0],
+                    mode="markers",
+                    marker={"color": color, "size": 15, "line": {"color": "white", "width": 2}},
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+
+        n_frames = 28
+        frames = []
+        for k in range(n_frames):
+            frac = k / (n_frames - 1)  # 0 -> 1 (unloaded -> at yield)
+            frame_data = [
+                go.Scatter(
+                    x=[frac * strain_yield * 100],
+                    y=[frac * strain_yield * e_mpa],
+                )
+                for strain_yield, e_mpa, _yield_mpa, _color in loads
+            ]
+            frames.append(go.Frame(data=frame_data, traces=marker_indices, name=str(k)))
 
         fig.update_layout(
             title={
-                "text": "<b>Stress–Strain: the Slope is Stiffness</b><br><sub>steeper line = stiffer material; × marks where it stops springing back</sub>"
+                "text": "<b>Stress–Strain: the Slope is Stiffness</b><br><sub>press Play to load each specimen up to its yield point (×) — steeper line = stiffer material</sub>"
             },
             xaxis={"title": "strain ε (%)", "range": [0, 0.45]},
             yaxis={"title": "stress σ (MPa)", "range": [0, 300]},
+            updatemenus=[
+                {
+                    "type": "buttons",
+                    "showactive": False,
+                    "y": 1.15,
+                    "x": 0.5,
+                    "xanchor": "center",
+                    "buttons": create_play_pause_buttons(),
+                    "bgcolor": COLORS["paper"],
+                    "font": {"color": COLORS["text"]},
+                }
+            ],
             height=520,
         )
+        fig.frames = frames
         return fig
 
     stress_strain_plot = mo.ui.plotly(stress_strain_figure(), config=get_plotly_config())
