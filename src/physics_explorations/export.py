@@ -54,6 +54,7 @@ FEYNMAN_NOTEBOOKS = {
     "007_magnetism",
     "003_charged_motion",
     "002_black_holes",
+    "012_forces_and_materials",
 }
 
 # Explicit tags for each notebook (avoids false matches from keyword inference)
@@ -66,6 +67,7 @@ NOTEBOOK_TAGS = {
     "007_magnetism": ["Electromagnetism", "Magnetic Fields", "Feynman Lectures"],
     "003_charged_motion": ["Electromagnetism", "Charged Particles", "Feynman Lectures"],
     "002_black_holes": ["Black Holes", "General Relativity", "Feynman Lectures"],
+    "012_forces_and_materials": ["Mechanics", "Materials", "Feynman Lectures"],
     # Explorations
     "001_beyond_light": ["Exotic Physics", "Relativity", "Wormholes"],
     "004_dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],

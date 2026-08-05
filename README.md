@@ -215,6 +215,27 @@ uv run marimo edit notebooks/dimensions.py  # Edit mode
 - The arrow of time: Entropy and the thermodynamic direction (animated)
 - Why we can only move forward in time
 
+### 11. Forces, Friction, and the Strength of Materials
+
+Based on [Feynman Lectures, Vol. I, Ch. 12](https://www.feynmanlectures.caltech.edu/I_12.html) and [Vol. II, Ch. 38–39](https://www.feynmanlectures.caltech.edu/II_38.html)
+
+```bash
+uv run marimo run notebooks/012_forces_and_materials.py   # View mode
+uv run marimo edit notebooks/012_forces_and_materials.py  # Edit mode
+```
+
+**Contents:**
+- Force as a vector and the free-body diagram
+- Equilibrium: why two flat ropes carry enormous tension (interactive)
+- The moment / torque and the balancing seesaw (interactive)
+- Constraints and reactions: rollers, pins, fixed supports; beam reactions (interactive)
+- Friction: static vs kinetic, the slope-slip angle, real μ values (interactive)
+- Stress, strain, and Young's modulus — the stress–strain curve
+- Everyday materials compared: steel, aluminium, wood, concrete, rubber (stiffness vs weight)
+- Beams: why depth matters cubed, and the trick behind the I-beam (interactive)
+- Stress concentration around a hole — Kirsch's factor of three
+- Buckling: why long thin columns fold (animated)
+
 ## Features
 
 All notebooks include:
