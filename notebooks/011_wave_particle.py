@@ -351,31 +351,7 @@ def _(get_plotly_config, go, mo, np):
                         y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=60),
@@ -572,31 +548,7 @@ def _(get_plotly_config, go, mo, np):
                         y=-0.08,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=60),
@@ -849,31 +801,7 @@ def _(get_plotly_config, go, mo, np):
                         y=-0.1,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=60),
@@ -1235,31 +1163,7 @@ def _(get_plotly_config, go, mo, np):
                         y=-0.1,
                         x=0.5,
                         xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=60),

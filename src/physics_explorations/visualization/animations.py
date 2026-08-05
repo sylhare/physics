@@ -14,17 +14,22 @@ from physics_explorations.visualization.styles import (
 def create_play_pause_buttons(
     play_label: str = "Play",
     pause_label: str = "Pause",
+    include_reset: bool = False,
+    reset_label: str = "Reset",
 ) -> list[dict[str, Any]]:
     """Create standard Play/Pause animation buttons.
 
     Args:
         play_label: Label for play button (default: "Play")
         pause_label: Label for pause button (default: "Pause")
+        include_reset: Whether to append a Reset button that jumps to the
+            first frame (default: False)
+        reset_label: Label for the reset button (default: "Reset")
 
     Returns:
         List of button definitions for updatemenus
     """
-    return [
+    buttons = [
         {
             "label": f"▶ {play_label}",
             "method": "animate",
@@ -51,6 +56,22 @@ def create_play_pause_buttons(
             ],
         },
     ]
+    if include_reset:
+        buttons.append(
+            {
+                "label": f"↺ {reset_label}",
+                "method": "animate",
+                "args": [
+                    ["0"],
+                    {
+                        "frame": {"duration": 0, "redraw": True},
+                        "mode": "immediate",
+                        "transition": {"duration": 0},
+                    },
+                ],
+            }
+        )
+    return buttons
 
 
 def create_slider_steps(

@@ -562,42 +562,7 @@ def _(go, np, solve_kepler_equation, true_anomaly_from_eccentric):
                         "y": -0.15,
                         "x": 0.5,
                         "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "▶ Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "⏸ Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "↺ Reset",
-                                "method": "animate",
-                                "args": [
-                                    ["0"],
-                                    {
-                                        "frame": {"duration": 0, "redraw": True},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
+                        "buttons": create_play_pause_buttons(include_reset=True),
                     }
                 ],
                 margin=dict(b=80),
@@ -1667,31 +1632,7 @@ def _(go, np):
                         "y": -0.12,
                         "x": 0.5,
                         "xanchor": "center",
-                        "buttons": [
-                            {
-                                "label": "▶ Play",
-                                "method": "animate",
-                                "args": [
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            },
-                            {
-                                "label": "⏸ Pause",
-                                "method": "animate",
-                                "args": [
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            },
-                        ],
+                        "buttons": create_play_pause_buttons(),
                     }
                 ],
                 margin=dict(b=80),
