@@ -320,7 +320,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, lorentz_factor, mo, np):
     def create_energy_barrier_animation():
         """Animate the energy barrier at c."""
         n_frames = 50
@@ -332,11 +332,11 @@ def _(get_plotly_config, go, mo, np):
             v_current = 0.999 * i / n_frames
 
             v = np.linspace(0, 0.999, 500)
-            gamma = 1 / np.sqrt(1 - v**2)
+            gamma = lorentz_factor(v)
             energy = gamma  # In units of rest mass energy
 
             # Marker position
-            gamma_current = 1 / np.sqrt(1 - v_current**2) if v_current > 0 else 1
+            gamma_current = lorentz_factor(v_current)
 
             frame_data = [
                 # Energy curve
@@ -490,12 +490,12 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, lorentz_factor, np):
     def create_tachyon_energy():
         """Show energy curves for normal matter and tachyons."""
         # Normal matter (v < c)
         v_normal = np.linspace(0, 0.99, 200)
-        gamma_normal = 1 / np.sqrt(1 - v_normal**2)
+        gamma_normal = lorentz_factor(v_normal)
         E_normal = gamma_normal
 
         # Tachyons (v > c)
@@ -646,20 +646,20 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, lorentz_factor, np):
     def create_different_c_comparison():
         """Compare time dilation for different values of c."""
         v = np.linspace(0, 0.95, 200)  # Velocity in units of our c
 
         # Our universe (c = 1)
-        gamma_1 = 1 / np.sqrt(1 - v**2)
+        gamma_1 = lorentz_factor(v)
 
         # c' = 2c (so v/c' = v/2)
-        gamma_2 = 1 / np.sqrt(1 - (v / 2) ** 2)
+        gamma_2 = lorentz_factor(v / 2)
 
         # c' = 0.5c (so v/c' = 2v, only valid for v < 0.5)
         v_small = np.linspace(0, 0.49, 100)
-        gamma_half = 1 / np.sqrt(1 - (2 * v_small) ** 2)
+        gamma_half = lorentz_factor(2 * v_small)
 
         fig = go.Figure()
 

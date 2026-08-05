@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
 
     from physics.constants import C
+    from physics.relativity import lorentz_factor
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -19,7 +20,18 @@ def _():
         get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, SCENE_3D, C, create_play_pause_buttons, get_plotly_config, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        SCENE_3D,
+        C,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        lorentz_factor,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -104,14 +116,14 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, lorentz_factor, mo, np):
     def create_light_clock_animation():
         """Animate the light clock thought experiment showing time dilation."""
         n_frames = 60
         velocity = 0.5  # v/c
 
         # Gamma factor
-        gamma = 1 / np.sqrt(1 - velocity**2)
+        gamma = lorentz_factor(velocity)
 
         frames = []
 
@@ -312,15 +324,15 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np, velocity_slider):
+def _(get_plotly_config, go, lorentz_factor, mo, np, velocity_slider):
     v = velocity_slider.value
     if v >= 1:
         v = 0.999
-    gamma_val = 1 / np.sqrt(1 - v**2)
+    gamma_val = lorentz_factor(v)
 
     # Plot gamma vs velocity
     velocities = np.linspace(0, 0.99, 100)
-    gammas = 1 / np.sqrt(1 - velocities**2)
+    gammas = lorentz_factor(velocities)
 
     gamma_fig = go.Figure()
 
@@ -392,7 +404,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, lorentz_factor, mo, np):
     def create_length_contraction_animation():
         """Animate length contraction of a spaceship."""
         n_frames = 60
@@ -409,7 +421,7 @@ def _(get_plotly_config, go, mo, np):
             v = 0.8 * np.sin(2 * np.pi * t)  # Oscillate between -0.8c and +0.8c
 
             if abs(v) > 0.01:
-                gamma = 1 / np.sqrt(1 - v**2)
+                gamma = lorentz_factor(v)
                 contracted_length = ship_length / gamma
             else:
                 gamma = 1
@@ -1137,10 +1149,10 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, lorentz_factor, mo, np):
     # E vs v showing rest energy and kinetic energy
     v_range = np.linspace(0, 0.99, 100)
-    gamma_range = 1 / np.sqrt(1 - v_range**2)
+    gamma_range = lorentz_factor(v_range)
 
     # Normalize to rest mass energy
     total_energy = gamma_range  # E/mc²

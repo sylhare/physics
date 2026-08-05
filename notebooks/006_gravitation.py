@@ -12,6 +12,10 @@ def _():
 
     from physics.constants import AU, PLANETS, G
     from physics.integrators import gravity_acceleration, rk4_step
+    from physics.orbital_mechanics import (
+        solve_kepler_equation,
+        true_anomaly_from_eccentric,
+    )
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -26,6 +30,8 @@ def _():
         PLANETS,
         rk4_step,
         gravity_acceleration,
+        solve_kepler_equation,
+        true_anomaly_from_eccentric,
         COLORS,
         DARK_THEME,
         SCENE_3D,
@@ -130,7 +136,15 @@ def _(mo):
 
 
 @app.cell
-def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
+def _(
+    ANIMATION_SETTINGS,
+    COLORS,
+    create_play_pause_buttons,
+    go,
+    np,
+    solve_kepler_equation,
+    true_anomaly_from_eccentric,
+):
     def create_ellipse_animation(e: float = 0.5, a: float = 1.0, n_frames: int = 120):
         """Create animated ellipse with planet motion."""
         # Generate ellipse
@@ -150,14 +164,8 @@ def _(ANIMATION_SETTINGS, COLORS, create_play_pause_buttons, go, np):
         y_planet = []
 
         for M in M_values:
-            # Solve Kepler's equation iteratively
-            E = M
-            for _ in range(20):
-                E = M + e * np.sin(E)
-            # True anomaly
-            theta_true = 2 * np.arctan2(
-                np.sqrt(1 + e) * np.sin(E / 2), np.sqrt(1 - e) * np.cos(E / 2)
-            )
+            E = solve_kepler_equation(M, e)
+            theta_true = true_anomaly_from_eccentric(E, e)
             r_val = a * (1 - e**2) / (1 + e * np.cos(theta_true))
             x_planet.append(r_val * np.cos(theta_true))
             y_planet.append(r_val * np.sin(theta_true))
@@ -396,7 +404,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, np, solve_kepler_equation, true_anomaly_from_eccentric):
     def create_equal_areas_animation(e: float = 0.6, n_wedges: int = 8):
         """Create animation showing equal areas swept in equal times."""
         a = 1.0
@@ -414,12 +422,8 @@ def _(go, np):
         theta_values = []
 
         for M in M_values:
-            E = M
-            for _ in range(20):
-                E = M + e * np.sin(E)
-            theta_true = 2 * np.arctan2(
-                np.sqrt(1 + e) * np.sin(E / 2), np.sqrt(1 - e) * np.cos(E / 2)
-            )
+            E = solve_kepler_equation(M, e)
+            theta_true = true_anomaly_from_eccentric(E, e)
             r_val = a * (1 - e**2) / (1 + e * np.cos(theta_true))
             positions.append((r_val * np.cos(theta_true), r_val * np.sin(theta_true)))
             theta_values.append(theta_true)
