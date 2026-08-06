@@ -239,10 +239,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -379,10 +381,12 @@ def _(get_plotly_config, go, lorentz_factor, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -874,10 +878,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -1202,10 +1208,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -1389,10 +1397,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -1791,10 +1801,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -1956,10 +1968,12 @@ def _(go, np, polar_mesh):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -2383,10 +2397,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],

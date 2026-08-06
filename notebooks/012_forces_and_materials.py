@@ -362,11 +362,12 @@ def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np, rope_ang
             updatemenus=[
                 {
                     "type": "buttons",
-                    "showactive": False,
+                    "x": 1.0,
                     "y": 1.12,
-                    "x": 0.0,
-                    "xanchor": "left",
+                    "xanchor": "right",
                     "yanchor": "bottom",
+                    "direction": "left",
+                    "showactive": False,
                     "buttons": create_play_pause_buttons(),
                     "bgcolor": COLORS["paper"],
                     "font": {"color": COLORS["text"]},
@@ -929,11 +930,12 @@ def _(
             updatemenus=[
                 {
                     "type": "buttons",
-                    "showactive": False,
+                    "x": 1.0,
                     "y": 1.12,
-                    "x": 0.0,
-                    "xanchor": "left",
+                    "xanchor": "right",
                     "yanchor": "bottom",
+                    "direction": "left",
+                    "showactive": False,
                     "buttons": create_play_pause_buttons(),
                     "bgcolor": COLORS["paper"],
                     "font": {"color": COLORS["text"]},
@@ -1129,11 +1131,12 @@ def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np):
             updatemenus=[
                 {
                     "type": "buttons",
-                    "showactive": False,
+                    "x": 1.0,
                     "y": 1.12,
-                    "x": 0.0,
-                    "xanchor": "left",
+                    "xanchor": "right",
                     "yanchor": "bottom",
+                    "direction": "left",
+                    "showactive": False,
                     "buttons": create_play_pause_buttons(),
                     "bgcolor": COLORS["paper"],
                     "font": {"color": COLORS["text"]},
@@ -2391,11 +2394,12 @@ def _(COLORS, create_play_pause_buttons, get_plotly_config, go, mo, np, column_l
             updatemenus=[
                 {
                     "type": "buttons",
-                    "showactive": False,
+                    "x": 1.0,
                     "y": 1.12,
-                    "x": 0.0,
-                    "xanchor": "left",
+                    "xanchor": "right",
                     "yanchor": "bottom",
+                    "direction": "left",
+                    "showactive": False,
                     "buttons": create_play_pause_buttons(),
                     "bgcolor": COLORS["paper"],
                     "font": {"color": COLORS["text"]},

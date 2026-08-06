@@ -244,10 +244,12 @@ def _(get_plotly_config, go, lorentz_factor, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.08,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                         bgcolor=COLORS["paper"],
                         font=dict(color=COLORS["text"]),
@@ -515,10 +517,12 @@ def _(get_plotly_config, go, lorentz_factor, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.1,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                     )
                 ],
@@ -749,10 +753,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.1,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(include_reset=True),
                     )
                 ],
