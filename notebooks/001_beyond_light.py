@@ -45,7 +45,7 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        # Beyond the Speed of Light? ($c = 299,792,458 \text{ m/s}$)
+        # Beyond the Speed of Light?
 
         *A thought experiment exploring the deep structure of spacetime*
 
