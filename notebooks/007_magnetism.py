@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
 
     from physics.constants import C, G
+    from physics.geometry import rotation_matrix
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -30,6 +31,7 @@ def _():
         go,
         mo,
         np,
+        rotation_matrix,
     )
 
 
@@ -208,33 +210,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -420,33 +402,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -617,33 +579,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -870,33 +812,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -964,7 +886,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, mo, np, rotation_matrix):
     # Animation: DC Motor operation
     def create_dc_motor_animation():
         n_frames = 120
@@ -1049,8 +971,7 @@ def _(get_plotly_config, go, mo, np):
             )
 
             # Rotate
-            cos_a, sin_a = np.cos(angle), np.sin(angle)
-            rotation = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
+            rotation = rotation_matrix(angle)
             corners_rotated = corners_local @ rotation.T
 
             # Current direction depends on commutator position
@@ -1190,33 +1111,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -1479,10 +1380,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.08,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                         bgcolor=COLORS["paper"],
                         font=dict(color=COLORS["text"]),
@@ -1735,10 +1638,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.08,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                         bgcolor=COLORS["paper"],
                         font=dict(color=COLORS["text"]),
@@ -2024,33 +1929,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),

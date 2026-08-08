@@ -11,6 +11,7 @@ def _():
     import plotly.graph_objects as go
 
     from physics.constants import C
+    from physics.geometry import circle
     from physics_explorations.visualization import (
         COLORS,
         DARK_THEME,
@@ -18,7 +19,17 @@ def _():
         get_plotly_config,
     )
 
-    return COLORS, DARK_THEME, C, create_play_pause_buttons, get_plotly_config, go, mo, np
+    return (
+        COLORS,
+        DARK_THEME,
+        C,
+        circle,
+        create_play_pause_buttons,
+        get_plotly_config,
+        go,
+        mo,
+        np,
+    )
 
 
 @app.cell
@@ -273,33 +284,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -372,7 +363,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(circle, get_plotly_config, go, mo, np):
     # Animation: Charged particle in uniform magnetic field (circular motion)
     def create_magnetic_circular_animation():
         n_frames = 120
@@ -432,11 +423,11 @@ def _(get_plotly_config, go, mo, np):
             )
 
             # Reference circle
-            theta_circle = np.linspace(0, 2 * np.pi, 100)
+            circle_x, circle_y = circle(r, 100)
             frame_data.append(
                 go.Scatter(
-                    x=r * np.cos(theta_circle),
-                    y=r * np.sin(theta_circle),
+                    x=circle_x,
+                    y=circle_y,
                     mode="lines",
                     line=dict(color="rgba(255, 255, 255, 0.2)", width=1),
                     name="Cyclotron orbit",
@@ -560,33 +551,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -857,33 +828,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -1148,10 +1099,12 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.08,
-                        x=0.5,
-                        xanchor="center",
                         buttons=create_play_pause_buttons(),
                         bgcolor=COLORS["paper"],
                         font=dict(color=COLORS["text"]),
@@ -1421,33 +1374,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -1698,33 +1631,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 40, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -1968,33 +1881,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -2067,7 +1960,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(circle, get_plotly_config, go, mo, np):
     # Animation: Charged particles in Earth's magnetic field (aurora)
     def create_aurora_animation():
         n_frames = 120
@@ -2078,12 +1971,12 @@ def _(get_plotly_config, go, mo, np):
             frame_data = []
 
             # Earth
-            theta_earth = np.linspace(0, 2 * np.pi, 100)
             r_earth = 1.0
+            earth_x, earth_y = circle(r_earth, 100)
             frame_data.append(
                 go.Scatter(
-                    x=r_earth * np.cos(theta_earth),
-                    y=r_earth * np.sin(theta_earth),
+                    x=earth_x,
+                    y=earth_y,
                     mode="lines",
                     fill="toself",
                     fillcolor="rgba(50, 100, 200, 0.5)",
@@ -2264,33 +2157,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.1,
-                        buttons=[
-                            dict(
-                                label="Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 50, "redraw": True},
-                                        "fromcurrent": True,
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),

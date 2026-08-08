@@ -71,6 +71,7 @@ NOTEBOOK_TAGS = {
     "004_dimensions": ["Geometry", "Higher Dimensions", "Visualizations"],
     "005_exotic_matter": ["Exotic Physics", "Quantum Field Theory", "Casimir Effect"],
     "010_three_body": ["Orbital Mechanics", "Chaos Theory", "Animations"],
+    "012_forces_and_materials": ["Mechanics", "Materials", "Engineering"],
 }
 
 

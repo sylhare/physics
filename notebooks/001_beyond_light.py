@@ -12,6 +12,7 @@ def _():
     from plotly.subplots import make_subplots
 
     from physics.constants import C
+    from physics.geometry import polar_mesh
     from physics.relativity import lorentz_factor, lorentz_transform
     from physics_explorations.visualization import (
         COLORS,
@@ -36,6 +37,7 @@ def _():
         make_subplots,
         mo,
         np,
+        polar_mesh,
     )
 
 
@@ -43,7 +45,7 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        # Beyond the Speed of Light? ($c = 299,792,458 \text{ m/s}$)
+        # Beyond the Speed of Light?
 
         *A thought experiment exploring the deep structure of spacetime*
 
@@ -237,35 +239,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -318,7 +298,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_plotly_config, go, mo, np):
+def _(get_plotly_config, go, lorentz_factor, mo, np):
     def create_energy_barrier_animation():
         """Animate the energy barrier at c."""
         n_frames = 50
@@ -330,11 +310,11 @@ def _(get_plotly_config, go, mo, np):
             v_current = 0.999 * i / n_frames
 
             v = np.linspace(0, 0.999, 500)
-            gamma = 1 / np.sqrt(1 - v**2)
+            gamma = lorentz_factor(v)
             energy = gamma  # In units of rest mass energy
 
             # Marker position
-            gamma_current = 1 / np.sqrt(1 - v_current**2) if v_current > 0 else 1
+            gamma_current = lorentz_factor(v_current)
 
             frame_data = [
                 # Energy curve
@@ -401,35 +381,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -488,12 +446,12 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, lorentz_factor, np):
     def create_tachyon_energy():
         """Show energy curves for normal matter and tachyons."""
         # Normal matter (v < c)
         v_normal = np.linspace(0, 0.99, 200)
-        gamma_normal = 1 / np.sqrt(1 - v_normal**2)
+        gamma_normal = lorentz_factor(v_normal)
         E_normal = gamma_normal
 
         # Tachyons (v > c)
@@ -644,20 +602,20 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, lorentz_factor, np):
     def create_different_c_comparison():
         """Compare time dilation for different values of c."""
         v = np.linspace(0, 0.95, 200)  # Velocity in units of our c
 
         # Our universe (c = 1)
-        gamma_1 = 1 / np.sqrt(1 - v**2)
+        gamma_1 = lorentz_factor(v)
 
         # c' = 2c (so v/c' = v/2)
-        gamma_2 = 1 / np.sqrt(1 - (v / 2) ** 2)
+        gamma_2 = lorentz_factor(v / 2)
 
         # c' = 0.5c (so v/c' = 2v, only valid for v < 0.5)
         v_small = np.linspace(0, 0.49, 100)
-        gamma_half = 1 / np.sqrt(1 - (2 * v_small) ** 2)
+        gamma_half = lorentz_factor(2 * v_small)
 
         fig = go.Figure()
 
@@ -920,35 +878,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -1272,35 +1208,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -1483,35 +1397,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -1909,35 +1801,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 80, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
@@ -1997,7 +1867,7 @@ def _(mo):
 
 
 @app.cell
-def _(go, np):
+def _(go, np, polar_mesh):
     def create_wormhole_animation():
         """Visualize a wormhole connecting distant regions of spacetime."""
         n_frames = 50
@@ -2013,16 +1883,12 @@ def _(go, np):
             # Radial coordinate
             r = np.linspace(0.5, 4, 40)
             theta = np.linspace(0, 2 * np.pi, 30)
-            R, Theta = np.meshgrid(r, theta)
+            X, Y, R, _Theta = polar_mesh(r, theta)
 
             # Embedding function: z = sqrt(r² - b²) for r > b (throat radius b)
             b = 0.5  # Throat radius
             Z_upper = np.sqrt(R**2 - b**2 + 0.01)
             Z_lower = -np.sqrt(R**2 - b**2 + 0.01)
-
-            # Convert to Cartesian for 3D plot
-            X = R * np.cos(Theta)
-            Y = R * np.sin(Theta)
 
             # Traveler position
             if progress < 0.4:
@@ -2102,35 +1968,13 @@ def _(go, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=0,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
             ),
@@ -2553,35 +2397,13 @@ def _(get_plotly_config, go, mo, np):
                 updatemenus=[
                     dict(
                         type="buttons",
+                        x=1.0,
+                        y=1.12,
+                        xanchor="right",
+                        yanchor="bottom",
+                        direction="left",
                         showactive=False,
-                        y=-0.15,
-                        x=0.5,
-                        xanchor="center",
-                        buttons=[
-                            dict(
-                                label="▶ Play",
-                                method="animate",
-                                args=[
-                                    None,
-                                    {
-                                        "frame": {"duration": 60, "redraw": True},
-                                        "fromcurrent": True,
-                                        "transition": {"duration": 0},
-                                    },
-                                ],
-                            ),
-                            dict(
-                                label="⏸ Pause",
-                                method="animate",
-                                args=[
-                                    [None],
-                                    {
-                                        "frame": {"duration": 0, "redraw": False},
-                                        "mode": "immediate",
-                                    },
-                                ],
-                            ),
-                        ],
+                        buttons=create_play_pause_buttons(),
                     )
                 ],
                 margin=dict(b=80),
