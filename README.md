@@ -241,6 +241,26 @@ uv run marimo edit notebooks/012_forces_and_materials.py  # Edit mode
 - Buckling: why long thin columns fold (animated)
 - Factor of safety: how much margin to leave (interactive)
 
+### 12. Electric Circuits: Series, Parallel, and Everything In Between
+
+An exploration of how current, voltage, resistance, and power flow through DC circuits
+
+```bash
+uv run marimo run notebooks/013_electric_circuits.py   # View mode
+uv run marimo edit notebooks/013_electric_circuits.py  # Edit mode
+```
+
+**Contents:**
+- The three quantities (V, I, R) and Ohm's law, with the water-pipe analogy (interactive)
+- Power and energy: P = VI = I²R = V²/R, watts vs. kilowatt-hours (worked example)
+- Series circuits — one path, one current, voltages add (animated current flow)
+- Parallel circuits — one voltage, the current splits (animated current flow)
+- Mixed circuits — reducing a tangle one clump at a time (animated)
+- Kirchhoff's rules, the voltage divider (interactive) and the current divider
+- Capacitors — storing charge, energy ½CV², and why they combine backwards from resistors
+- The RC circuit — charging, draining, and the time constant τ = RC (animated, interactive)
+- A full worked example tying every rule together, plus a one-page formula cheat sheet
+
 ## Features
 
 All notebooks include:
