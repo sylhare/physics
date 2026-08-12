@@ -258,6 +258,7 @@ uv run marimo edit notebooks/013_electric_circuits.py  # Edit mode
 - Mixed circuits — reducing a tangle one clump at a time (animated)
 - Common setups, shortcuts and edge cases — short/open circuits, n-equal resistors, series-vs-parallel of the same parts (animated)
 - Kirchhoff's rules (animated KCL node), the voltage divider (interactive) and the current divider
+- Bridge circuits and the diamond (losange/Wheatstone) — the balance condition, Δ–Y transform, and nodal analysis, with an interactive bridge that solves itself live (drag R₄ to watch the bridge current vanish at balance)
 - Capacitors — storing charge, energy ½CV², why they combine backwards from resistors (animated charging)
 - The RC circuit — charging, draining, and the time constant τ = RC (animated, interactive)
 - A full worked example tying every rule together (animated), plus a one-page formula cheat sheet

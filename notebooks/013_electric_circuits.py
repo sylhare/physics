@@ -76,9 +76,10 @@ def _(mo):
         5. **Mixed circuits** — reduce a tangle one clump at a time
         6. **Common setups & edge cases** — shortcuts, and the tricks that catch people out
         7. **Kirchhoff's rules** — the two laws underneath everything, and the divider shortcuts
-        8. **Capacitors** — storing charge, and why they combine backwards from resistors
-        9. **The RC circuit** — charging and draining, and the time constant τ
-        10. **A full worked example** — one circuit, every tool, all the numbers
+        8. **Bridge circuits & the diamond** — the *losange*, and how to solve what won't reduce
+        9. **Capacitors** — storing charge, and why they combine backwards from resistors
+        10. **The RC circuit** — charging and draining, and the time constant τ
+        11. **A full worked example** — one circuit, every tool, all the numbers
 
         Nothing here needs more than school algebra. Let's go and look.
         """
@@ -216,8 +217,35 @@ def _(COLORS, create_play_pause_buttons, go, np):
 
         return dot_fn
 
+    def legend_swatches(items):
+        """Dummy (invisible) markers that put a colour key in the Plotly legend.
+
+        `items` = list of (colour, text); each becomes one legend row so readers
+        know what the yellow / blue / red dots mean without cluttering the figure.
+        """
+        return [
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="markers",
+                marker={"size": 11, "color": color},
+                name=text,
+                showlegend=True,
+                hoverinfo="skip",
+            )
+            for color, text in items
+        ]
+
     def circuit_animation(
-        wire_traces, dot_fn, overlay_traces, title, xrange, yrange, n_frames=ANIM_FRAMES, height=460
+        wire_traces,
+        dot_fn,
+        overlay_traces,
+        title,
+        xrange,
+        yrange,
+        legend=None,
+        n_frames=ANIM_FRAMES,
+        height=460,
     ):
         """Assemble a schematic with an animated charge flow drawn *behind* the parts.
 
@@ -225,6 +253,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         labels. Because the dots sit under the boxes and labels, the moving charge
         slides behind each component and never hides its text. `dot_fn(i)` returns
         the moving traces for frame `i`; it must return the same count every frame.
+        `legend` = optional list of (colour, text) rows explaining the dot colours.
         """
         first_dots = dot_fn(0)
         n_wire = len(wire_traces)
@@ -233,7 +262,8 @@ def _(COLORS, create_play_pause_buttons, go, np):
             go.Frame(data=first_dots if i == 0 else dot_fn(i), traces=dot_indices, name=str(i))
             for i in range(n_frames)
         ]
-        fig = go.Figure(data=[*wire_traces, *first_dots, *overlay_traces], frames=frames)
+        swatches = legend_swatches(legend) if legend else []
+        fig = go.Figure(data=[*wire_traces, *first_dots, *overlay_traces, *swatches], frames=frames)
         fig.update_layout(
             title={"text": title},
             xaxis={"range": xrange, "showgrid": False, "zeroline": False, "showticklabels": False},
@@ -244,7 +274,17 @@ def _(COLORS, create_play_pause_buttons, go, np):
                 "showticklabels": False,
                 "scaleanchor": "x",
             },
-            showlegend=False,
+            showlegend=bool(legend),
+            legend={
+                "orientation": "h",
+                "yanchor": "top",
+                "y": -0.02,
+                "xanchor": "center",
+                "x": 0.5,
+                "bgcolor": "rgba(22, 33, 62, 0.6)",
+                "font": {"color": COLORS["text"], "size": 12},
+            },
+            margin={"l": 30, "r": 30, "t": 70, "b": 60},
             height=height,
             updatemenus=play_pause_menu(),
         )
@@ -299,6 +339,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
             title=title,
             xrange=[-0.2, 10.6],
             yrange=[0.4, 4.2],
+            legend=[
+                (COLORS["electric"], f"yellow — main current ({i_main:g} A)"),
+                (COLORS["primary"], f"blue — through R₂ ({i2:g} A)"),
+                (COLORS["secondary"], f"red — through R₃ ({i3:g} A)"),
+            ],
             height=height,
         )
 
@@ -430,6 +475,7 @@ def _(
             title="<b>Ohm's law, live — bigger R throttles the flow of charge</b>",
             xrange=[-0.2, 9.2],
             yrange=[0.2, 4.0],
+            legend=[(COLORS["electric"], "yellow — current")],
             height=380,
         )
 
@@ -516,6 +562,7 @@ def _(
             title="<b>Power: current forced through a resistor comes out as heat</b>",
             xrange=[-0.2, 9.2],
             yrange=[0.2, 4.0],
+            legend=[(COLORS["electric"], "yellow — current (spends energy as heat)")],
             height=400,
         )
 
@@ -620,6 +667,7 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
             title="<b>Series circuit — one path, one current</b>",
             xrange=[-0.2, 9.4],
             yrange=[0.0, 4.2],
+            legend=[(COLORS["electric"], "yellow — current (same everywhere)")],
             height=440,
         )
 
@@ -751,6 +799,11 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
             title="<b>Parallel circuit — one voltage, the current splits</b>",
             xrange=[-0.2, 10.4],
             yrange=[0.2, 4.4],
+            legend=[
+                (COLORS["electric"], "yellow — total current (4 A)"),
+                (COLORS["primary"], "blue — through R₁ (3 A)"),
+                (COLORS["secondary"], "red — through R₂ (1 A)"),
+            ],
             height=460,
         )
 
@@ -983,6 +1036,11 @@ def _(COLORS, charge_dots, circuit_animation, component, get_plotly_config, labe
             title="<b>Same two resistors, two montages — parallel pulls 4× the current</b>",
             xrange=[-0.2, 9.4],
             yrange=[0.2, 8.4],
+            legend=[
+                (COLORS["electric"], "yellow — total current"),
+                (COLORS["primary"], "blue — through one 4 Ω"),
+                (COLORS["secondary"], "red — through the other 4 Ω"),
+            ],
             height=620,
         )
 
@@ -1137,6 +1195,11 @@ def _(COLORS, circuit_animation, flow, get_plotly_config, go, label, mo, wire):
             title="<b>Kirchhoff's current law — what flows in flows out</b>",
             xrange=[0.0, 9.4],
             yrange=[0.0, 4.0],
+            legend=[
+                (COLORS["electric"], "yellow — 5 A in"),
+                (COLORS["primary"], "blue — 3 A out"),
+                (COLORS["secondary"], "red — 2 A out"),
+            ],
             height=400,
         )
 
@@ -1203,7 +1266,289 @@ def _(COLORS, divider_ratio, get_plotly_config, go, mo, np):
 def _(mo):
     mo.md(
         r"""
-        ## 8. Capacitors: storing charge instead of burning it
+        ## 8. Bridge circuits and the diamond — when series-parallel isn't enough
+
+        Wire four resistors into a **diamond** (a *losange*): two arms climbing to a top node, two
+        dropping to a bottom node, driven across the left–right diagonal. That one is still easy —
+        it's just two series pairs sitting in parallel, and everything from §5 handles it.
+
+        The trouble starts when you drop a **fifth resistor across the middle**, bridging the top and
+        bottom nodes. This is the famous **Wheatstone bridge**, and it breaks the whole
+        series-parallel game: look as hard as you like and there is no pair of resistors that is
+        *purely* in series or *purely* in parallel. Reduction stalls on the first step.
+
+        When that happens, you reach for one of three tools:
+
+        1. **The balance shortcut.** If the arms are in proportion,
+
+           $$\frac{R_1}{R_2} = \frac{R_3}{R_4} \quad\Longleftrightarrow\quad R_1 R_4 = R_2 R_3,$$
+
+           the two middle nodes sit at exactly the same voltage, so **no current flows through the
+           bridge at all.** Delete the bridge resistor and reduce the rest normally. This is how a
+           Wheatstone bridge *measures* an unknown resistor: adjust a known one until the bridge
+           current reads zero, then read the answer off the ratio — precise, and independent of the
+           source voltage.
+
+        2. **Kirchhoff's laws (the method that always works).** Label a current in every branch,
+           write KCL at each node and KVL around enough loops to match the unknowns, and solve the
+           simultaneous equations. It never fails; it's just more algebra. The interactive below does
+           exactly this — solving the bridge by **nodal analysis**, computing every branch current
+           live as you drag the slider.
+
+        3. **The delta–wye (Δ–Y) transform.** Any triangle of three resistors ("delta", Δ) can be
+           swapped for an equivalent three-spoke star ("wye", Y) that the rest of the circuit can't
+           tell apart. One such swap turns the bridge back into something series-parallel. Each Y
+           spoke is the product of its two neighbouring Δ resistors over the sum of all three:
+
+           $$R_A = \frac{R_{AB}\,R_{AC}}{R_{AB}+R_{BC}+R_{CA}} \quad(\text{and likewise for } R_B, R_C).$$
+
+        Drag the slider and watch the bridge solve itself. Away from balance the teal bridge current
+        flows; hit **R₄ = 10 Ω** and it drops to zero — only then does the diamond collapse back into
+        two simple parallel branches.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    r4_slider = mo.ui.slider(
+        start=4,
+        stop=24,
+        step=1,
+        value=6,
+        label="Bridge arm R₄ (Ω) — the bridge balances at R₄ = 10 Ω",
+        show_value=True,
+    )
+    mo.hstack(
+        [mo.md("**Adjust R₄ (watch the bridge current):**"), r4_slider], justify="start", gap=1
+    )
+    return (r4_slider,)
+
+
+@app.cell
+def _(
+    COLORS,
+    charge_dots,
+    circuit_animation,
+    component,
+    get_plotly_config,
+    go,
+    label,
+    mo,
+    np,
+    r4_slider,
+    wire,
+):
+    def bridge_figure(r4):
+        source = 20.0
+        r1 = r2 = r3 = r5 = 10.0
+        r4 = float(r4)
+        g1, g2, g3, g4, g5 = 1 / r1, 1 / r2, 1 / r3, 1 / r4, 1 / r5
+        # Nodal analysis: fix V_A = 20 V (source +) and V_C = 0 (reference), then
+        # solve KCL at the two middle nodes B and D for their voltages.
+        coeff = np.array([[g1 + g2 + g5, -g5], [-g5, g3 + g4 + g5]])
+        rhs = np.array([g1 * source, g3 * source])
+        v_b, v_d = (float(v) for v in np.linalg.solve(coeff, rhs))
+        i1 = g1 * (source - v_b)  # A → B
+        i2 = g2 * v_b  # B → C
+        i3 = g3 * (source - v_d)  # A → D
+        i4 = g4 * v_d  # D → C
+        i5 = g5 * (v_b - v_d)  # bridge B → D
+        i_tot = i1 + i3
+        balanced = abs(i5) < 0.02
+
+        ax, ay = 2.2, 2.2
+        bx, by = 5.0, 3.9
+        dx, dy = 5.0, 0.5
+        cx, cy = 8.2, 2.2
+        trunk_in = [(1.2, 2.2), (ax, ay)]
+        arm_ab = [(ax, ay), (bx, by)]
+        arm_ad = [(ax, ay), (dx, dy)]
+        arm_bc = [(bx, by), (cx, cy)]
+        arm_dc = [(dx, dy), (cx, cy)]
+        bridge = [(bx, by), (dx, dy)]
+        ret = [(cx, cy), (9.0, 2.2), (9.0, -0.6), (0.7, -0.6), (0.7, 1.5)]
+        wires = [wire(w) for w in (trunk_in, arm_ab, arm_ad, arm_bc, arm_dc, bridge, ret)]
+
+        def node_dot(x, y):
+            return go.Scatter(
+                x=[x],
+                y=[y],
+                mode="markers",
+                marker={"size": 9, "color": COLORS["text"]},
+                showlegend=False,
+                hoverinfo="skip",
+            )
+
+        overlays = [
+            *component(0.7, 2.2, "20 V", COLORS["quaternary"], width=1.0, height=1.3),
+            *component(
+                (ax + bx) / 2, (ay + by) / 2, "R₁", COLORS["primary"], width=0.9, height=0.5
+            ),
+            *component(
+                (bx + cx) / 2, (by + cy) / 2, "R₂", COLORS["primary"], width=0.9, height=0.5
+            ),
+            *component(
+                (ax + dx) / 2, (ay + dy) / 2, "R₃", COLORS["secondary"], width=0.9, height=0.5
+            ),
+            *component(
+                (dx + cx) / 2, (dy + cy) / 2, "R₄", COLORS["secondary"], width=0.9, height=0.5
+            ),
+            *component(
+                (bx + dx) / 2, (by + dy) / 2, "R₅", COLORS["tertiary"], width=0.9, height=0.5
+            ),
+            node_dot(ax, ay),
+            node_dot(bx, by),
+            node_dot(dx, dy),
+            node_dot(cx, cy),
+            label(ax - 0.32, ay + 0.36, "A", COLORS["text"], 13),
+            label(bx, by + 0.32, "B", COLORS["text"], 13),
+            label(dx, dy - 0.32, "D", COLORS["text"], 13),
+            label(cx + 0.3, cy + 0.35, "C", COLORS["text"], 13),
+            label(4.5, -0.32, f"total current I = {i_tot:.2f} A", COLORS["electric"], 12),
+            label(
+                6.45,
+                2.2,
+                f"I₅ = {i5:.2f} A" + ("  (balanced!)" if balanced else ""),
+                COLORS["tertiary"],
+                13,
+            ),
+        ]
+
+        def branch_dots(path, current, phase, color):
+            n = max(0, round(3.0 * abs(current)))
+            directed = path if current >= 0 else path[::-1]
+            return charge_dots(directed, n, phase, color=color)
+
+        def dot_fn(i):
+            phase = 3 * i / 90
+            return [
+                branch_dots(trunk_in, i_tot, phase, COLORS["electric"]),
+                branch_dots(arm_ab, i1, phase, COLORS["primary"]),
+                branch_dots(arm_ad, i3, phase, COLORS["secondary"]),
+                branch_dots(arm_bc, i2, phase, COLORS["primary"]),
+                branch_dots(arm_dc, i4, phase, COLORS["secondary"]),
+                branch_dots(bridge, i5, phase, COLORS["tertiary"]),
+                branch_dots(ret, i_tot, phase, COLORS["electric"]),
+            ]
+
+        state = "balanced — bridge carries nothing" if balanced else "unbalanced — bridge conducts"
+        return circuit_animation(
+            wires,
+            dot_fn,
+            overlays,
+            title=f"<b>Wheatstone bridge — R₁=R₂=R₃=R₅=10 Ω, R₄={r4:.0f} Ω</b><br>"
+            f"<sub>solved live by nodal analysis: bridge current I₅ = {i5:.2f} A ({state})</sub>",
+            xrange=[-0.2, 9.6],
+            yrange=[-0.9, 4.4],
+            legend=[
+                (COLORS["electric"], "yellow — total current"),
+                (COLORS["primary"], "blue — top path (R₁, R₂)"),
+                (COLORS["secondary"], "red — bottom path (R₃, R₄)"),
+                (COLORS["tertiary"], "teal — bridge (R₅)"),
+            ],
+            height=540,
+        )
+
+    bridge_plot = mo.ui.plotly(bridge_figure(r4_slider.value), config=get_plotly_config())
+    mo.output.replace(bridge_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.accordion(
+        {
+            "▸ Worked example: the balanced bridge that measures a resistor": mo.md(
+                r"""
+        The bridge's fame comes from measurement. Wire two known "ratio" arms $R_1 = 10\ \Omega$ and
+        $R_2 = 20\ \Omega$, a known adjustable $R_3$, and the unknown $R_4$ you want to measure.
+        Turn $R_3$ until a meter in the bridge reads **exactly zero current**. At that balance point
+
+        $$\frac{R_1}{R_2} = \frac{R_3}{R_4} \;\Rightarrow\; R_4 = R_3\,\frac{R_2}{R_1}.$$
+
+        Say balance is reached at $R_3 = 15\ \Omega$. Then
+
+        $$R_4 = 15 \times \frac{20}{10} = 30\ \Omega,$$
+
+        read off from three *known* resistances — with no dependence on the source voltage or the
+        meter's calibration, only on the null. That's why a bridge can measure to a fraction of a
+        percent.
+
+        With the bridge balanced it carries no current, so the network is simply two series branches
+        in parallel:
+
+        $$(R_1 + R_3) \parallel (R_2 + R_4) = 25 \parallel 50 = \frac{25 \times 50}{75}
+          = 16.7\ \Omega.$$
+        """
+            ),
+            "▸ Worked example: cracking an unbalanced bridge with Δ–Y": mo.md(
+                r"""
+        Take an *unbalanced* bridge across A–C, all values in ohms: $R_{AB}=30$, $R_{AD}=30$,
+        $R_{BD}=30$ (the bridge), $R_{BC}=20$, $R_{DC}=5$. Since $R_{AB}/R_{BC}=1.5$ but
+        $R_{AD}/R_{DC}=6$, it is **not** balanced — the bridge carries current, and no two resistors
+        are cleanly in series or parallel.
+
+        **Step 1 — turn the triangle A–B–D into a Y.** The delta
+        $R_{AB}=R_{AD}=R_{BD}=30\ \Omega$ becomes a star with centre $N$; each spoke is
+
+        $$R = \frac{30 \times 30}{30 + 30 + 30} = \frac{900}{90} = 10\ \Omega,$$
+
+        so $R_{NA}=R_{NB}=R_{ND}=10\ \Omega$.
+
+        **Step 2 — now it's series-parallel.** From $N$, the path through $B$ is
+        $R_{NB}+R_{BC} = 10+20 = 30\ \Omega$; the path through $D$ is $R_{ND}+R_{DC} = 10+5 =
+        15\ \Omega$. Those two run in parallel:
+
+        $$30 \parallel 15 = \frac{30 \times 15}{45} = 10\ \Omega.$$
+
+        **Step 3 — add the last spoke in series:**
+
+        $$R_{AC} = R_{NA} + 10 = 10 + 10 = 20\ \Omega.$$
+
+        A tangled five-resistor bridge collapses to a clean **20 Ω** — no simultaneous equations, just
+        one Δ→Y swap.
+        """
+            ),
+            "▸ The method that never fails: Kirchhoff, step by step": mo.md(
+                r"""
+        When there's no shortcut, Kirchhoff's laws always solve it — and the interactive above uses
+        exactly this recipe:
+
+        1. **Pick a reference node** (voltage 0) and label the unknown node voltages. For the bridge,
+           ground $C$ and fix $A$ at the source $V$; the unknowns are $V_B$ and $V_D$.
+        2. **Write KCL at each unknown node** as "currents leaving sum to zero", each current written
+           as (voltage difference) × (conductance $g = 1/R$). At $B$:
+
+           $$g_1(V_B - V_A) + g_2(V_B - V_C) + g_5(V_B - V_D) = 0,$$
+
+           and similarly at $D$.
+        3. **Collect into a linear system** — here two equations in $V_B, V_D$ — and solve it (by
+           hand, or with `numpy.linalg.solve`):
+
+           $$\begin{aligned}
+           (g_1 + g_2 + g_5)\,V_B - g_5\,V_D &= g_1 V, \\
+           -g_5\,V_B + (g_3 + g_4 + g_5)\,V_D &= g_3 V.
+           \end{aligned}$$
+        4. **Back-substitute** for every branch current, e.g. $I_5 = g_5(V_B - V_D)$ through the
+           bridge. When $V_B = V_D$ the bridge current is zero — the balance condition falls out
+           automatically.
+
+        This **nodal analysis** scales to any network: $n$ unknown nodes give $n$ equations. It's more
+        work than a clever reduction, but it never gets stuck.
+        """
+            ),
+        }
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## 9. Capacitors: storing charge instead of burning it
 
         Every part so far has *resisted* current and turned energy into heat. A **capacitor**
         (French *condensateur*) does something completely different: it **stores** charge, like a
@@ -1233,9 +1578,11 @@ def _(mo):
         A clean way to remember it: **capacitors are the mirror of resistors.** Wherever resistors
         add, capacitors take reciprocals, and vice-versa.
 
-        The animation charges one up. Charge streams onto the plates and the gap fills — but as it
-        fills, the capacitor pushes back harder, so **the current fades to nothing** once it's full.
-        That fade is the whole story of the next section.
+        The animation runs a full cycle. First it **charges**: charge streams onto the plates and
+        the gap fills, but as it fills the capacitor pushes back harder, so the current fades to
+        nothing once it's full. Then it **discharges**: the stored charge drains back out and the
+        current runs the *other* way, fading again as the plates empty. That fade-and-flow is the
+        whole story of the next section.
         """
     )
     return
@@ -1259,14 +1606,26 @@ def _(
             *component(0.6, 2.0, "5 V", COLORS["quaternary"], width=1.0, height=1.1),
             label(7.5, 2.3, "+Q", COLORS["secondary"], size=15),
             label(7.5, 1.7, "−Q", COLORS["primary"], size=15),
-            label(3.0, 3.35, "current fades as the plates fill", COLORS["text_secondary"], size=12),
+            label(3.0, 0.5, "one full cycle: charge, then discharge", COLORS["text_secondary"], 12),
         ]
 
         def dot_fn(i):
-            frac = i / 89.0
-            level = 1.0 - float(np.exp(-frac * 5.0))  # 0 → 1 as it charges
-            n_dots = round(9 * float(np.exp(-frac * 5.0)))  # current ∝ e^(−t/τ) → 0
-            phase = 3 * i / 90
+            # First half charges the capacitor; second half discharges it. On
+            # discharge the current reverses (phase runs backwards) and the
+            # stored charge drains back out.
+            if i < 45:
+                f = i / 44.0
+                level = 1.0 - float(np.exp(-f * 5.0))  # gap fills 0 → 1
+                cur = float(np.exp(-f * 5.0))  # charging current e^(−t/τ) → 0
+                phase = 3 * i / 90
+                status, status_color = "charging ▲", COLORS["wave"]
+            else:
+                f = (i - 45) / 44.0
+                level = float(np.exp(-f * 5.0))  # gap drains 1 → 0
+                cur = float(np.exp(-f * 5.0))  # discharge current, same envelope
+                phase = -3 * i / 90  # current runs the other way
+                status, status_color = "discharging ▼", COLORS["secondary"]
+            n_dots = round(9 * cur)
             y_fill = 1.74 + level * 0.52
             fill = go.Scatter(
                 x=[5.45, 6.55, 6.55, 5.45, 5.45],
@@ -1274,7 +1633,16 @@ def _(
                 mode="lines",
                 line={"width": 0},
                 fill="toself",
-                fillcolor="rgba(250, 204, 21, 0.35)",  # stored charge, filling up
+                fillcolor="rgba(167, 139, 250, 0.40)",  # stored charge on the plates
+                showlegend=False,
+                hoverinfo="skip",
+            )
+            status_text = go.Scatter(
+                x=[3.0],
+                y=[3.6],
+                mode="text",
+                text=[status],
+                textfont={"color": status_color, "size": 14},
                 showlegend=False,
                 hoverinfo="skip",
             )
@@ -1282,16 +1650,23 @@ def _(
                 charge_dots(top_path, n_dots, phase, color=COLORS["electric"]),
                 charge_dots(bot_path, n_dots, phase, color=COLORS["electric"]),
                 fill,
+                status_text,
             ]
 
         return circuit_animation(
             wires,
             dot_fn,
             overlays,
-            title="<b>Charging a capacitor — it fills, and the current dies away</b>",
+            title="<b>Charging then discharging — it fills up, then drains back out</b>",
             xrange=[-0.2, 8.6],
             yrange=[0.2, 4.0],
-            height=420,
+            legend=[
+                (COLORS["electric"], "yellow — current (charge/discharge)"),
+                (COLORS["spacetime"], "purple — stored charge"),
+                (COLORS["secondary"], "red — +Q plate"),
+                (COLORS["primary"], "blue — −Q plate"),
+            ],
+            height=440,
         )
 
     capacitor_plot = mo.ui.plotly(capacitor_figure(), config=get_plotly_config())
@@ -1338,7 +1713,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## 9. The RC circuit: charging, draining, and the time constant
+        ## 10. The RC circuit: charging, draining, and the time constant
 
         Put a resistor and a capacitor in series with a battery and you get the most useful little
         circuit in electronics — the **RC circuit**. Close the switch and the capacitor doesn't
@@ -1415,7 +1790,8 @@ def _(
             y=v_c,
             mode="lines",
             line={"color": COLORS["primary"], "width": 3},
-            name="V_C(t)",
+            name="blue line — capacitor voltage V_C(t)",
+            showlegend=True,
             hoverinfo="skip",
         )
         target = go.Scatter(
@@ -1423,6 +1799,7 @@ def _(
             y=[source, source],
             mode="lines",
             line={"color": COLORS["text_secondary"], "width": 1, "dash": "dash"},
+            showlegend=False,
             hoverinfo="skip",
         )
         tau_mark = go.Scatter(
@@ -1433,6 +1810,7 @@ def _(
             text=["  63% at t = τ"],
             textposition="middle right",
             textfont={"color": COLORS["quaternary"], "size": 12},
+            showlegend=False,
             hoverinfo="skip",
         )
         head = go.Scatter(
@@ -1440,6 +1818,16 @@ def _(
             y=[0],
             mode="markers",
             marker={"size": 15, "color": COLORS["electric"]},
+            showlegend=False,
+            hoverinfo="skip",
+        )
+        legend_dot = go.Scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker={"size": 11, "color": COLORS["electric"]},
+            name="yellow dots — charging current I(t)",
+            showlegend=True,
             hoverinfo="skip",
         )
         wire_trace = wire(loop, width=2)
@@ -1454,6 +1842,7 @@ def _(
             dots0,
             label(1.5, -0.4, "charging current I(t) — watch it fade", COLORS["text_secondary"], 11),
             head,
+            legend_dot,
         ]
 
         n_frames = 90
@@ -1490,7 +1879,16 @@ def _(
                 "showticklabels": True,
             },
             height=520,
-            showlegend=False,
+            showlegend=True,
+            legend={
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": 1.02,
+                "xanchor": "left",
+                "x": 0.0,
+                "bgcolor": "rgba(22, 33, 62, 0.6)",
+                "font": {"color": COLORS["text"], "size": 12},
+            },
             updatemenus=play_pause_menu(),
         )
         return fig
@@ -1539,7 +1937,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## 10. Putting it all together
+        ## 11. Putting it all together
 
         Here is one circuit that uses every tool at once: a source, a resistor in series, and a
         parallel pair — the kind of thing you'd actually meet on a breadboard. The recipe never
@@ -1640,6 +2038,8 @@ def _(mo):
         | Current divider | $I_1 = I\dfrac{R_2}{R_1+R_2}$ | parallel splits inversely |
         | Kirchhoff current (KCL) | $\sum I_\text{in} = \sum I_\text{out}$ | charge is conserved at a node |
         | Kirchhoff voltage (KVL) | $\sum V = 0$ around a loop | energy is conserved round a loop |
+        | Bridge balance | $R_1 R_4 = R_2 R_3$ | bridge current = 0 (removable) |
+        | Delta → Wye | $R_A = \dfrac{R_{AB}R_{AC}}{R_{AB}+R_{BC}+R_{CA}}$ | unlocks a non-reducible network |
         | Capacitor charge | $Q = CV$ | stored charge |
         | Capacitor energy | $E = \tfrac{1}{2}CV^2$ | stored energy |
         | **Capacitors in parallel** | $C = C_1 + C_2 + \cdots$ | add (mirror of resistors) |
@@ -1649,7 +2049,8 @@ def _(mo):
 
         **The whole method for any resistor network:** reduce series/parallel clumps inward to one
         resistance → find the main current with Ohm's law → expand back outward, dividing voltage
-        across series steps and current across parallel branches.
+        across series steps and current across parallel branches. **If it won't reduce** (a bridge or
+        worse), fall back to a Δ–Y swap, or to Kirchhoff/nodal analysis, which always works.
         """
             )
         }
@@ -1671,6 +2072,9 @@ def _(mo):
           (resistors, capacitors, and inductors as idealised parts)
         - **HyperPhysics — [Ohm's Law and DC circuits](https://hyperphysics.gsu.edu/hbase/electric/ohmlaw.html)**
           (series/parallel combinations, with interactive calculators)
+        - **Wikipedia — [Wheatstone bridge](https://en.wikipedia.org/wiki/Wheatstone_bridge)** and
+          **[Y-Δ transform](https://en.wikipedia.org/wiki/Y-%CE%94_transform)**
+          (the diamond, its balance condition, and delta–wye conversion)
         - **HyperPhysics — [Capacitor combinations](https://hyperphysics.gsu.edu/hbase/electric/capac.html)**,
           **[charging an RC circuit](https://hyperphysics.gsu.edu/hbase/electric/capchg.html)**, and
           **[discharging](https://hyperphysics.gsu.edu/hbase/electric/capdis.html)**
