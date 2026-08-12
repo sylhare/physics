@@ -47,15 +47,14 @@ def _(mo):
 
         ## Why bother with circuits?
 
-        Flip a switch and a light comes on. Behind that everyday miracle is a loop of wire, a
-        source pushing on the electric charge inside it, and a few parts that decide how hard the
-        charge is pushed and how fast it flows. Learn to read that loop and you can look at almost
-        any gadget — a torch, a phone charger, a string of fairy lights — and say, with reasons,
-        *how much current flows here*, *what voltage sits across this part*, and *how much power it
-        burns*.
+        Flip a switch and a light comes on. Behind it is a loop of wire, a source pushing on the
+        electric charge inside it, and a few parts that decide how hard the charge is pushed and how
+        fast it flows. Learn to read that loop and you can look at almost any gadget — a torch, a
+        phone charger, a string of fairy lights — and say, with reasons, *how much current flows
+        here*, *what voltage sits across this part*, and *how much power it burns*.
 
-        The wonderful thing is that the whole subject rests on **three quantities** and a small
-        handful of rules for combining parts. We'll meet the quantities first, then build up circuits
+        The whole subject rests on just **three quantities** and a small handful of rules for
+        combining parts. We'll meet the quantities first, then build up circuits
         the way you'd actually build one: a single part, then two in a row, then two side by side,
         then the messy real thing that mixes both. Along the way we'll add the **capacitor** — a
         part that stores charge instead of burning it — and watch a circuit fill up and drain like
@@ -505,7 +504,7 @@ def _(mo):
         (handy for parts in a row, which share a current), and $P = V^2/R$ when you know the
         voltage across it (handy for parts side by side, which share a voltage).
 
-        One more distinction that trips people up: **power is not energy.** Power (watts) is the
+        One distinction matters: **power is not energy.** Power (watts) is the
         *rate*; **energy** is power multiplied by time,
 
         $$E = P \, t,$$
@@ -514,9 +513,9 @@ def _(mo):
         1000 W for one hour). A 60 W bulb doesn't "use 60 W per hour"; it *is* 60 W, and left on
         for an hour it uses 60 watt-hours of energy.
 
-        In the animation, the charge flows through a resistor and the resistor glows: every charge
-        that squeezes through gives up a little energy as heat, and the glow pulses with the power
-        $P = I^2R$ being dissipated.
+        Below, the charge flows through a resistor and the resistor glows: every charge that squeezes
+        through gives up a little energy as heat, and the glow pulses with the power $P = I^2R$ being
+        dissipated.
         """
     )
     return
@@ -626,9 +625,9 @@ def _(mo):
 
         $$V = V_1 + V_2 + \cdots, \qquad V_k = I\,R_k.$$
 
-        In the animation, notice the dots are **evenly spaced all the way round** and move at one
-        speed — that's "the current is the same everywhere" made visible. The bigger resistor
-        simply steals a bigger share of the 12 V push.
+        Notice how the dots stay **evenly spaced all the way round** and move at one speed — that's
+        "the current is the same everywhere" made visible. The bigger resistor simply takes a bigger
+        share of the 12 V push.
         """
     )
     return
@@ -740,9 +739,9 @@ def _(mo):
 
         $$R_\text{parallel} = \frac{R_1 R_2}{R_1 + R_2}.$$
 
-        In the animation, both branches feel the same 12 V, but the **4 Ω branch runs three times
-        denser** than the 12 Ω branch — three times the current — and the trunk wire carries the
-        sum of the two. Watch the dots split at the junction and merge again on the way back.
+        Both branches feel the same 12 V, but the **4 Ω branch runs three times denser** than the
+        12 Ω branch — three times the current — and the trunk wire carries the sum of the two. The
+        dots split at the junction and merge again on the way back.
         """
     )
     return
@@ -962,9 +961,9 @@ def _(mo):
 
         If a result ever breaks one of those, you've slipped a digit somewhere.
 
-        The animation makes the point with the very same parts: take two 4 Ω resistors and wire them
-        both ways. In **series** they make 8 Ω and sip 1.5 A; in **parallel** they make 2 Ω and gulp
-        6 A — four times the current, from identical components.
+        The animation takes the very same two 4 Ω resistors and wires them both ways. In **series**
+        they make 8 Ω and draw 1.5 A; in **parallel** they make 2 Ω and draw 6 A — four times the
+        current, from identical components.
         """
     )
     return
@@ -1149,7 +1148,7 @@ def _(mo):
         (Note the other resistor's value on top — the branch you're solving for gets the *opposite*
         branch's resistance in the numerator.)
 
-        The animation shows Kirchhoff's current law in the flesh: **5 A flow into the junction, and
+        The animation is Kirchhoff's current law made visible: **5 A flow into the junction, and
         exactly 5 A flow out** — 3 A up one branch, 2 A down the other. Charge never piles up at a
         node, so what arrives must leave.
         """
@@ -1273,7 +1272,7 @@ def _(mo):
         it's just two series pairs sitting in parallel, and everything from §5 handles it.
 
         The trouble starts when you drop a **fifth resistor across the middle**, bridging the top and
-        bottom nodes. This is the famous **Wheatstone bridge**, and it breaks the whole
+        bottom nodes. This is the **Wheatstone bridge**, and it breaks the whole
         series-parallel game: look as hard as you like and there is no pair of resistors that is
         *purely* in series or *purely* in parallel. Reduction stalls on the first step.
 
@@ -1566,7 +1565,7 @@ def _(mo):
 
         $$E = \tfrac{1}{2} C V^2.$$
 
-        Here's the twist that catches everyone out: **capacitors combine the *opposite* way to
+        There is one twist worth pinning down: **capacitors combine the *opposite* way to
         resistors.**
 
         - **In parallel**, the plate areas effectively add, so capacitances simply add:
@@ -1735,10 +1734,10 @@ def _(mo):
         about **5 τ** it's essentially full (over 99%). Draining is the mirror image — the same
         curve upside-down, $V_C(t) = V_0\,e^{-t/RC}$ — with the same $\tau$.
 
-        In the animation, watch two things at once: the **curve** climbing toward the source voltage,
-        and the **charge flow slowing down** as the capacitor fills. The dots crowd through fast at
-        first, then thin out to a trickle — that's the current dying away. Drag the slider to change
-        the resistance, and watch a bigger $R$ stretch the whole process out in time.
+        The animation tracks both at once: the **curve** climbing toward the source voltage, and the
+        **charge flow slowing** as the capacitor fills — the dots crowd through fast at first, then
+        thin to a trickle as the current dies away. A bigger $R$ stretches the whole process out in
+        time; drag the slider to see it.
         """
     )
     return
