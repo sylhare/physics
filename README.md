@@ -250,16 +250,17 @@ uv run marimo run notebooks/013_electric_circuits.py   # View mode
 uv run marimo edit notebooks/013_electric_circuits.py  # Edit mode
 ```
 
-**Contents:**
-- The three quantities (V, I, R) and Ohm's law, with the water-pipe analogy (interactive)
-- Power and energy: P = VI = I²R = V²/R, watts vs. kilowatt-hours (worked example)
+**Contents (every section has an animation of the current actually flowing):**
+- The three quantities (V, I, R) and Ohm's law, with the water-pipe analogy (interactive + animated)
+- Power and energy: P = VI = I²R = V²/R, watts vs. kilowatt-hours (animated heat + worked example)
 - Series circuits — one path, one current, voltages add (animated current flow)
 - Parallel circuits — one voltage, the current splits (animated current flow)
 - Mixed circuits — reducing a tangle one clump at a time (animated)
-- Kirchhoff's rules, the voltage divider (interactive) and the current divider
-- Capacitors — storing charge, energy ½CV², and why they combine backwards from resistors
+- Common setups, shortcuts and edge cases — short/open circuits, n-equal resistors, series-vs-parallel of the same parts (animated)
+- Kirchhoff's rules (animated KCL node), the voltage divider (interactive) and the current divider
+- Capacitors — storing charge, energy ½CV², why they combine backwards from resistors (animated charging)
 - The RC circuit — charging, draining, and the time constant τ = RC (animated, interactive)
-- A full worked example tying every rule together, plus a one-page formula cheat sheet
+- A full worked example tying every rule together (animated), plus a one-page formula cheat sheet
 
 ## Features
 

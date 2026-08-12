@@ -74,10 +74,11 @@ def _(mo):
         3. **Series** — parts in a row: the current is shared, the voltage divides
         4. **Parallel** — parts side by side: the voltage is shared, the current divides
         5. **Mixed circuits** — reduce a tangle one clump at a time
-        6. **Kirchhoff's rules** — the two laws underneath everything, and the divider shortcuts
-        7. **Capacitors** — storing charge, and why they combine backwards from resistors
-        8. **The RC circuit** — charging and draining, and the time constant τ
-        9. **A full worked example** — one circuit, every tool, all the numbers
+        6. **Common setups & edge cases** — shortcuts, and the tricks that catch people out
+        7. **Kirchhoff's rules** — the two laws underneath everything, and the divider shortcuts
+        8. **Capacitors** — storing charge, and why they combine backwards from resistors
+        9. **The RC circuit** — charging and draining, and the time constant τ
+        10. **A full worked example** — one circuit, every tool, all the numbers
 
         Nothing here needs more than school algebra. Let's go and look.
         """
@@ -106,8 +107,12 @@ def _(COLORS, create_play_pause_buttons, go, np):
             hoverinfo="skip",
         )
 
-    def component(cx, cy, label, color, width=1.1, height=0.66):
-        """A labelled box (resistor, battery, capacitor) centred on (cx, cy)."""
+    def component(cx, cy, label, color, width=1.1, height=0.66, fill=None):
+        """A labelled box (resistor, battery, capacitor) centred on (cx, cy).
+
+        `fill` overrides the box fill colour; pass a transparent colour to let an
+        animated glow behind the box show through (used by the power section).
+        """
         hw, hh = width / 2, height / 2
         box = go.Scatter(
             x=[cx - hw, cx + hw, cx + hw, cx - hw, cx - hw],
@@ -115,7 +120,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
             mode="lines",
             line={"color": color, "width": 3},
             fill="toself",
-            fillcolor=COLORS["paper"],
+            fillcolor=fill or COLORS["paper"],
             showlegend=False,
             hoverinfo="skip",
         )
@@ -145,10 +150,11 @@ def _(COLORS, create_play_pause_buttons, go, np):
     def charge_dots(path, n_dots, phase, color=None, size=9):
         """`n_dots` glowing charges spread evenly along `path`, shifted by `phase`.
 
-        `phase` runs 0 → 1 across the animation; the dots drift one full gap in
-        that time, so the flow loops seamlessly. More dots on a wire means more
-        current: at a fixed drift speed, packing charges closer *is* more charge
-        per second passing any point.
+        `phase` is measured in gaps: advancing it by 1 slides every dot forward
+        into its neighbour's place, so any whole-number phase looks identical and
+        the flow loops seamlessly. More dots on a wire means more current: at a
+        fixed drift speed, packing charges closer *is* more charge per second
+        passing any point.
         """
         pts = np.asarray(path, dtype=float)
         seg = np.diff(pts, axis=0)
@@ -194,32 +200,40 @@ def _(COLORS, create_play_pause_buttons, go, np):
             }
         ]
 
-    def flow(specs, n_frames=30):
+    ANIM_FRAMES = 90  # ~4.5 s per play at the shared 50 ms/frame — long and smooth
+    ANIM_CYCLES = 3  # dots drift three whole gaps across a play, so the flow reads
+
+    def flow(specs, n_frames=ANIM_FRAMES, cycles=ANIM_CYCLES):
         """Turn a list of `(path, n_dots, color)` specs into a `dot_fn` for
         `circuit_animation`: each frame drifts every stream on by a shared phase,
-        so wires with more dots simply carry more current.
+        so wires with more dots simply carry more current. The dots advance
+        `cycles` gaps over the whole play, ending where they began (seamless loop).
         """
 
         def dot_fn(i):
-            phase = i / n_frames
+            phase = cycles * i / n_frames
             return [charge_dots(path, n, phase, color=color) for path, n, color in specs]
 
         return dot_fn
 
-    def circuit_animation(static_traces, dot_fn, n_frames, title, xrange, yrange, height=460):
-        """Assemble a schematic (`static_traces`) with an animated charge flow.
+    def circuit_animation(
+        wire_traces, dot_fn, overlay_traces, title, xrange, yrange, n_frames=ANIM_FRAMES, height=460
+    ):
+        """Assemble a schematic with an animated charge flow drawn *behind* the parts.
 
-        `dot_fn(i)` returns the moving-dot traces for frame `i`; it must return
-        the same number of traces every time so the frames line up.
+        Draw order (back to front): wires → charge dots → component boxes and
+        labels. Because the dots sit under the boxes and labels, the moving charge
+        slides behind each component and never hides its text. `dot_fn(i)` returns
+        the moving traces for frame `i`; it must return the same count every frame.
         """
         first_dots = dot_fn(0)
-        n_static = len(static_traces)
-        dot_indices = list(range(n_static, n_static + len(first_dots)))
+        n_wire = len(wire_traces)
+        dot_indices = list(range(n_wire, n_wire + len(first_dots)))
         frames = [
             go.Frame(data=first_dots if i == 0 else dot_fn(i), traces=dot_indices, name=str(i))
             for i in range(n_frames)
         ]
-        fig = go.Figure(data=[*static_traces, *first_dots], frames=frames)
+        fig = go.Figure(data=[*wire_traces, *first_dots, *overlay_traces], frames=frames)
         fig.update_layout(
             title={"text": title},
             xaxis={"range": xrange, "showgrid": False, "zeroline": False, "showticklabels": False},
@@ -236,15 +250,74 @@ def _(COLORS, create_play_pause_buttons, go, np):
         )
         return fig
 
-    return charge_dots, circuit_animation, component, flow, label, play_pause_menu, wire
+    def series_parallel_scene(labels, currents, note, title, height=460):
+        """The shared schematic for a resistor in series feeding a parallel pair,
+        reused by the mixed-circuit (§5) and full-example (§9) animations.
+
+        `labels` = (V, R₁, R₂, R₃) strings; `currents` = (I_main, I₂, I₃) in amps.
+        Dot density tracks those currents, so the same drawing serves any values.
+        """
+        left_x, split_x, join_x = 0.7, 4.6, 8.2
+        y_top, y_bot, y_mid = 3.4, 1.2, 2.3
+        series_seg = [(left_x, y_mid), (left_x, y_top), (split_x, y_top)]
+        left_rail = [(split_x, y_top), (split_x, y_bot)]
+        branch_top = [(split_x, y_top), (join_x, y_top)]
+        branch_bot = [(split_x, y_bot), (join_x, y_bot)]
+        right_rail = [(join_x, y_top), (join_x, y_bot)]
+        return_seg = [(join_x, y_bot), (left_x, y_bot), (left_x, y_mid)]
+        v_lbl, r1_lbl, r2_lbl, r3_lbl = labels
+        i_main, i2, i3 = currents
+
+        wires = [
+            wire(series_seg),
+            wire(left_rail),
+            wire(branch_top),
+            wire(branch_bot),
+            wire(right_rail),
+            wire(return_seg),
+        ]
+        overlays = [
+            *component(left_x, y_mid, v_lbl, COLORS["quaternary"], width=1.0, height=1.2),
+            *component(2.6, y_top, r1_lbl, COLORS["tertiary"]),
+            *component(6.4, y_top, r2_lbl, COLORS["primary"]),
+            *component(6.4, y_bot, r3_lbl, COLORS["secondary"]),
+            label(2.6, y_top + 0.5, f"I = {i_main:g} A (all of it)", COLORS["electric"], size=12),
+            label(6.4, y_top + 0.5, f"I₂ = {i2:g} A", COLORS["primary"], size=12),
+            label(6.4, y_bot - 0.5, f"I₃ = {i3:g} A", COLORS["secondary"], size=12),
+            label(9.2, y_mid, note, COLORS["text_secondary"], size=11),
+        ]
+        specs = [
+            (series_seg, max(2, round(i_main * 2.0)), COLORS["electric"]),
+            (branch_top, max(2, round(i2 * 1.5)), COLORS["primary"]),
+            (branch_bot, max(2, round(i3 * 1.5)), COLORS["secondary"]),
+            (return_seg, max(2, round(i_main * 3.4)), COLORS["electric"]),
+        ]
+        return circuit_animation(
+            wires,
+            flow(specs),
+            overlays,
+            title=title,
+            xrange=[-0.2, 10.6],
+            yrange=[0.4, 4.2],
+            height=height,
+        )
+
+    return (
+        charge_dots,
+        circuit_animation,
+        component,
+        flow,
+        label,
+        play_pause_menu,
+        series_parallel_scene,
+        wire,
+    )
 
 
 @app.cell
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## 1. The three quantities, and the one law that ties them
 
         A circuit runs on three numbers. The trick to never getting confused is a picture: think
@@ -335,11 +408,40 @@ def _(COLORS, get_plotly_config, go, mo, np, ohm_resistance):
 
 
 @app.cell
+def _(
+    COLORS, circuit_animation, component, flow, get_plotly_config, label, mo, ohm_resistance, wire
+):
+    def ohm_flow_figure(resistance):
+        current = 9.0 / resistance  # amps
+        # The same one-resistor loop, but now you can *see* the current: raise R
+        # with the slider above and the stream of charge thins out.
+        loop = [(0.6, 1.0), (0.6, 3.0), (4.5, 3.0), (8.4, 3.0), (8.4, 1.0), (0.6, 1.0)]
+        n_dots = min(30, max(1, round(current * 8)))
+        wires = [wire(loop, width=3)]
+        overlays = [
+            *component(0.6, 2.0, "9 V", COLORS["quaternary"], width=1.0, height=1.1),
+            *component(4.5, 3.0, f"R = {resistance:.0f} Ω", COLORS["primary"], width=1.7),
+            label(4.5, 2.2, f"I = {current * 1000:.0f} mA", COLORS["electric"], size=14),
+        ]
+        return circuit_animation(
+            wires,
+            flow([(loop, n_dots, COLORS["electric"])]),
+            overlays,
+            title="<b>Ohm's law, live — bigger R throttles the flow of charge</b>",
+            xrange=[-0.2, 9.2],
+            yrange=[0.2, 4.0],
+            height=380,
+        )
+
+    ohm_flow_plot = mo.ui.plotly(ohm_flow_figure(ohm_resistance.value), config=get_plotly_config())
+    mo.output.replace(ohm_flow_plot)
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## 2. Power: how fast the circuit spends energy
 
         Voltage and current together tell you the **power** — the rate at which the circuit turns
@@ -365,8 +467,60 @@ def _(mo):
         measured in joules, or — on your electricity bill — in **kilowatt-hours** (1 kWh is running
         1000 W for one hour). A 60 W bulb doesn't "use 60 W per hour"; it *is* 60 W, and left on
         for an hour it uses 60 watt-hours of energy.
+
+        In the animation, the charge flows through a resistor and the resistor glows: every charge
+        that squeezes through gives up a little energy as heat, and the glow pulses with the power
+        $P = I^2R$ being dissipated.
         """
     )
+    return
+
+
+@app.cell
+def _(
+    COLORS, charge_dots, circuit_animation, component, get_plotly_config, go, label, mo, np, wire
+):
+    def power_figure():
+        loop = [(0.6, 1.0), (0.6, 3.0), (4.5, 3.0), (8.4, 3.0), (8.4, 1.0), (0.6, 1.0)]
+        cx, cy = 4.5, 3.0
+        wires = [wire(loop, width=3)]
+        overlays = [
+            *component(0.6, 2.0, "12 V", COLORS["quaternary"], width=1.0, height=1.1),
+            # Transparent fill so the pulsing heat-glow behind it shows through.
+            *component(cx, cy, "R", COLORS["secondary"], width=1.4, fill="rgba(0,0,0,0)"),
+            label(cx, 2.1, "P = I²R burned as heat", COLORS["gravity"], size=13),
+        ]
+
+        def dot_fn(i):
+            phase = 3 * i / 90
+            pulse = 0.5 + 0.5 * float(np.sin(2 * np.pi * i / 30))
+            glow = go.Scatter(
+                x=[cx],
+                y=[cy],
+                mode="markers",
+                marker={
+                    "size": 60 + 45 * pulse,
+                    "color": COLORS["gravity"],
+                    "opacity": 0.10 + 0.16 * pulse,
+                    "line": {"width": 0},
+                },
+                showlegend=False,
+                hoverinfo="skip",
+            )
+            return [glow, charge_dots(loop, 14, phase)]
+
+        return circuit_animation(
+            wires,
+            dot_fn,
+            overlays,
+            title="<b>Power: current forced through a resistor comes out as heat</b>",
+            xrange=[-0.2, 9.2],
+            yrange=[0.2, 4.0],
+            height=400,
+        )
+
+    power_plot = mo.ui.plotly(power_figure(), config=get_plotly_config())
+    mo.output.replace(power_plot)
     return
 
 
@@ -405,8 +559,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## 3. Series: parts in a row share the current
 
         The simplest way to wire two parts is **in a row**, one after the other, so the same loop
@@ -423,7 +575,7 @@ def _(mo):
 
         The current pushed through that total is $I = V / R_\text{series}$, the same in every part.
         And because each resistor drops some of the voltage as the current fights through it, the
-        **voltages add back up to the source** (that's Kirchhoff's voltage law, coming in §6):
+        **voltages add back up to the source** (that's Kirchhoff's voltage law, coming in §7):
 
         $$V = V_1 + V_2 + \cdots, \qquad V_k = I\,R_k.$$
 
@@ -448,8 +600,8 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
             (8.6, 1.0),
             (0.6, 1.0),  # back to the battery
         ]
-        static = [
-            wire(loop, width=3),
+        wires = [wire(loop, width=3)]
+        overlays = [
             *component(0.6, 2.0, "12 V", COLORS["quaternary"], width=1.0, height=1.1),
             *component(3.0, 3.0, "R₁ = 4 Ω", COLORS["primary"]),
             *component(6.4, 3.0, "R₂ = 8 Ω", COLORS["secondary"]),
@@ -462,9 +614,9 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
 
         # One current everywhere → one evenly-spaced stream of charge.
         return circuit_animation(
-            static,
+            wires,
             flow([(loop, 22, COLORS["electric"])]),
-            n_frames=30,
+            overlays,
             title="<b>Series circuit — one path, one current</b>",
             xrange=[-0.2, 9.4],
             yrange=[0.0, 4.2],
@@ -516,8 +668,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## 4. Parallel: parts side by side share the voltage
 
         Now wire the two parts **side by side**, both ends joined, so each has its own path back to
@@ -528,7 +678,7 @@ def _(mo):
 
         In the water picture, it's one pipe branching into two before rejoining — the same pressure
         drives both branches, but more water takes the wider (lower-resistance) branch. The branch
-        currents add up to the total (that's Kirchhoff's current law, §6):
+        currents add up to the total (that's Kirchhoff's current law, §7):
 
         $$I = I_1 + I_2 + \cdots, \qquad I_k = \frac{V}{R_k}.$$
 
@@ -566,13 +716,15 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
         right_rail = [(right_rail_x, y_top), (right_rail_x, y_bot)]
         trunk_out = [(right_rail_x, y_bot), (0.7, y_bot), (0.7, y_mid)]
 
-        static = [
+        wires = [
             wire(trunk_in),
             wire(trunk_left_rail),
             wire(branch_top),
             wire(branch_bot),
             wire(right_rail),
             wire(trunk_out),
+        ]
+        overlays = [
             *component(0.7, y_mid, "12 V", COLORS["quaternary"], width=1.0, height=1.2),
             *component(5.2, y_top, "R₁ = 4 Ω", COLORS["primary"]),
             *component(5.2, y_bot, "R₂ = 12 Ω", COLORS["secondary"]),
@@ -586,7 +738,7 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
         # per unit length) tracks the current: trunk 4 A, top branch 3 A, bottom
         # branch 1 A — the 4 Ω branch runs three times denser.
         return circuit_animation(
-            static,
+            wires,
             flow(
                 [
                     (trunk_in, 4, COLORS["electric"]),
@@ -595,7 +747,7 @@ def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, 
                     (trunk_out, 12, COLORS["electric"]),
                 ]
             ),
-            n_frames=30,
+            overlays,
             title="<b>Parallel circuit — one voltage, the current splits</b>",
             xrange=[-0.2, 10.4],
             yrange=[0.2, 4.4],
@@ -652,8 +804,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## 5. Mixed circuits: reduce the tangle one clump at a time
 
         Real circuits are rarely all-series or all-parallel — they're a mix. The good news is that
@@ -676,56 +826,17 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, circuit_animation, component, flow, label, mo, get_plotly_config, wire):
-    def mixed_figure():
-        # R1 in series, feeding a parallel pair (R2 over R3).
-        left_x, split_x, join_x = 0.7, 4.6, 8.2
-        y_top, y_bot, y_mid = 3.4, 1.2, 2.3
-
-        series_seg = [(left_x, y_mid), (left_x, y_top), (split_x, y_top)]
-        left_rail = [(split_x, y_top), (split_x, y_bot)]
-        branch_top = [(split_x, y_top), (join_x, y_top)]
-        branch_bot = [(split_x, y_bot), (join_x, y_bot)]
-        right_rail = [(join_x, y_top), (join_x, y_bot)]
-        return_seg = [(join_x, y_bot), (left_x, y_bot), (left_x, y_mid)]
-
-        static = [
-            wire(series_seg),
-            wire(left_rail),
-            wire(branch_top),
-            wire(branch_bot),
-            wire(right_rail),
-            wire(return_seg),
-            *component(left_x, y_mid, "18 V", COLORS["quaternary"], width=1.0, height=1.2),
-            *component(2.6, y_top, "R₁ = 3 Ω", COLORS["tertiary"]),
-            *component(6.4, y_top, "R₂ = 6 Ω", COLORS["primary"]),
-            *component(6.4, y_bot, "R₃ = 6 Ω", COLORS["secondary"]),
-            label(2.6, y_top + 0.5, "I = 3 A (all of it)", COLORS["electric"], size=12),
-            label(6.4, y_top + 0.5, "I₂ = 1.5 A", COLORS["primary"], size=12),
-            label(6.4, y_bot - 0.5, "I₃ = 1.5 A", COLORS["secondary"], size=12),
-            label(9.1, y_mid, "R₂ ∥ R₃ = 3 Ω", COLORS["text_secondary"], size=12),
-        ]
-
-        # Full current (3 A) in the trunk; it splits evenly, so each 1.5 A
-        # branch runs at half the trunk's dot density.
-        return circuit_animation(
-            static,
-            flow(
-                [
-                    (series_seg, 5, COLORS["electric"]),
-                    (branch_top, 2, COLORS["primary"]),
-                    (branch_bot, 2, COLORS["secondary"]),
-                    (return_seg, 9, COLORS["electric"]),
-                ]
-            ),
-            n_frames=30,
+def _(get_plotly_config, mo, series_parallel_scene):
+    # R₁ = 3 Ω in series feeds R₂ ∥ R₃ = 6 Ω ∥ 6 Ω; 3 A splits evenly into 1.5 A each.
+    mixed_plot = mo.ui.plotly(
+        series_parallel_scene(
+            labels=("18 V", "R₁ = 3 Ω", "R₂ = 6 Ω", "R₃ = 6 Ω"),
+            currents=(3, 1.5, 1.5),
+            note="R₂ ∥ R₃ = 3 Ω",
             title="<b>Mixed circuit — a resistor in series with a parallel pair</b>",
-            xrange=[-0.2, 10.6],
-            yrange=[0.4, 4.2],
-            height=460,
-        )
-
-    mixed_plot = mo.ui.plotly(mixed_figure(), config=get_plotly_config())
+        ),
+        config=get_plotly_config(),
+    )
     mo.output.replace(mixed_plot)
     return
 
@@ -780,9 +891,175 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
+        ## 6. Common setups, shortcuts, and edge cases
 
-        ## 6. Kirchhoff's rules, and the divider shortcuts
+        You now have the two moves — **series adds, parallel takes reciprocals** — and the recipe to
+        reduce any tangle. Here are the shortcuts worth memorising, and the edge cases that catch
+        people out.
+
+        **Two shortcuts that cover most real circuits:**
+
+        - **$n$ identical resistors in series:** $R_\text{eq} = nR$. Three 100 Ω in a row → 300 Ω.
+        - **$n$ identical resistors in parallel:** $R_\text{eq} = R/n$. Three 100 Ω side by side → 33.3 Ω.
+
+        **Two sanity checks you can always apply:**
+
+        - **Series** is always *larger than the largest* resistor — you keep adding restriction.
+        - **Parallel** is always *smaller than the smallest* resistor — you keep adding paths.
+
+        If a result ever breaks one of those, you've slipped a digit somewhere.
+
+        The animation makes the point with the very same parts: take two 4 Ω resistors and wire them
+        both ways. In **series** they make 8 Ω and sip 1.5 A; in **parallel** they make 2 Ω and gulp
+        6 A — four times the current, from identical components.
+        """
+    )
+    return
+
+
+@app.cell
+def _(COLORS, charge_dots, circuit_animation, component, get_plotly_config, label, mo, np, wire):
+    def compare_figure():
+        def plen(path):
+            pts = np.asarray(path, dtype=float)
+            return float(np.hypot(*np.diff(pts, axis=0).T).sum())
+
+        def n_for(path, current):
+            return max(2, round(0.5 * current * plen(path)))
+
+        # SERIES (top): the two 4 Ω resistors in a row.
+        loop_s = [
+            (0.6, 5.4),
+            (0.6, 7.4),
+            (3.4, 7.4),
+            (6.2, 7.4),
+            (8.6, 7.4),
+            (8.6, 5.4),
+            (0.6, 5.4),
+        ]
+        # PARALLEL (bottom): the same two resistors side by side.
+        lrx, rrx = 2.6, 8.0
+        trunk_in = [(0.6, 2.0), (0.6, 3.4), (lrx, 3.4)]
+        left_rail = [(lrx, 3.4), (lrx, 0.6)]
+        branch_top = [(lrx, 3.4), (rrx, 3.4)]
+        branch_bot = [(lrx, 0.6), (rrx, 0.6)]
+        right_rail = [(rrx, 3.4), (rrx, 0.6)]
+        trunk_out = [(rrx, 0.6), (0.6, 0.6), (0.6, 2.0)]
+
+        wires = [
+            wire(loop_s),
+            wire(trunk_in),
+            wire(left_rail),
+            wire(branch_top),
+            wire(branch_bot),
+            wire(right_rail),
+            wire(trunk_out),
+        ]
+        overlays = [
+            *component(0.6, 6.4, "12 V", COLORS["quaternary"], width=1.0, height=1.1),
+            *component(3.4, 7.4, "4 Ω", COLORS["primary"]),
+            *component(6.2, 7.4, "4 Ω", COLORS["secondary"]),
+            label(4.8, 8.0, "SERIES:  4 + 4 = 8 Ω  →  I = 1.5 A", COLORS["electric"], size=13),
+            *component(0.6, 2.0, "12 V", COLORS["quaternary"], width=1.0, height=1.1),
+            *component(5.3, 3.4, "4 Ω", COLORS["primary"]),
+            *component(5.3, 0.6, "4 Ω", COLORS["secondary"]),
+            label(4.8, 4.0, "PARALLEL:  4 ∥ 4 = 2 Ω  →  I = 6 A", COLORS["electric"], size=13),
+        ]
+
+        def dot_fn(i):
+            phase = 3 * i / 90
+            return [
+                charge_dots(loop_s, n_for(loop_s, 1.5), phase, color=COLORS["electric"]),
+                charge_dots(trunk_in, n_for(trunk_in, 6), phase, color=COLORS["electric"]),
+                charge_dots(branch_top, n_for(branch_top, 3), phase, color=COLORS["primary"]),
+                charge_dots(branch_bot, n_for(branch_bot, 3), phase, color=COLORS["secondary"]),
+                charge_dots(trunk_out, n_for(trunk_out, 6), phase, color=COLORS["electric"]),
+            ]
+
+        return circuit_animation(
+            wires,
+            dot_fn,
+            overlays,
+            title="<b>Same two resistors, two montages — parallel pulls 4× the current</b>",
+            xrange=[-0.2, 9.4],
+            yrange=[0.2, 8.4],
+            height=620,
+        )
+
+    compare_plot = mo.ui.plotly(compare_figure(), config=get_plotly_config())
+    mo.output.replace(compare_plot)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.accordion(
+        {
+            "▸ The mirror table: series vs parallel at a glance": mo.md(
+                r"""
+        | | **Series** (one path) | **Parallel** (many paths) |
+        |---|---|---|
+        | Current | **same** through every part | **splits** between parts |
+        | Voltage | **splits** across parts | **same** across every part |
+        | Resistance | adds: $R_1 + R_2 + \cdots$ | reciprocals add (always smaller) |
+        | Total vs parts | bigger than the **biggest** | smaller than the **smallest** |
+        | $n$ equal parts | $nR$ | $R/n$ |
+        | Capacitors | reciprocals add (smaller) | add (bigger) |
+
+        Series and parallel are mirror images: flip a circuit from one to the other and every row of
+        this table flips with it.
+        """
+            ),
+            "▸ Edge cases that trip people up": mo.md(
+                r"""
+        **A short circuit (0 Ω) in parallel wins everything.** A bare wire has essentially no
+        resistance, so put one across a resistor and product-over-sum gives
+        $R_\text{eq} = R\cdot 0/(R+0) = 0$: all the current pours through the wire and the resistor
+        beside it carries almost none. That's why a stray wire across a battery is dangerous — the
+        current is then limited only by the battery itself.
+
+        **An open circuit (∞ Ω) stops a series path dead.** A broken wire or unplugged part is
+        infinite resistance. In *series* that makes the whole loop infinite and the current zero —
+        one gap and nothing flows (why old fairy-light strings all went dark when a single bulb
+        blew). In *parallel* an open branch just carries no current; the rest of the circuit doesn't
+        notice.
+
+        **The bottleneck is the biggest in series, the smallest in parallel.** A 1 kΩ in series with
+        a 10 Ω behaves like ~1 kΩ — the big one dominates. But a 1 kΩ in *parallel* with a 10 Ω
+        behaves like ~10 Ω — the *small* one dominates, because current takes the easy path. When one
+        resistor is far larger or smaller than its neighbour, you can often ignore the other.
+        """
+            ),
+            "▸ Worked example: three resistors in parallel (a shared power rail)": mo.md(
+                r"""
+        A 12 V rail feeds three loads at once: $R_1 = 6\ \Omega$, $R_2 = 3\ \Omega$, $R_3 = 2\ \Omega$.
+
+        **Total resistance — add the reciprocals** (product-over-sum is for two only):
+
+        $$\frac{1}{R_\text{eq}} = \frac16 + \frac13 + \frac12 = \frac{1}{6} + \frac{2}{6} + \frac{3}{6}
+          = \frac{6}{6} = 1 \;\Rightarrow\; R_\text{eq} = 1\ \Omega,$$
+
+        smaller than the smallest branch (2 Ω), as it must be.
+
+        **Each branch sees the full 12 V:**
+
+        $$I_1 = \frac{12}{6} = 2\ \text{A}, \qquad I_2 = \frac{12}{3} = 4\ \text{A}, \qquad
+          I_3 = \frac{12}{2} = 6\ \text{A}.$$
+
+        **Total current:** $I = 2 + 4 + 6 = 12\ \text{A}$, matching $I = V/R_\text{eq} = 12/1 = 12$ A. ✓
+        The smallest resistor hogs the most current — the current divider at work.
+        """
+            ),
+        }
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## 7. Kirchhoff's rules, and the divider shortcuts
 
         Everything above is really two bookkeeping laws in disguise — **Kirchhoff's rules**, the
         foundation the whole subject stands on. They're just statements that charge and energy are
@@ -813,8 +1090,58 @@ def _(mo):
 
         (Note the other resistor's value on top — the branch you're solving for gets the *opposite*
         branch's resistance in the numerator.)
+
+        The animation shows Kirchhoff's current law in the flesh: **5 A flow into the junction, and
+        exactly 5 A flow out** — 3 A up one branch, 2 A down the other. Charge never piles up at a
+        node, so what arrives must leave.
         """
     )
+    return
+
+
+@app.cell
+def _(COLORS, circuit_animation, flow, get_plotly_config, go, label, mo, wire):
+    def kcl_figure():
+        node = (4.2, 2.0)
+        wire_in = [(0.4, 2.0), node]
+        wire_top = [node, (8.4, 3.3)]
+        wire_bot = [node, (8.4, 0.7)]
+        wires = [wire(wire_in), wire(wire_top), wire(wire_bot)]
+        node_dot = go.Scatter(
+            x=[node[0]],
+            y=[node[1]],
+            mode="markers",
+            marker={"size": 13, "color": COLORS["text"]},
+            showlegend=False,
+            hoverinfo="skip",
+        )
+        overlays = [
+            node_dot,
+            label(1.9, 2.35, "I = 5 A in", COLORS["electric"], size=14),
+            label(6.9, 3.5, "3 A out", COLORS["primary"], size=13),
+            label(6.9, 0.5, "2 A out", COLORS["secondary"], size=13),
+            label(4.2, 1.2, "KCL: 5 = 3 + 2", COLORS["text_secondary"], size=13),
+        ]
+        # Dot counts track current (in = top + bottom), so the two outgoing
+        # streams together carry exactly what the incoming wire delivers.
+        return circuit_animation(
+            wires,
+            flow(
+                [
+                    (wire_in, 8, COLORS["electric"]),
+                    (wire_top, 6, COLORS["primary"]),
+                    (wire_bot, 4, COLORS["secondary"]),
+                ]
+            ),
+            overlays,
+            title="<b>Kirchhoff's current law — what flows in flows out</b>",
+            xrange=[0.0, 9.4],
+            yrange=[0.0, 4.0],
+            height=400,
+        )
+
+    kcl_plot = mo.ui.plotly(kcl_figure(), config=get_plotly_config())
+    mo.output.replace(kcl_plot)
     return
 
 
@@ -876,9 +1203,7 @@ def _(COLORS, divider_ratio, get_plotly_config, go, mo, np):
 def _(mo):
     mo.md(
         r"""
-        ---
-
-        ## 7. Capacitors: storing charge instead of burning it
+        ## 8. Capacitors: storing charge instead of burning it
 
         Every part so far has *resisted* current and turned energy into heat. A **capacitor**
         (French *condensateur*) does something completely different: it **stores** charge, like a
@@ -907,8 +1232,70 @@ def _(mo):
 
         A clean way to remember it: **capacitors are the mirror of resistors.** Wherever resistors
         add, capacitors take reciprocals, and vice-versa.
+
+        The animation charges one up. Charge streams onto the plates and the gap fills — but as it
+        fills, the capacitor pushes back harder, so **the current fades to nothing** once it's full.
+        That fade is the whole story of the next section.
         """
     )
+    return
+
+
+@app.cell
+def _(
+    COLORS, charge_dots, circuit_animation, component, get_plotly_config, go, label, mo, np, wire
+):
+    def capacitor_figure():
+        battery_seg = [(0.6, 1.0), (0.6, 3.0)]
+        top_path = [(0.6, 3.0), (6.0, 3.0), (6.0, 2.3)]  # battery + → top plate
+        bot_path = [(6.0, 1.7), (6.0, 1.0), (0.6, 1.0)]  # bottom plate → battery −
+        top_plate = [(5.3, 2.3), (6.7, 2.3)]
+        bot_plate = [(5.3, 1.7), (6.7, 1.7)]
+
+        wires = [wire(battery_seg), wire(top_path), wire(bot_path)]
+        overlays = [
+            wire(top_plate, color=COLORS["secondary"], width=6),
+            wire(bot_plate, color=COLORS["primary"], width=6),
+            *component(0.6, 2.0, "5 V", COLORS["quaternary"], width=1.0, height=1.1),
+            label(7.5, 2.3, "+Q", COLORS["secondary"], size=15),
+            label(7.5, 1.7, "−Q", COLORS["primary"], size=15),
+            label(3.0, 3.35, "current fades as the plates fill", COLORS["text_secondary"], size=12),
+        ]
+
+        def dot_fn(i):
+            frac = i / 89.0
+            level = 1.0 - float(np.exp(-frac * 5.0))  # 0 → 1 as it charges
+            n_dots = round(9 * float(np.exp(-frac * 5.0)))  # current ∝ e^(−t/τ) → 0
+            phase = 3 * i / 90
+            y_fill = 1.74 + level * 0.52
+            fill = go.Scatter(
+                x=[5.45, 6.55, 6.55, 5.45, 5.45],
+                y=[1.74, 1.74, y_fill, y_fill, 1.74],
+                mode="lines",
+                line={"width": 0},
+                fill="toself",
+                fillcolor="rgba(250, 204, 21, 0.35)",  # stored charge, filling up
+                showlegend=False,
+                hoverinfo="skip",
+            )
+            return [
+                charge_dots(top_path, n_dots, phase, color=COLORS["electric"]),
+                charge_dots(bot_path, n_dots, phase, color=COLORS["electric"]),
+                fill,
+            ]
+
+        return circuit_animation(
+            wires,
+            dot_fn,
+            overlays,
+            title="<b>Charging a capacitor — it fills, and the current dies away</b>",
+            xrange=[-0.2, 8.6],
+            yrange=[0.2, 4.0],
+            height=420,
+        )
+
+    capacitor_plot = mo.ui.plotly(capacitor_figure(), config=get_plotly_config())
+    mo.output.replace(capacitor_plot)
     return
 
 
@@ -951,9 +1338,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
-        ## 8. The RC circuit: charging, draining, and the time constant
+        ## 9. The RC circuit: charging, draining, and the time constant
 
         Put a resistor and a capacitor in series with a battery and you get the most useful little
         circuit in electronics — the **RC circuit**. Close the switch and the capacitor doesn't
@@ -1059,23 +1444,28 @@ def _(
         )
         wire_trace = wire(loop, width=2)
         dots0 = charge_dots(loop, 10, 0.0)
+        # Draw order keeps the moving charge (dots0) *under* the note and the
+        # marker, so the flowing dots never sit on top of the text.
         static = [
             curve,
             target,
             tau_mark,
             wire_trace,
+            dots0,
             label(1.5, -0.4, "charging current I(t) — watch it fade", COLORS["text_secondary"], 11),
             head,
-            dots0,
         ]
 
+        n_frames = 90
+
         def frame_data(i):
-            frac = i / 39.0
+            frac = i / (n_frames - 1)
             ti = frac * t_max
             vi = source * (1 - np.exp(-ti / tau))
             # Fewer dots as the current dies away: n ∝ I(t) = (V/R)·e^(−t/τ).
             n_dots = max(1, round(10 * float(np.exp(-ti / tau))))
             return [
+                charge_dots(loop, n_dots, frac * 6.0),
                 go.Scatter(
                     x=[ti],
                     y=[vi],
@@ -1083,10 +1473,9 @@ def _(
                     marker={"size": 15, "color": COLORS["electric"]},
                     hoverinfo="skip",
                 ),
-                charge_dots(loop, n_dots, frac * 6.0),
             ]
 
-        frames = [go.Frame(data=frame_data(i), traces=[5, 6], name=str(i)) for i in range(40)]
+        frames = [go.Frame(data=frame_data(i), traces=[4, 6], name=str(i)) for i in range(n_frames)]
         fig = go.Figure(data=static, frames=frames)
         fig.update_layout(
             title={
@@ -1150,16 +1539,31 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
-        ## 9. Putting it all together
+        ## 10. Putting it all together
 
         Here is one circuit that uses every tool at once: a source, a resistor in series, and a
         parallel pair — the kind of thing you'd actually meet on a breadboard. The recipe never
         changes: **collapse inward to find the total current, then expand outward to split it.**
-        Open the box for the full walkthrough, with every number.
+        Watch the 2 A leave the source, cross $R_1$, split into 1 A + 1 A through the equal pair,
+        and merge again on the way home. Open the box for the full walkthrough, with every number.
         """
     )
+    return
+
+
+@app.cell
+def _(get_plotly_config, mo, series_parallel_scene):
+    # V = 18 V, R₁ = 3 Ω in series with R₂ ∥ R₃ = 12 Ω ∥ 12 Ω → 2 A splitting into 1 A + 1 A.
+    full_plot = mo.ui.plotly(
+        series_parallel_scene(
+            labels=("18 V", "R₁ = 3 Ω", "R₂ = 12 Ω", "R₃ = 12 Ω"),
+            currents=(2, 1, 1),
+            note="V₁ = 6 V<br>pair = 12 V",
+            title="<b>The whole circuit at once — 2 A in, 1 A + 1 A through the pair</b>",
+        ),
+        config=get_plotly_config(),
+    )
+    mo.output.replace(full_plot)
     return
 
 
@@ -1257,8 +1661,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ---
-
         ## Where to read more
 
         Every rule here is standard, checkable physics. Good next steps, for validation and depth:
