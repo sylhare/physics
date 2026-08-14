@@ -14,12 +14,14 @@ def _():
         COLORS,
         create_play_pause_buttons,
         get_plotly_config,
+        get_trace_style,
     )
 
     return (
         COLORS,
         create_play_pause_buttons,
         get_plotly_config,
+        get_trace_style,
         go,
         mo,
         np,
@@ -147,6 +149,17 @@ def _(COLORS, create_play_pause_buttons, go, np):
             hoverinfo="skip",
         )
 
+    def node_marker(x, y, size=11, color=None):
+        """A small filled dot marking a wire junction / circuit node."""
+        return go.Scatter(
+            x=[x],
+            y=[y],
+            mode="markers",
+            marker={"size": size, "color": color or COLORS["text"]},
+            showlegend=False,
+            hoverinfo="skip",
+        )
+
     def charge_dots(path, n_dots, phase, color=None, size=9):
         """`n_dots` glowing charges spread evenly along `path`, shifted by `phase`.
 
@@ -203,16 +216,23 @@ def _(COLORS, create_play_pause_buttons, go, np):
     ANIM_FRAMES = 90  # ~4.5 s per play at the shared 50 ms/frame — long and smooth
     ANIM_CYCLES = 3  # dots drift three whole gaps across a play, so the flow reads
 
-    def flow(specs, n_frames=ANIM_FRAMES, cycles=ANIM_CYCLES):
+    def phase(i):
+        """Shared drift offset (in gaps) for frame `i`: every animation advances
+        `ANIM_CYCLES` whole gaps over the `ANIM_FRAMES`-frame play, so all panels
+        flow in lockstep and each loop is seamless. Single source of truth — every
+        hand-written `dot_fn` should call this rather than re-deriving the formula.
+        """
+        return ANIM_CYCLES * i / ANIM_FRAMES
+
+    def flow(specs):
         """Turn a list of `(path, n_dots, color)` specs into a `dot_fn` for
-        `circuit_animation`: each frame drifts every stream on by a shared phase,
-        so wires with more dots simply carry more current. The dots advance
-        `cycles` gaps over the whole play, ending where they began (seamless loop).
+        `circuit_animation`: each frame drifts every stream on by the shared
+        `phase`, so wires with more dots simply carry more current. The dots end
+        where they began, so the play loops seamlessly.
         """
 
         def dot_fn(i):
-            phase = cycles * i / n_frames
-            return [charge_dots(path, n, phase, color=color) for path, n, color in specs]
+            return [charge_dots(path, n, phase(i), color=color) for path, n, color in specs]
 
         return dot_fn
 
@@ -243,7 +263,6 @@ def _(COLORS, create_play_pause_buttons, go, np):
         xrange,
         yrange,
         legend=None,
-        n_frames=ANIM_FRAMES,
         height=460,
     ):
         """Assemble a schematic with an animated charge flow drawn *behind* the parts.
@@ -259,7 +278,7 @@ def _(COLORS, create_play_pause_buttons, go, np):
         dot_indices = list(range(n_wire, n_wire + len(first_dots)))
         frames = [
             go.Frame(data=first_dots if i == 0 else dot_fn(i), traces=dot_indices, name=str(i))
-            for i in range(n_frames)
+            for i in range(ANIM_FRAMES)
         ]
         swatches = legend_swatches(legend) if legend else []
         fig = go.Figure(data=[*wire_traces, *first_dots, *overlay_traces, *swatches], frames=frames)
@@ -347,11 +366,14 @@ def _(COLORS, create_play_pause_buttons, go, np):
         )
 
     return (
+        ANIM_FRAMES,
         charge_dots,
         circuit_animation,
         component,
         flow,
         label,
+        node_marker,
+        phase,
         play_pause_menu,
         series_parallel_scene,
         wire,
@@ -408,7 +430,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, get_plotly_config, go, mo, np, ohm_resistance):
+def _(COLORS, get_plotly_config, get_trace_style, go, mo, np, ohm_resistance):
     def ohm_figure(resistance):
         voltage = 9.0
         current = voltage / resistance  # amps, from Ohm's law
@@ -419,8 +441,7 @@ def _(COLORS, get_plotly_config, go, mo, np, ohm_resistance):
         curve = go.Scatter(
             x=r_axis,
             y=i_axis * 1000,  # milliamps for a friendlier axis
-            mode="lines",
-            line={"color": COLORS["primary"], "width": 3},
+            **get_trace_style("primary"),
             name="I = V / R",
             hoverinfo="skip",
         )
@@ -523,7 +544,17 @@ def _(mo):
 
 @app.cell
 def _(
-    COLORS, charge_dots, circuit_animation, component, get_plotly_config, go, label, mo, np, wire
+    COLORS,
+    charge_dots,
+    circuit_animation,
+    component,
+    get_plotly_config,
+    go,
+    label,
+    mo,
+    np,
+    phase,
+    wire,
 ):
     def power_figure():
         loop = [(0.6, 1.0), (0.6, 3.0), (4.5, 3.0), (8.4, 3.0), (8.4, 1.0), (0.6, 1.0)]
@@ -537,7 +568,6 @@ def _(
         ]
 
         def dot_fn(i):
-            phase = 3 * i / 90
             pulse = 0.5 + 0.5 * float(np.sin(2 * np.pi * i / 30))
             glow = go.Scatter(
                 x=[cx],
@@ -552,7 +582,7 @@ def _(
                 showlegend=False,
                 hoverinfo="skip",
             )
-            return [glow, charge_dots(loop, 14, phase)]
+            return [glow, charge_dots(loop, 14, phase(i))]
 
         return circuit_animation(
             wires,
@@ -970,7 +1000,9 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, charge_dots, circuit_animation, component, get_plotly_config, label, mo, np, wire):
+def _(
+    COLORS, charge_dots, circuit_animation, component, get_plotly_config, label, mo, np, phase, wire
+):
     def compare_figure():
         def plen(path):
             pts = np.asarray(path, dtype=float)
@@ -1018,14 +1050,22 @@ def _(COLORS, charge_dots, circuit_animation, component, get_plotly_config, labe
             label(4.8, 4.0, "PARALLEL:  4 ∥ 4 = 2 Ω  →  I = 6 A", COLORS["electric"], size=13),
         ]
 
+        # Dot counts depend only on path length and current, not the frame —
+        # compute them once rather than on every one of the 90 frames.
+        n_loop_s = n_for(loop_s, 1.5)
+        n_trunk_in = n_for(trunk_in, 6)
+        n_branch_top = n_for(branch_top, 3)
+        n_branch_bot = n_for(branch_bot, 3)
+        n_trunk_out = n_for(trunk_out, 6)
+
         def dot_fn(i):
-            phase = 3 * i / 90
+            p = phase(i)
             return [
-                charge_dots(loop_s, n_for(loop_s, 1.5), phase, color=COLORS["electric"]),
-                charge_dots(trunk_in, n_for(trunk_in, 6), phase, color=COLORS["electric"]),
-                charge_dots(branch_top, n_for(branch_top, 3), phase, color=COLORS["primary"]),
-                charge_dots(branch_bot, n_for(branch_bot, 3), phase, color=COLORS["secondary"]),
-                charge_dots(trunk_out, n_for(trunk_out, 6), phase, color=COLORS["electric"]),
+                charge_dots(loop_s, n_loop_s, p, color=COLORS["electric"]),
+                charge_dots(trunk_in, n_trunk_in, p, color=COLORS["electric"]),
+                charge_dots(branch_top, n_branch_top, p, color=COLORS["primary"]),
+                charge_dots(branch_bot, n_branch_bot, p, color=COLORS["secondary"]),
+                charge_dots(trunk_out, n_trunk_out, p, color=COLORS["electric"]),
             ]
 
         return circuit_animation(
@@ -1157,23 +1197,15 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, circuit_animation, flow, get_plotly_config, go, label, mo, wire):
+def _(COLORS, circuit_animation, flow, get_plotly_config, label, mo, node_marker, wire):
     def kcl_figure():
         node = (4.2, 2.0)
         wire_in = [(0.4, 2.0), node]
         wire_top = [node, (8.4, 3.3)]
         wire_bot = [node, (8.4, 0.7)]
         wires = [wire(wire_in), wire(wire_top), wire(wire_bot)]
-        node_dot = go.Scatter(
-            x=[node[0]],
-            y=[node[1]],
-            mode="markers",
-            marker={"size": 13, "color": COLORS["text"]},
-            showlegend=False,
-            hoverinfo="skip",
-        )
         overlays = [
-            node_dot,
+            node_marker(node[0], node[1], size=13),
             label(1.9, 2.35, "I = 5 A in", COLORS["electric"], size=14),
             label(6.9, 3.5, "3 A out", COLORS["primary"], size=13),
             label(6.9, 0.5, "2 A out", COLORS["secondary"], size=13),
@@ -1222,7 +1254,7 @@ def _(mo):
 
 
 @app.cell
-def _(COLORS, divider_ratio, get_plotly_config, go, mo, np):
+def _(COLORS, divider_ratio, get_plotly_config, get_trace_style, go, mo, np):
     def divider_figure(r2_k):
         source, r1_k = 9.0, 2.0
         r2_axis = np.linspace(0.5, 9.0, 200)
@@ -1232,8 +1264,7 @@ def _(COLORS, divider_ratio, get_plotly_config, go, mo, np):
         curve = go.Scatter(
             x=r2_axis,
             y=v_out_axis,
-            mode="lines",
-            line={"color": COLORS["tertiary"], "width": 3},
+            **get_trace_style("tertiary"),
             hoverinfo="skip",
         )
         marker = go.Scatter(
@@ -1332,10 +1363,11 @@ def _(
     circuit_animation,
     component,
     get_plotly_config,
-    go,
     label,
     mo,
+    node_marker,
     np,
+    phase,
     r4_slider,
     wire,
 ):
@@ -1370,16 +1402,6 @@ def _(
         ret = [(cx, cy), (9.0, 2.2), (9.0, -0.6), (0.7, -0.6), (0.7, 1.5)]
         wires = [wire(w) for w in (trunk_in, arm_ab, arm_ad, arm_bc, arm_dc, bridge, ret)]
 
-        def node_dot(x, y):
-            return go.Scatter(
-                x=[x],
-                y=[y],
-                mode="markers",
-                marker={"size": 9, "color": COLORS["text"]},
-                showlegend=False,
-                hoverinfo="skip",
-            )
-
         overlays = [
             *component(0.7, 2.2, "20 V", COLORS["quaternary"], width=1.0, height=1.3),
             *component(
@@ -1397,10 +1419,10 @@ def _(
             *component(
                 (bx + dx) / 2, (by + dy) / 2, "R₅", COLORS["tertiary"], width=0.9, height=0.5
             ),
-            node_dot(ax, ay),
-            node_dot(bx, by),
-            node_dot(dx, dy),
-            node_dot(cx, cy),
+            node_marker(ax, ay, size=9),
+            node_marker(bx, by, size=9),
+            node_marker(dx, dy, size=9),
+            node_marker(cx, cy, size=9),
             label(ax - 0.32, ay + 0.36, "A", COLORS["text"], 13),
             label(bx, by + 0.32, "B", COLORS["text"], 13),
             label(dx, dy - 0.32, "D", COLORS["text"], 13),
@@ -1415,22 +1437,25 @@ def _(
             ),
         ]
 
-        def branch_dots(path, current, phase, color):
-            n = max(0, round(3.0 * abs(current)))
-            directed = path if current >= 0 else path[::-1]
-            return charge_dots(directed, n, phase, color=color)
+        # Each branch's dot count and flow direction are fixed by its current and
+        # path (not the frame), so resolve them once here rather than per frame.
+        branches = [
+            (trunk_in, i_tot, COLORS["electric"]),
+            (arm_ab, i1, COLORS["primary"]),
+            (arm_ad, i3, COLORS["secondary"]),
+            (arm_bc, i2, COLORS["primary"]),
+            (arm_dc, i4, COLORS["secondary"]),
+            (bridge, i5, COLORS["tertiary"]),
+            (ret, i_tot, COLORS["electric"]),
+        ]
+        streams = [
+            (path if current >= 0 else path[::-1], max(0, round(3.0 * abs(current))), color)
+            for path, current, color in branches
+        ]
 
         def dot_fn(i):
-            phase = 3 * i / 90
-            return [
-                branch_dots(trunk_in, i_tot, phase, COLORS["electric"]),
-                branch_dots(arm_ab, i1, phase, COLORS["primary"]),
-                branch_dots(arm_ad, i3, phase, COLORS["secondary"]),
-                branch_dots(arm_bc, i2, phase, COLORS["primary"]),
-                branch_dots(arm_dc, i4, phase, COLORS["secondary"]),
-                branch_dots(bridge, i5, phase, COLORS["tertiary"]),
-                branch_dots(ret, i_tot, phase, COLORS["electric"]),
-            ]
+            p = phase(i)
+            return [charge_dots(path, n, p, color=color) for path, n, color in streams]
 
         state = "balanced — bridge carries nothing" if balanced else "unbalanced — bridge conducts"
         return circuit_animation(
@@ -1589,7 +1614,17 @@ def _(mo):
 
 @app.cell
 def _(
-    COLORS, charge_dots, circuit_animation, component, get_plotly_config, go, label, mo, np, wire
+    COLORS,
+    charge_dots,
+    circuit_animation,
+    component,
+    get_plotly_config,
+    go,
+    label,
+    mo,
+    np,
+    phase,
+    wire,
 ):
     def capacitor_figure():
         battery_seg = [(0.6, 1.0), (0.6, 3.0)]
@@ -1616,13 +1651,13 @@ def _(
                 f = i / 44.0
                 level = 1.0 - float(np.exp(-f * 5.0))  # gap fills 0 → 1
                 cur = float(np.exp(-f * 5.0))  # charging current e^(−t/τ) → 0
-                phase = 3 * i / 90
+                ph = phase(i)
                 status, status_color = "charging ▲", COLORS["wave"]
             else:
                 f = (i - 45) / 44.0
                 level = float(np.exp(-f * 5.0))  # gap drains 1 → 0
                 cur = float(np.exp(-f * 5.0))  # discharge current, same envelope
-                phase = -3 * i / 90  # current runs the other way
+                ph = -phase(i)  # current runs the other way
                 status, status_color = "discharging ▼", COLORS["secondary"]
             n_dots = round(9 * cur)
             y_fill = 1.74 + level * 0.52
@@ -1646,8 +1681,8 @@ def _(
                 hoverinfo="skip",
             )
             return [
-                charge_dots(top_path, n_dots, phase, color=COLORS["electric"]),
-                charge_dots(bot_path, n_dots, phase, color=COLORS["electric"]),
+                charge_dots(top_path, n_dots, ph, color=COLORS["electric"]),
+                charge_dots(bot_path, n_dots, ph, color=COLORS["electric"]),
                 fill,
                 status_text,
             ]
@@ -1761,9 +1796,11 @@ def _(mo):
 
 @app.cell
 def _(
+    ANIM_FRAMES,
     COLORS,
     charge_dots,
     get_plotly_config,
+    get_trace_style,
     go,
     label,
     mo,
@@ -1787,8 +1824,7 @@ def _(
         curve = go.Scatter(
             x=t,
             y=v_c,
-            mode="lines",
-            line={"color": COLORS["primary"], "width": 3},
+            **get_trace_style("primary"),
             name="blue line — capacitor voltage V_C(t)",
             showlegend=True,
             hoverinfo="skip",
@@ -1844,7 +1880,7 @@ def _(
             legend_dot,
         ]
 
-        n_frames = 90
+        n_frames = ANIM_FRAMES
 
         def frame_data(i):
             frac = i / (n_frames - 1)
